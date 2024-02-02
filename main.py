@@ -70,7 +70,7 @@ def scroll_text(text_sections, screenSize=100):
 
         print("\033c", end="")  # Clear the console
         print(display_text)
-        time.sleep(0.5)  # Update every 0.2 seconds for smoother scrolling
+        time.sleep(0.2)  # Update every 0.2 seconds for smoother scrolling
 
 
 if __name__ == "__main__":
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     scrolling_thread.start()
 
     while True:
-        for game in get_nba_games():
+        for game in get_nba_games() + get_nfl_games():
             if game["status"] == "STATUS_IN_PROGRESS":
                 period = game["period"]
                 clock = game["clock"]

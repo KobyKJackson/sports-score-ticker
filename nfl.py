@@ -3,44 +3,39 @@ from datetime import datetime, timedelta
 from utilities import *
 
 
+def getTeamData(team):
+    retVal = {}
+    retVal["shortName"] = team["team"]["abbreviation"]
+    retVal["logo"] = team["team"]["logo"]
+    retVal["score"] = team["score"]
+    leaders = {}
+    retVal["leaders"] = leaders
+    return retVal
+
+
 def format_nfl_game_info(game):
-    competition = game["competitions"][0]
-    competitors = competition["competitors"]
-    teams = [team["team"]["abbreviation"] for team in competitors]
-    logos = [team["team"]["logo"] for team in competitors]
-    game_date_utc = datetime.strptime(game["date"], "%Y-%m-%dT%H:%MZ")
-    game_date_local = convert_to_local_time(game_date_utc)
-    game_status = competition["status"]["type"]["name"]
+    output = {}
+    output["id"] = game["id"]
+    output["shortName"] = game["shortName"]
+    output["status"] = game["competitions"][0]["status"]["type"]["name"]
+    output["start"] = convert_to_local_time(
+        datetime.strptime(game["date"], "%Y-%m-%dT%H:%MZ")
+    )
+    output["period"] = game["competitions"][0]["status"]["period"]
+    output["clock"] = game["competitions"][0]["status"]["displayClock"]
 
-    if game_status == "STATUS_IN_PROGRESS":
-        period = competition["status"]["period"]
-        clock = competition["status"]["displayClock"]
-        score = " - ".join([team["score"] for team in competitors])
-        return {
-            "string": f"{teams[0]} {score} {teams[1]} Q{period} {clock}",
-            "logo_h": logos[0],
-            "logo_a": logos[1],
-        }
-    elif game_status == "STATUS_FINAL":
-        score = " - ".join([team["score"] for team in competitors])
-        return {
-            "string": f"{teams[0]} {score} {teams[1]} Final",
-            "logo_h": logos[0],
-            "logo_a": logos[1],
-        }
-    else:
-        # For scheduled games
-        return {
-            "string": f"{teams[0]} vs {teams[1]} at {game_date_local.strftime('%m/%d %I:%M %p')}",
-            "logo_h": logos[0],
-            "logo_a": logos[1],
-        }
+    for team in game["competitions"][0]["competitors"]:
+        if team["homeAway"] == "home":
+            output["home"] = getTeamData(team)
+        else:
+            output["away"] = getTeamData(team)
+    return output
 
 
-def get_nfl_games():
+def get_nfl_games(previous_hours=300, upcoming_hours=300):
     today = datetime.now()
-    start_date = today - timedelta(days=2)
-    end_date = today + timedelta(days=3)
+    start_date = today - timedelta(hours=previous_hours)
+    end_date = today + timedelta(hours=upcoming_hours)
     start_str = start_date.strftime("%Y%m%d")
     end_str = end_date.strftime("%Y%m%d")
 
@@ -51,5 +46,6 @@ def get_nfl_games():
         return ["Failed to retrieve data"]
 
     data = response.json()
+
     games_info = [format_nfl_game_info(game) for game in data.get("events", [])]
     return games_info
