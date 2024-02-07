@@ -4,14 +4,26 @@ import json
 import threading
 from threading import Lock
 from collections import OrderedDict
+from flask import Flask, jsonify
+from flask_cors import CORS, cross_origin  # Import CORS
 
 
 from nba import *
 from nfl import *
 
+app = Flask(__name__)
+CORS(app)
+app.config["CORS_HEADERS"] = "Content-Type"
+
 
 def printAPI():
-    url = f"http://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+    today = datetime.now()
+    start_date = today - timedelta(hours=12)
+    end_date = today + timedelta(hours=24)
+    start_str = start_date.strftime("%Y%m%d")
+    end_str = end_date.strftime("%Y%m%d")
+
+    url = f"http://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={start_str}-{end_str}"
 
     response = requests.get(url)
     if response.status_code != 200:
@@ -20,92 +32,403 @@ def printAPI():
     data = response.json()
 
     # Save the entire API response in a separate file
-    with open("out.json", "w") as api_file:
+    with open("nbaOut.json", "w") as api_file:
+        json.dump(data, api_file, indent=4)
+
+    today = datetime.now()
+    start_date = today - timedelta(hours=1)
+    end_date = today + timedelta(hours=200)
+    start_str = start_date.strftime("%Y%m%d")
+    end_str = end_date.strftime("%Y%m%d")
+
+    url = f"http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates={start_str}-{end_str}"
+
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("Failed to retrieve data")
+
+    data = response.json()
+
+    # Save the entire API response in a separate file
+    with open("nflOut.json", "w") as api_file:
         json.dump(data, api_file, indent=4)
 
     exit()
 
 
-class ThreadSafeTextSections:
+class ThreadSafeData:
     def __init__(self):
-        self.sections = OrderedDict()  # Stores sections with unique IDs
+        self.data = OrderedDict()
         self.lock = Lock()
-        self.current_text = ""  # Current compiled text to display
 
-    def add_or_update_section(self, section_id, text):
+    def updateData(self, id, data):
         with self.lock:
-            self.sections[section_id] = text + " | "  # Update or add the section text
-            self._compile_text()
+            self.data[id] = data
 
-    def _compile_text(self):
-        """Compile the sections into a single string up to the max width."""
-        compiled_text = " ".join(self.sections.values())  # Combine texts with space
-        self.current_text = compiled_text
-
-    def get_scrolling_text(self):
-        """Return the current text to display."""
-        return self.current_text
+    def getData(self):
+        return self.data
 
 
-def scroll_text(text_sections, screenSize=100):
-    scroll_position = 0
+data = ThreadSafeData()
+
+
+def update_game_info():
     while True:
-        full_text = text_sections.get_scrolling_text()
-        # Ensure text is at least 100 characters by repeating it
-        scrolling_text = (
-            (full_text * (screenSize // len(full_text) + 1))
-            if len(full_text) > 0
-            else " " * screenSize
-        )
-        # Calculate display text considering wrapping
-        display_text = (
-            scrolling_text[scroll_position : scroll_position + screenSize]
-            if scroll_position + screenSize <= len(scrolling_text)
-            else scrolling_text[scroll_position:]
-            + scrolling_text[: scroll_position + screenSize - len(scrolling_text)]
-        )
-
-        # Increment scroll position, wrapping around as needed
-        scroll_position = (scroll_position + 1) % len(scrolling_text)
-
-        print("\033c", end="")  # Clear the console
-        print(display_text)
-        time.sleep(0.2)  # Update every 0.2 seconds for smoother scrolling
-
-
-if __name__ == "__main__":
-    text_sections = ThreadSafeTextSections()
-
-    # Thread for scrolling text
-    scrolling_thread = threading.Thread(
-        target=scroll_text,
-        args=(
-            text_sections,
-            50,
-        ),
-    )
-    scrolling_thread.daemon = True
-    scrolling_thread.start()
-
-    while True:
-        for game in get_nba_games() + get_nfl_games():
+        for game in get_nba_games():
+            gameData = {
+                "id": game["id"],
+                "data": [
+                    {
+                        "type": "image",
+                        "location": [1, 2, 3, 4],
+                        "data": game["away"]["logo"],
+                    },
+                    {"type": "text", "location": [2, 3], "data": "@"},
+                    {
+                        "type": "image",
+                        "location": [1, 2, 3, 4],
+                        "data": game["home"]["logo"],
+                    },
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1, 2],
+                                "data": game["away"]["name"],
+                                "color": game["away"]["color"],
+                                "altColor": game["away"]["altColor"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3, 4],
+                                "data": game["home"]["name"],
+                                "color": game["home"]["color"],
+                                "altColor": game["home"]["altColor"],
+                            },
+                        ],
+                    },
+                ],
+            }
             if game["status"] == "STATUS_IN_PROGRESS":
                 period = game["period"]
                 clock = game["clock"]
-                text_sections.add_or_update_section(
-                    game["id"],
-                    f"{game['home']['shortName']} {game['home']['score']} - {game['away']['score']} {game['away']['shortName']}  Q{period} {clock}",
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1, 2],
+                                "data": game["away"]["score"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3, 4],
+                                "data": game["home"]["score"],
+                            },
+                        ],
+                    }
                 )
+                gameData["data"].append(
+                    {
+                        "type": "text",
+                        "location": [2, 3],
+                        "data": f"Q{period} {clock}",
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1],
+                                "data": "PTS "
+                                + str(game["away"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [2],
+                                "data": "REB "
+                                + str(game["away"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Reb"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3],
+                                "data": "PTS "
+                                + str(game["home"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [4],
+                                "data": "REB "
+                                + str(game["home"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Reb"]["name"],
+                            },
+                        ],
+                    }
+                )
+                data.updateData(game["id"], gameData)
+            elif game["status"] == "STATUS_HALFTIME":
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1, 2],
+                                "data": game["away"]["score"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3, 4],
+                                "data": game["home"]["score"],
+                            },
+                        ],
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "text",
+                        "location": [2, 3],
+                        "data": "HALF",
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1],
+                                "data": "PTS "
+                                + str(game["away"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [2],
+                                "data": "REB "
+                                + str(game["away"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Reb"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3],
+                                "data": "PTS "
+                                + str(game["home"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [4],
+                                "data": "REB "
+                                + str(game["home"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Reb"]["name"],
+                            },
+                        ],
+                    },
+                )
+                data.updateData(game["id"], gameData)
+            elif game["status"] == "STATUS_END_PERIOD":
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1, 2],
+                                "data": game["away"]["score"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3, 4],
+                                "data": game["home"]["score"],
+                            },
+                        ],
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "text",
+                        "location": [2, 3],
+                        "data": f"END Q{game['period']}",
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1],
+                                "data": "PTS "
+                                + str(game["away"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [2],
+                                "data": "REB "
+                                + str(game["away"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Reb"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3],
+                                "data": "PTS "
+                                + str(game["home"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [4],
+                                "data": "REB "
+                                + str(game["home"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Reb"]["name"],
+                            },
+                        ],
+                    },
+                )
+                data.updateData(game["id"], gameData)
             elif game["status"] == "STATUS_FINAL":
-                text_sections.add_or_update_section(
-                    game["id"],
-                    f"{game['home']['shortName']} {game['home']['score']} - {game['away']['score']} {game['away']['shortName']}  Final",
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1, 2],
+                                "data": game["away"]["score"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3, 4],
+                                "data": game["home"]["score"],
+                            },
+                        ],
+                    }
                 )
+                gameData["data"].append(
+                    {
+                        "type": "text",
+                        "location": [2, 3],
+                        "data": "FINAL",
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1],
+                                "data": "PTS "
+                                + str(game["away"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [2],
+                                "data": "REB "
+                                + str(game["away"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["away"]["leaders"]["Reb"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [3],
+                                "data": "PTS "
+                                + str(game["home"]["leaders"]["Pts"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Pts"]["name"],
+                            },
+                            {
+                                "type": "text",
+                                "location": [4],
+                                "data": "REB "
+                                + str(game["home"]["leaders"]["Reb"]["value"])
+                                + " "
+                                + game["home"]["leaders"]["Reb"]["name"],
+                            },
+                        ],
+                    },
+                )
+                data.updateData(game["id"], gameData)
             else:  # For scheduled games
-                text_sections.add_or_update_section(
-                    game["id"],
-                    f"{game['shortName']} at {game['start'].strftime('%m/%d %I:%M %p')}",
-                )
-        time.sleep(1)  # Wait more before stopping
+                homeOdds = ""
+                awayOdds = ""
+                if "odds" in game:
+                    if game["odds"]["favorite"] == "home":
+                        homeOdds = game["odds"]["spread"]
+                        awayOdds = game["odds"]["overUnder"]
+                    else:
+                        awayOdds = game["odds"]["spread"]
+                        homeOdds = game["odds"]["overUnder"]
 
+                gameData["data"][3]["data"][0]["data"] += f" ({game['away']['record']})"
+                gameData["data"][3]["data"][1]["data"] += f" ({game['home']['record']})"
+                gameData["data"].append(
+                    {
+                        "type": "multi",
+                        "data": [
+                            {
+                                "type": "text",
+                                "location": [1, 2],
+                                "data": awayOdds,
+                            },
+                            {
+                                "type": "text",
+                                "location": [3, 4],
+                                "data": homeOdds,
+                            },
+                        ],
+                    }
+                )
+                gameData["data"].append(
+                    {
+                        "type": "text",
+                        "location": [2, 3],
+                        "data": f"{game['start'].strftime('%m/%d %I:%M %p')}",
+                    },
+                )
+                data.updateData(game["id"], gameData)
+        time.sleep(1)  # Adjust as needed
+
+
+def activate_game_updates():
+    """Start the background thread for game updates."""
+    thread = threading.Thread(target=update_game_info)
+    thread.daemon = True
+    thread.start()
+
+
+@app.route("/api/data", methods=["GET"])
+@cross_origin()
+def get_text():
+    send = list(data.getData().values())
+    return jsonify(send)
+
+
+if __name__ == "__main__":
     # printAPI()
+    activate_game_updates()
+    app.run(debug=True, port=5001, host="0.0.0.0")
+    exit()
