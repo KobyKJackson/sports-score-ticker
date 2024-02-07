@@ -32,7 +32,7 @@ def format_nfl_game_info(game):
     return output
 
 
-def get_nfl_games(previous_hours=36, upcoming_hours=72):
+def get_nfl_games(previous_hours=36, upcoming_hours=300):
     today = datetime.now()
     start_date = today - timedelta(hours=previous_hours)
     end_date = today + timedelta(hours=upcoming_hours)

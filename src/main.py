@@ -406,7 +406,7 @@ def update_game_info():
                     {
                         "type": "text",
                         "location": [2, 3],
-                        "data": f"{game['start'].strftime('%m/%d %I:%M %p')}",
+                        "data": f"{game['start'].strftime('%-m/%-d %-I:%M %p')}",
                     },
                 )
                 data.updateData(game["id"], gameData)
