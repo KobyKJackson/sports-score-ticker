@@ -33,8 +33,10 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::stri
     }
 }
 
-static void ReadCurlData()
+static std::string ReadCurlData()
 {
+    std::string retVal = "DEFAULT";
+
     CURL *curl;
     CURLcode res;
     std::string readBuffer;
@@ -62,6 +64,7 @@ static void ReadCurlData()
                 // Now you can do something with jsonResponse
                 // Example: Accessing an element (adjust according to your actual JSON structure)
                 std::cout << "Example element: " << jsonResponse << std::endl;
+                retVal = jsonResponse[12]["data"][4]["data"][0]["data"];
             }
             catch (json::parse_error &e)
             {
@@ -69,6 +72,7 @@ static void ReadCurlData()
             }
         }
     }
+    return retVal;
 }
 
 static bool FullSaturation(const Color &c)
@@ -97,21 +101,21 @@ int main()
     std::string TEXT = "Koby";
 
     Color lColor(255, 255, 255);
-    Color lBGColor(0, 0, 0);
+    Color lBGColor(255, 0, 0);
     Color lOutlineColor(0, 0, 0);
-    bool lIsOutline = false;
+    bool lIsOutline = true;
     float lSpeed = 7.0f;
     bool lXOriginConfigured = false;
     int lXOrigin = 0;
     int lYOrigin = 0;
     int lLetterSpacing = 0;
-    int lLoops = -1;
+    int lLoops = 25;
 
     /*
      * Load font. This needs to be a filename with a bdf bitmap font.
      */
 
-    const char *lpFontFile = NULL;
+    const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/4x6.bdf";
     rgb_matrix::Font lFont;
     if (!lFont.LoadFont(lpFontFile))
     {
@@ -133,12 +137,13 @@ int main()
     RGBMatrix::Options lMatrixOptions;
     rgb_matrix::RuntimeOptions lRuntimeOptions;
 
-    lMatrixOptions.rows = 64;
-    lMatrixOptions.cols = 320;
-    lMatrixOptions.chain_length = 5;
-    lMatrixOptions.parallel = 2;
-    lMatrixOptions.hardware_mapping = "regular"; // or "adafruit-hat" depending on your setup
+    lMatrixOptions.rows = 32;
+    lMatrixOptions.cols = 64;
+    lMatrixOptions.chain_length = 1;
+    lMatrixOptions.parallel = 1;
+    lMatrixOptions.hardware_mapping = "adafruit-hat"; // or "adafruit-hat" depending on your setup
     lMatrixOptions.disable_hardware_pulsing = true;
+    lRuntimeOptions.gpio_slowdown = 4;
 
     // Run Validate?
 
@@ -213,7 +218,10 @@ int main()
         {
             lX = lXOrigin + ((lScrollDirection > 0) ? -lLength : 0);
             if (lLoops > 0)
+            {
                 --lLoops;
+                TEXT = ReadCurlData();
+            }
         }
 
         // Make sure render-time delays are not influencing scroll-time
