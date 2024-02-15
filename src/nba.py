@@ -47,6 +47,8 @@ def format_nba_game_info(game):
     output["id"] = game["id"]
     output["shortName"] = game["shortName"]
     output["status"] = game["competitions"][0]["status"]["type"]["name"]
+    output["statusDetail"] = game["competitions"][0]["status"]["type"]["shortDetail"]
+
     output["start"] = convert_to_local_time(
         datetime.strptime(game["date"], "%Y-%m-%dT%H:%MZ")
     )

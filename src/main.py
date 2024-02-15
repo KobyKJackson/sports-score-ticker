@@ -112,6 +112,10 @@ def update_game_info():
             }
             if game["status"] == "STATUS_IN_PROGRESS":
                 period = game["period"]
+                if period > 4:
+                    period = "OT" + str((period - 4))
+                else:
+                    period = "Q" + str(period)
                 clock = game["clock"]
                 gameData["data"].append(
                     {
@@ -134,7 +138,7 @@ def update_game_info():
                     {
                         "type": "text",
                         "location": [2, 3],
-                        "data": f"Q{period} {clock}",
+                        "data": f"{period} {clock}",
                     }
                 )
                 gameData["data"].append(
@@ -329,7 +333,7 @@ def update_game_info():
                     {
                         "type": "text",
                         "location": [2, 3],
-                        "data": "FINAL",
+                        "data": f"{game['statusDetail']}",
                     }
                 )
                 gameData["data"].append(
@@ -424,6 +428,7 @@ def activate_game_updates():
 @cross_origin()
 def get_text():
     send = list(data.getData().values())
+
     return jsonify(send)
 
 
