@@ -22,7 +22,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::stri
     }
 }
 
-int main()
+static void ReadCurlData()
 {
     CURL *curl;
     CURLcode res;
@@ -31,7 +31,7 @@ int main()
     curl = curl_easy_init();
     if (curl)
     {
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5001/api/data");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.4.27:5001/api/data");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
         res = curl_easy_perform(curl);
@@ -50,7 +50,7 @@ int main()
                 jsonResponse = json::parse(readBuffer);
                 // Now you can do something with jsonResponse
                 // Example: Accessing an element (adjust according to your actual JSON structure)
-                // std::cout << "Example element: " << jsonResponse["key"] << std::endl;
+                std::cout << "Example element: " << jsonResponse << std::endl;
             }
             catch (json::parse_error &e)
             {
@@ -58,6 +58,10 @@ int main()
             }
         }
     }
+}
 
+int main()
+{
+    ReadCurlData();
     return 0;
 }
