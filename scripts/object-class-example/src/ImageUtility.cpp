@@ -32,24 +32,26 @@ bool ImageUtilityClass::DownloadPNGImage(const std::string &url, std::vector<uns
 	CURL *curl = curl_easy_init();
 	if (!curl)
 		return false;
-
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ImageUtilityClass::WriteCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 	CURLcode res = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
-
 	return res == CURLE_OK;
 }
 
-void ImageUtilityClass::SavePPM(const std::string &filename, png_bytep *row_pointers, int width, int height)
+void ImageUtilityClass::SavePPM(const std::string &filename, const cv::Mat &image)
 {
 	std::ofstream ofs(filename, std::ios::binary);
 	ofs << "P6\n"
-	    << width << " " << height << "\n255\n";
-	for (int y = 0; y < height; y++)
+	    << image.cols << " " << image.rows << "\n255\n";
+	for (int y = 0; y < image.rows; ++y)
 	{
-		ofs.write(reinterpret_cast<char *>(row_pointers[y]), width * 3);
+		for (int x = 0; x < image.cols; ++x)
+		{
+			cv::Vec3b pixel = image.at<cv::Vec3b>(y, x);
+			ofs.write(reinterpret_cast<char *>(pixel.val), 3);
+		}
 	}
 }
 

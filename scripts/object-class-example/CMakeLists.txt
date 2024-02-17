@@ -4,9 +4,11 @@ project(object-class-example LANGUAGES CXX)
 
 find_package(PNG REQUIRED)
 find_package(CURL REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(${PNG_INCLUDE_DIR})
 include_directories(${CURL_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
@@ -32,6 +34,6 @@ set(headers
 )
 
 add_executable(object-class-example ${sources})
-target_link_libraries(object-class-example ${PNG_LIBRARY} ${CURL_LIBRARIES})
+target_link_libraries(object-class-example ${PNG_LIBRARY} ${CURL_LIBRARIES} ${OpenCV_LIBS})
 target_compile_features(object-class-example PRIVATE cxx_std_17)
 add_definitions(-DCURL_STATICLIB)

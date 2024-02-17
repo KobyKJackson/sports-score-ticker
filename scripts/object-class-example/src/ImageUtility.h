@@ -14,11 +14,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <curl/curl.h>
-#include <png.h>
-#include <stdint.h>
 #include <fstream>
 #include <iostream>
-#include <stdexcept>
+#include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
 
@@ -36,7 +34,7 @@ public:
 
 	static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::vector<unsigned char> *buffer);
 	static bool DownloadPNGImage(const std::string &url, std::vector<unsigned char> &buffer);
-	static void SavePPM(const std::string &filename, png_bytep *row_pointers, int width, int height);
+	static void SavePPM(const std::string &filename, const cv::Mat &image);
 
 private:
 };

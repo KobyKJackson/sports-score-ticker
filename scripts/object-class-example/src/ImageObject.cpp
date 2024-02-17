@@ -18,48 +18,33 @@ ImageObjectClass::ImageObjectClass(std::vector<uint8_t> aLocation, std::string a
 {
 	std::string outputFolder = "images";
 	std::vector<unsigned char> buffer;
+	uint8_t maxHeight = this->GetHeight();
 
 	if (!ImageUtilityClass::DownloadPNGImage(aValue, buffer))
 	{
 		std::cerr << "Failed to download image." << std::endl;
 	}
 
+	// Convert the downloaded buffer into an OpenCV Mat
+	cv::Mat image = cv::imdecode(cv::Mat(buffer), cv::IMREAD_COLOR);
+	if (image.empty())
+	{
+		std::cerr << "Failed to decode image." << std::endl;
+	}
+
+	// Resize the image to the specified maxHeight while maintaining aspect ratio
+	double aspectRatio = image.cols / static_cast<double>(image.rows);
+	int newWidth = static_cast<int>(aspectRatio * maxHeight);
+	cv::Mat resizedImage;
+	cv::resize(image, resizedImage, cv::Size(newWidth, maxHeight));
+
+	// Extract filename from URL and change extension to .ppm
 	std::string filename = aValue.substr(aValue.find_last_of('/') + 1);
-	std::string outputFilename = filename.substr(0, filename.find_last_of('.')) + ".ppm";
-	std::string outputFilePath = outputFolder + "/" + outputFilename;
+	std::string baseFilename = filename.substr(0, filename.find_last_of('.'));
+	std::string outputFilename = outputFolder + "/" + baseFilename + ".ppm";
 
-	png_image image;
-	memset(&image, 0, (sizeof image));
-	image.version = PNG_IMAGE_VERSION;
-
-	if (png_image_begin_read_from_memory(&image, buffer.data(), buffer.size()))
-	{
-		image.format = PNG_FORMAT_RGB;
-		png_bytep buffer = new png_byte[PNG_IMAGE_SIZE(image)];
-		png_bytep row_pointers[image.height];
-
-		for (size_t y = 0; y < image.height; y++)
-		{
-			row_pointers[y] = &buffer[y * image.width * 3];
-		}
-
-		if (png_image_finish_read(&image, nullptr, buffer, 0, nullptr))
-		{
-			ImageUtilityClass::SavePPM(outputFilePath, row_pointers, image.width, image.height);
-		}
-		else
-		{
-			std::cerr << "Failed to read PNG image." << std::endl;
-		}
-
-		delete[] buffer;
-	}
-	else
-	{
-		std::cerr << "Failed to start reading PNG image." << std::endl;
-	}
-
-	png_image_free(&image);
+	// Save the resized image as PPM
+	ImageUtilityClass::SavePPM(outputFilename, resizedImage);
 }
 
 /* Class Destructor ----------------------------------------------------------*/
