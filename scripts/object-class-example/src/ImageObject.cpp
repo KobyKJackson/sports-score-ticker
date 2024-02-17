@@ -16,10 +16,12 @@
 ImageObjectClass::ImageObjectClass(std::vector<uint8_t> aLocation, std::string aValue) :
   ObjectTypeClass(), BaseObjectClass(BASE_OBJECT_TYPE::IMAGE, aLocation, aValue)
 {
+	ImageUtilityClass lImageUtility;
 	std::string outputFolder = "images";
 	std::vector<unsigned char> buffer;
+	uint8_t maxHeight = this->GetHeight();
 
-	if (!ImageUtilityClass::DownloadPNGImage(aValue, buffer))
+	if (!lImageUtility.DownloadPNGImage(aValue, buffer))
 	{
 		std::cerr << "Failed to download image." << std::endl;
 	}
@@ -45,7 +47,20 @@ ImageObjectClass::ImageObjectClass(std::vector<uint8_t> aLocation, std::string a
 
 		if (png_image_finish_read(&image, nullptr, buffer, 0, nullptr))
 		{
-			ImageUtilityClass::SavePPM(outputFilePath, row_pointers, image.width, image.height);
+			int resizedWidth = image.width, resizedHeight = image.height;
+			if (image.height > maxHeight)
+			{
+				resizedHeight = maxHeight;
+				resizedWidth = (image.width * maxHeight) / image.height;
+				png_bytep *resizedPixels = nullptr;
+				lImageUtility.ResizeImageSimpleNearestNeighbor(row_pointers, image.width, image.height, resizedPixels, resizedWidth, resizedHeight);
+				lImageUtility.SavePPM(outputFilePath, resizedPixels, resizedWidth, resizedHeight);
+				for (int y = 0; y < resizedHeight; ++y)
+				{
+					delete[] resizedPixels[y];
+				}
+				delete[] resizedPixels;
+			}
 		}
 		else
 		{

@@ -42,6 +42,7 @@ public:
 	BASE_OBJECT_TYPE GetBaseObjectType() const;
 	bool SetValue(std::string aValue);
 	std::string GetValue();
+	uint8_t GetHeight();
 
 private:
 	BASE_OBJECT_TYPE mObjectType;

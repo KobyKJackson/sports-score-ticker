@@ -35,8 +35,9 @@ public:
 	~ImageUtilityClass();
 
 	static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::vector<unsigned char> *buffer);
-	static bool DownloadPNGImage(const std::string &url, std::vector<unsigned char> &buffer);
-	static void SavePPM(const std::string &filename, png_bytep *row_pointers, int width, int height);
+	bool DownloadPNGImage(const std::string &url, std::vector<unsigned char> &buffer);
+	void ResizeImageSimpleNearestNeighbor(png_bytep *inputPixels, int originalWidth, int originalHeight, png_bytep *&outputPixels, int &resizedWidth, int &resizedHeight);
+	void SavePPM(const std::string &filename, png_bytep *row_pointers, int width, int height);
 
 private:
 };

@@ -42,6 +42,35 @@ bool ImageUtilityClass::DownloadPNGImage(const std::string &url, std::vector<uns
 	return res == CURLE_OK;
 }
 
+void ImageUtilityClass::ResizeImageSimpleNearestNeighbor(png_bytep *inputPixels, int originalWidth, int originalHeight, png_bytep *&outputPixels, int &resizedWidth, int &resizedHeight)
+{
+	// Allocate memory for the resized image
+	outputPixels = new png_bytep[resizedHeight];
+	for (int y = 0; y < resizedHeight; ++y)
+	{
+		outputPixels[y] = new png_byte[resizedWidth * 3]; // 3 bytes per pixel for RGB
+	}
+
+	// Calculate scaling factors
+	double scaleX = static_cast<double>(originalWidth) / resizedWidth;
+	double scaleY = static_cast<double>(originalHeight) / resizedHeight;
+
+	// Perform nearest neighbor scaling
+	for (int y = 0; y < resizedHeight; ++y)
+	{
+		for (int x = 0; x < resizedWidth; ++x)
+		{
+			int srcX = static_cast<int>(x * scaleX);
+			int srcY = static_cast<int>(y * scaleY);
+			png_bytep srcPixel = inputPixels[srcY] + (srcX * 3);
+			png_bytep dstPixel = outputPixels[y] + (x * 3);
+			dstPixel[0] = srcPixel[0]; // R
+			dstPixel[1] = srcPixel[1]; // G
+			dstPixel[2] = srcPixel[2]; // B
+		}
+	}
+}
+
 void ImageUtilityClass::SavePPM(const std::string &filename, png_bytep *row_pointers, int width, int height)
 {
 	std::ofstream ofs(filename, std::ios::binary);

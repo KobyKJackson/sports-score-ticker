@@ -50,6 +50,10 @@ std::string BaseObjectClass::GetValue()
 {
 	return this->mValue;
 }
+uint8_t BaseObjectClass::GetHeight()
+{
+	return this->mHeight;
+}
 /* Protected Static Class Methods --------------------------------------------*/
 
 /* Protected Class Methods ---------------------------------------------------*/
