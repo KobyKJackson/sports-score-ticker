@@ -46,10 +46,16 @@ BASE_OBJECT_TYPE BaseObjectClass::GetBaseObjectType() const
 	return this->mObjectType;
 }
 
-std::string BaseObjectClass::GetValue()
+std::string BaseObjectClass::GetValue() const
 {
 	return this->mValue;
 }
+
+void BaseObjectClass::SetValue(const std::string &aValue)
+{
+	this->mValue = aValue;
+}
+
 uint8_t BaseObjectClass::GetHeight()
 {
 	return this->mHeight;

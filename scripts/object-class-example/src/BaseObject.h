@@ -40,8 +40,9 @@ public:
 	static BASE_OBJECT_TYPE StringTypeToEnumType(const std::string &aValue);
 
 	BASE_OBJECT_TYPE GetBaseObjectType() const;
-	bool SetValue(std::string aValue);
-	std::string GetValue();
+
+	std::string GetValue() const;
+	void SetValue(const std::string &aValue);
 	uint8_t GetHeight();
 
 private:

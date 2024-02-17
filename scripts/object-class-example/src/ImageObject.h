@@ -34,6 +34,8 @@ public:
 	virtual OBJECT_TYPE GetObjectType() const;
 
 private:
+	static std::string getFilePathFromUrl(const std::string &aURL, const std::string &aPath);
+	void DownloadAndConvertFile();
 };
 
 /* Exported Functions --------------------------------------------------------*/
