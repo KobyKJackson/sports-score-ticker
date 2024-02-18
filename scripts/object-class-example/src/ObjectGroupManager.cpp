@@ -118,14 +118,14 @@ void ObjectGroupManagerClass::PrintAllObjects()
 				case OBJECT_TYPE::IMAGE:
 				{
 					ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObject);
-					std::cout << "data: " << lpImageObject->GetValue() << std::endl;
+					cout << "data: " << lpImageObject->GetValue() << endl;
 				}
 				break;
 
 				case OBJECT_TYPE::TEXT:
 				{
 					TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObject);
-					std::cout << "data: " << lpTextObject->GetValue() << std::endl;
+					cout << "data: " << lpTextObject->GetValue() << endl;
 				}
 				break;
 
@@ -140,14 +140,14 @@ void ObjectGroupManagerClass::PrintAllObjects()
 							case BASE_OBJECT_TYPE::IMAGE:
 							{
 								ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpBaseObject);
-								std::cout << "data: " << lpImageObject->GetValue() << std::endl;
+								cout << "data: " << lpImageObject->GetValue() << endl;
 							}
 							break;
 
 							case BASE_OBJECT_TYPE::TEXT:
 							{
 								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpBaseObject);
-								std::cout << "data: " << lpTextObject->GetValue() << std::endl;
+								cout << "data: " << lpTextObject->GetValue() << endl;
 							}
 							break;
 
@@ -181,24 +181,25 @@ void ObjectGroupManagerClass::threadFunction()
 		json lJSONData;
 		try
 		{
-			std::ifstream f("../src/example.json");
+			ifstream f("../src/example.json");
 			lJSONData = json::parse(f);
-			std::cout << "Example element: " << lJSONData << std::endl;
+			cout << "Example element: " << lJSONData << endl;
 		}
 		catch (json::parse_error &e)
 		{
-			std::cerr << "JSON parse error: " << e.what() << std::endl;
+			cerr << "JSON parse error: " << e.what() << endl;
 		}
 
 		//Update Objects
 		for (const auto &lGame : lJSONData["games"])
 		{
-			std::string lID = lGame["id"];
+			string lID = lGame["id"];
 			ObjectGroupClass *lpObjectGroup = this->GetByID(lID);
 
 			if (lpObjectGroup != nullptr)
 			{
 				//Update
+				auto initialTimestamp = chrono::steady_clock::now();
 			}
 			else
 			{
@@ -212,16 +213,16 @@ void ObjectGroupManagerClass::threadFunction()
 					{
 						case OBJECT_TYPE::IMAGE:
 						{
-							std::vector<uint8_t> lLocation = lElement["location"];
-							std::string lData = lElement["data"];
+							vector<uint8_t> lLocation = lElement["location"];
+							string lData = lElement["data"];
 							lpObject = new ImageObjectClass(lLocation, lData);
 						}
 						break;
 
 						case OBJECT_TYPE::TEXT:
 						{
-							std::vector<uint8_t> lLocation = lElement["location"];
-							std::string lData = lElement["data"];
+							vector<uint8_t> lLocation = lElement["location"];
+							string lData = lElement["data"];
 							lpObject = new TextObjectClass(lLocation, lData);
 						}
 						break;
@@ -238,16 +239,16 @@ void ObjectGroupManagerClass::threadFunction()
 								{
 									case BASE_OBJECT_TYPE::IMAGE:
 									{
-										std::vector<uint8_t> lLocation = lBaseElement["location"];
-										std::string lData = lBaseElement["data"];
+										vector<uint8_t> lLocation = lBaseElement["location"];
+										string lData = lBaseElement["data"];
 										lpBaseObject = new ImageObjectClass(lLocation, lData);
 									}
 									break;
 
 									case BASE_OBJECT_TYPE::TEXT:
 									{
-										std::vector<uint8_t> lLocation = lBaseElement["location"];
-										std::string lData = lBaseElement["data"];
+										vector<uint8_t> lLocation = lBaseElement["location"];
+										string lData = lBaseElement["data"];
 										lpBaseObject = new TextObjectClass(lLocation, lData);
 									}
 									break;
@@ -270,6 +271,15 @@ void ObjectGroupManagerClass::threadFunction()
 				}
 			}
 			this->AddOrUpdate(lpObjectGroup);
+		}
+
+		//Check if any need to be removed
+		for (const auto &lpObjectGroup : this->mObjectGroups)
+		{
+			if (OBJECT_TIMEOUT < chrono ::duration_cast<chrono::minutes>(chrono::steady_clock::now() - lpObjectGroup->GetUpdateTimestamp()).count())
+			{
+				// Delete lpObjectGroup
+			}
 		}
 
 		this->PrintAllObjects();

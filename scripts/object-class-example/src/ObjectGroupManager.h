@@ -22,7 +22,7 @@
 class ObjectGroupClass;
 
 /* Exported Constants --------------------------------------------------------*/
-
+#define OBJECT_TIMEOUT 10 //minutes
 /* Exported Types ------------------------------------------------------------*/
 
 /* Exported Classes ----------------------------------------------------------*/

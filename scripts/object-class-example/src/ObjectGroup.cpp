@@ -8,13 +8,15 @@
 
 #include "ObjectType.h"
 
+using namespace std;
+
 /* Exported Data -------------------------------------------------------------*/
 
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ObjectGroupClass::ObjectGroupClass(std::string aID) :
-  mID(aID), mXPosition(0), mYPosition(0)
+ObjectGroupClass::ObjectGroupClass(string aID) :
+  mID(aID), mUpdateTimestamp(chrono::steady_clock::now()), mXPosition(0), mYPosition(0)
 {
 }
 
@@ -26,7 +28,7 @@ ObjectGroupClass::~ObjectGroupClass()
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/
-std::string ObjectGroupClass::GetID() const
+string ObjectGroupClass::GetID() const
 {
 	return this->mID;
 }
@@ -51,6 +53,11 @@ ObjectTypeClass *ObjectGroupClass::GetByIndex(size_t aIndex)
 size_t ObjectGroupClass::GetNumberOfObjects()
 {
 	return this->mObjects.size();
+}
+
+chrono::time_point<chrono::steady_clock> ObjectGroupClass::GetUpdateTimestamp()
+{
+	return this->mUpdateTimestamp;
 }
 
 /* Protected Static Class Methods --------------------------------------------*/

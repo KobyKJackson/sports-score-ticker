@@ -34,8 +34,10 @@ public:
 	void AddObject(ObjectTypeClass *&aObject);
 	ObjectTypeClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
+	std::chrono::time_point<std::chrono::steady_clock> GetUpdateTimestamp();
 
-	bool operator==(const ObjectGroupClass &other) const
+	bool
+	operator==(const ObjectGroupClass &other) const
 	{
 		return this->mID == other.mID;
 	}
@@ -44,6 +46,8 @@ private:
 	std::vector<ObjectTypeClass *> mObjects;
 
 	std::string mID;
+
+	std::chrono::time_point<std::chrono::steady_clock> mUpdateTimestamp;
 
 	uint32_t mXPosition;
 	uint8_t mYPosition; //This will only ever have a max of ROW_SIZE * 3
