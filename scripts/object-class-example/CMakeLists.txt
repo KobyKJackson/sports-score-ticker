@@ -18,6 +18,7 @@ set(sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroupManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageUtility.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayManager.cpp
 )
 
 set(headers
@@ -29,6 +30,7 @@ set(headers
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroupManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageUtility.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayManager.h
 )
 
 add_executable(object-class-example ${sources})

@@ -15,6 +15,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 #include <string>
+#include <thread>
 #include <vector>
 
 /* Local Forward Declarations ------------------------------------------------*/
@@ -36,9 +37,13 @@ public:
 	ObjectGroupClass *GetByID(std::string aID);
 	ObjectGroupClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjectGroups();
+	void PrintAllObjects();
 
 private:
+	void threadFunction();
 	std::vector<ObjectGroupClass *> mObjectGroups;
+	std::thread mThread;
+	bool mIsThreadRunning;
 };
 
 /* Exported Functions --------------------------------------------------------*/
