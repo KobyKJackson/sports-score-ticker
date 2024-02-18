@@ -38,6 +38,16 @@ void ObjectGroupClass::AddObject(ObjectTypeClass *&aObject)
 	this->mObjects.push_back(aObject);
 }
 
+void ObjectGroupClass::RemoveAllObjects()
+{
+	for (ObjectTypeClass *lpObject : this->mObjects)
+	{
+		delete lpObject;
+	}
+
+	this->mObjects.clear();
+}
+
 ObjectTypeClass *ObjectGroupClass::GetByIndex(size_t aIndex)
 {
 	if (aIndex < this->mObjects.size())

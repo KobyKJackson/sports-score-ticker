@@ -32,6 +32,7 @@ public:
 
 	std::string GetID() const;
 	void AddObject(ObjectTypeClass *&aObject);
+	void RemoveAllObjects();
 	ObjectTypeClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
 	std::chrono::time_point<std::chrono::steady_clock> GetUpdateTimestamp();

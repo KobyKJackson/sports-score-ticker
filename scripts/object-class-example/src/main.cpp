@@ -17,6 +17,7 @@ int main()
 		std::this_thread::sleep_until(start + 1000ms);
 		start = high_resolution_clock::now();
 	}
+
 	delete lpDisplayManager;
 	delete lpObjectGroupManager;
 

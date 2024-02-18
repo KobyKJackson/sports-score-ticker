@@ -196,77 +196,77 @@ void ObjectGroupManagerClass::threadFunction()
 			string lID = lGame["id"];
 			ObjectGroupClass *lpObjectGroup = this->GetByID(lID);
 
-			if (lpObjectGroup != nullptr)
+			if (lpObjectGroup != nullptr) //TODO: Update, do this better, right now I just delete everything and reconstruct on update
 			{
-				//Update
+				lpObjectGroup->RemoveAllObjects();
 			}
-			else
+			else // New Game
 			{
 				lpObjectGroup = new ObjectGroupClass(lID);
+			}
 
-				for (const auto &lElement : lGame["data"])
+			for (const auto &lElement : lGame["data"])
+			{
+				OBJECT_TYPE lType = ObjectTypeClass::StringTypeToEnumType(lElement["type"]);
+				ObjectTypeClass *lpObject = nullptr;
+				switch (lType)
 				{
-					OBJECT_TYPE lType = ObjectTypeClass::StringTypeToEnumType(lElement["type"]);
-					ObjectTypeClass *lpObject = nullptr;
-					switch (lType)
+					case OBJECT_TYPE::IMAGE:
 					{
-						case OBJECT_TYPE::IMAGE:
-						{
-							vector<uint8_t> lLocation = lElement["location"];
-							string lData = lElement["data"];
-							lpObject = new ImageObjectClass(lLocation, lData);
-						}
-						break;
+						vector<uint8_t> lLocation = lElement["location"];
+						string lData = lElement["data"];
+						lpObject = new ImageObjectClass(lLocation, lData);
+					}
+					break;
 
-						case OBJECT_TYPE::TEXT:
-						{
-							vector<uint8_t> lLocation = lElement["location"];
-							string lData = lElement["data"];
-							lpObject = new TextObjectClass(lLocation, lData);
-						}
-						break;
+					case OBJECT_TYPE::TEXT:
+					{
+						vector<uint8_t> lLocation = lElement["location"];
+						string lData = lElement["data"];
+						lpObject = new TextObjectClass(lLocation, lData);
+					}
+					break;
 
-						case OBJECT_TYPE::MULTI:
-						{
-							lpObject = new MultiObjectClass();
+					case OBJECT_TYPE::MULTI:
+					{
+						lpObject = new MultiObjectClass();
 
-							for (const auto &lElementType : lElement["data"])
+						for (const auto &lElementType : lElement["data"])
+						{
+							OBJECT_TYPE lObjectType = ObjectTypeClass::StringTypeToEnumType(lElementType["type"]);
+							ObjectTypeClass *lpObjectType = nullptr;
+							switch (lObjectType)
 							{
-								OBJECT_TYPE lObjectType = ObjectTypeClass::StringTypeToEnumType(lElementType["type"]);
-								ObjectTypeClass *lpObjectType = nullptr;
-								switch (lObjectType)
+								case OBJECT_TYPE::IMAGE:
 								{
-									case OBJECT_TYPE::IMAGE:
-									{
-										vector<uint8_t> lLocation = lElementType["location"];
-										string lData = lElementType["data"];
-										lpObjectType = new ImageObjectClass(lLocation, lData);
-									}
-									break;
-
-									case OBJECT_TYPE::TEXT:
-									{
-										vector<uint8_t> lLocation = lElementType["location"];
-										string lData = lElementType["data"];
-										lpObjectType = new TextObjectClass(lLocation, lData);
-									}
-									break;
-
-									default:
-										break;
+									vector<uint8_t> lLocation = lElementType["location"];
+									string lData = lElementType["data"];
+									lpObjectType = new ImageObjectClass(lLocation, lData);
 								}
-								(static_cast<MultiObjectClass *>(lpObject))->AddObject(lpObjectType);
-							}
-						}
-						break;
+								break;
 
-						default:
-							break;
+								case OBJECT_TYPE::TEXT:
+								{
+									vector<uint8_t> lLocation = lElementType["location"];
+									string lData = lElementType["data"];
+									lpObjectType = new TextObjectClass(lLocation, lData);
+								}
+								break;
+
+								default:
+									break;
+							}
+							(static_cast<MultiObjectClass *>(lpObject))->AddObject(lpObjectType);
+						}
 					}
-					if (lpObject != nullptr)
-					{
-						lpObjectGroup->AddObject(lpObject);
-					}
+					break;
+
+					default:
+						break;
+				}
+				if (lpObject != nullptr)
+				{
+					lpObjectGroup->AddObject(lpObject);
 				}
 			}
 			this->AddOrUpdate(lpObjectGroup);
@@ -277,12 +277,12 @@ void ObjectGroupManagerClass::threadFunction()
 		{
 			if (OBJECT_TIMEOUT < chrono ::duration_cast<chrono::minutes>(chrono::steady_clock::now() - lpObjectGroup->GetUpdateTimestamp()).count())
 			{
-				// Delete lpObjectGroup
+				// TODO: Delete lpObjectGroup
 			}
 		}
 
 		this->PrintAllObjects();
-		this_thread::sleep_for(chrono::seconds(10));
+		this_thread::sleep_for(chrono::seconds(2));
 	}
 	cout << "ObjectGroupManagerClass thread is stopping." << endl;
 }
