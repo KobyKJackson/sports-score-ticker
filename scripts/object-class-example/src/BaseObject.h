@@ -40,16 +40,13 @@ public:
 	static BASE_OBJECT_TYPE StringTypeToEnumType(const std::string &aValue);
 
 	BASE_OBJECT_TYPE GetBaseObjectType() const;
-
 	std::string GetValue() const;
 	void SetValue(const std::string &aValue);
 	uint8_t GetHeight();
 
 private:
 	BASE_OBJECT_TYPE mObjectType;
-
 	std::string mValue;
-
 	uint8_t mYPosition; //This will only ever have a max of ROW_SIZE * 3
 	uint8_t mHeight;
 };

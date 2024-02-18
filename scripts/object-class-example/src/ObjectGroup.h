@@ -43,12 +43,12 @@ public:
 	}
 
 private:
+	void calculateLength();
+
 	std::vector<ObjectTypeClass *> mObjects;
-
 	std::string mID;
-
 	std::chrono::time_point<std::chrono::steady_clock> mUpdateTimestamp;
-
+	uint32_t mLength;
 	uint32_t mXPosition;
 	uint8_t mYPosition; //This will only ever have a max of ROW_SIZE * 3
 };

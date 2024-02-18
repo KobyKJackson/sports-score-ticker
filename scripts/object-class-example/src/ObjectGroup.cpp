@@ -16,7 +16,7 @@ using namespace std;
 
 /* Class Constructors --------------------------------------------------------*/
 ObjectGroupClass::ObjectGroupClass(string aID) :
-  mID(aID), mUpdateTimestamp(chrono::steady_clock::now()), mXPosition(0), mYPosition(0)
+  mID(aID), mUpdateTimestamp(chrono::steady_clock::now()), mLength(0), mXPosition(0), mYPosition(0)
 {
 }
 
@@ -67,3 +67,12 @@ chrono::time_point<chrono::steady_clock> ObjectGroupClass::GetUpdateTimestamp()
 /* Private Static Class Methods ----------------------------------------------*/
 
 /* Private Class Methods -----------------------------------------------------*/
+void ObjectGroupClass::calculateLength()
+{
+	uint32_t lTotalWidth = 0;
+	for (const auto &lpObject : this->mObjects)
+	{
+		lTotalWidth += lpObject->GetLength();
+	}
+	this->mLength = lTotalWidth;
+}

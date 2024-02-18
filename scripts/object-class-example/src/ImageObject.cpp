@@ -9,8 +9,8 @@
 #include <filesystem> // Include the filesystem library
 #include "ImageUtility.h"
 
-namespace fs = std::filesystem;
 using namespace std;
+namespace fs = filesystem;
 
 /* Exported Data -------------------------------------------------------------*/
 
@@ -24,14 +24,15 @@ ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) :
 
 	if (fs::exists(fs::path(lFileName)))
 	{
-		std::cout << "Image file already exists for: " << aValue << std::endl;
+		cout << "Image file already exists for: " << aValue << endl;
 		this->SetValue(lFileName);
 	}
 	else
 	{
-		std::cout << "File does not exist, proceed with downloading and conversion." << std::endl;
+		cout << "File does not exist, proceed with downloading and conversion." << endl;
 		//Download and convert
 	}
+	this->calculateLength();
 }
 
 /* Class Destructor ----------------------------------------------------------*/
@@ -62,6 +63,35 @@ string ImageObjectClass::getFilePathFromUrl(const string &aURL, const string &aP
 }
 
 /* Private Class Methods -----------------------------------------------------*/
+void ImageObjectClass::calculateLength()
+{
+	string lValue = this->GetValue();
+
+	ifstream lFile(lValue, ios::binary);
+	if (!lFile.is_open())
+	{
+		cerr << "Failed to open file: " << lValue << endl;
+		return;
+	}
+
+	string lLine;
+	getline(lFile, lLine); // Read the magic number line
+	if (lLine != "P6")
+	{
+		cerr << "Unsupported PPM format or incorrect file: " << lLine << endl;
+		return;
+	}
+
+	while (lFile.peek() == '#')
+	{
+		getline(lFile, lLine);
+	}
+
+	uint32_t lWidth = 0, lHeight = 0;
+	lFile >> lWidth >> lHeight;
+	this->mLength = lWidth;
+}
+
 void ImageObjectClass::DownloadAndConvertFile()
 {
 	ImageUtilityClass *lpImageUtility = new ImageUtilityClass();

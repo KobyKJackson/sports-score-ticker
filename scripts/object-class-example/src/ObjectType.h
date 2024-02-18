@@ -41,9 +41,15 @@ public:
 
 	static OBJECT_TYPE StringTypeToEnumType(const std::string &aValue);
 
-private:
-	uint32_t mXPosition;
+	uint32_t GetLength() const;
+
+protected:
 	uint32_t mLength;
+
+private:
+	virtual void calculateLength() = 0;
+
+	uint32_t mXPosition;
 };
 
 /* Exported Functions --------------------------------------------------------*/

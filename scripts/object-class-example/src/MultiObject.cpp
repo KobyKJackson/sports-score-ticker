@@ -32,12 +32,13 @@ OBJECT_TYPE MultiObjectClass::GetObjectType() const
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/
-void MultiObjectClass::AddObject(BaseObjectClass *&aObject)
+void MultiObjectClass::AddObject(ObjectTypeClass *&aObject)
 {
 	this->mObjects.push_back(aObject);
+	this->calculateLength();
 }
 
-BaseObjectClass *MultiObjectClass::GetByIndex(size_t aIndex)
+ObjectTypeClass *MultiObjectClass::GetByIndex(size_t aIndex)
 {
 	if (aIndex < this->mObjects.size())
 	{
@@ -58,6 +59,16 @@ size_t MultiObjectClass::GetNumberOfObjects()
 
 /* Protected Class Methods ---------------------------------------------------*/
 
+/* Private Virtual Class Methods ----------------------------------------------*/
+void MultiObjectClass::calculateLength()
+{
+	uint32_t lTotalWidth = 0;
+	for (const auto &lpObject : this->mObjects)
+	{
+		lTotalWidth += lpObject->GetLength();
+	}
+	this->mLength = lTotalWidth;
+}
 /* Private Static Class Methods ----------------------------------------------*/
 
 /* Private Class Methods -----------------------------------------------------*/

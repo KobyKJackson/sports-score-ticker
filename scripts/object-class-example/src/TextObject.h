@@ -34,6 +34,8 @@ public:
 	virtual OBJECT_TYPE GetObjectType() const;
 
 private:
+	virtual void calculateLength();
+
 	std::string mColor;
 };
 

@@ -12,8 +12,8 @@
 
 /* Class Constructors --------------------------------------------------------*/
 ObjectTypeClass::ObjectTypeClass() :
-  mXPosition(0),
-  mLength(0)
+  mLength(0),
+  mXPosition(0)
 {
 }
 
@@ -43,6 +43,10 @@ OBJECT_TYPE ObjectTypeClass::StringTypeToEnumType(const std::string &aValue)
 	}
 }
 /* Public Class Methods ------------------------------------------------------*/
+uint32_t ObjectTypeClass::GetLength() const
+{
+	return this->mLength;
+}
 
 /* Protected Static Class Methods --------------------------------------------*/
 

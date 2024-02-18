@@ -134,19 +134,19 @@ void ObjectGroupManagerClass::PrintAllObjects()
 					MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
 					for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
 					{
-						BaseObjectClass *lpBaseObject = lpMultiObject->GetByIndex(k);
-						switch (lpBaseObject->GetBaseObjectType())
+						ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
+						switch (lpObjectType->GetObjectType())
 						{
-							case BASE_OBJECT_TYPE::IMAGE:
+							case OBJECT_TYPE::IMAGE:
 							{
-								ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpBaseObject);
+								ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObjectType);
 								cout << "data: " << lpImageObject->GetValue() << endl;
 							}
 							break;
 
-							case BASE_OBJECT_TYPE::TEXT:
+							case OBJECT_TYPE::TEXT:
 							{
-								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpBaseObject);
+								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
 								cout << "data: " << lpTextObject->GetValue() << endl;
 							}
 							break;
@@ -199,7 +199,6 @@ void ObjectGroupManagerClass::threadFunction()
 			if (lpObjectGroup != nullptr)
 			{
 				//Update
-				auto initialTimestamp = chrono::steady_clock::now();
 			}
 			else
 			{
@@ -231,32 +230,32 @@ void ObjectGroupManagerClass::threadFunction()
 						{
 							lpObject = new MultiObjectClass();
 
-							for (const auto &lBaseElement : lElement["data"])
+							for (const auto &lElementType : lElement["data"])
 							{
-								BASE_OBJECT_TYPE lBaseType = BaseObjectClass::StringTypeToEnumType(lBaseElement["type"]);
-								BaseObjectClass *lpBaseObject = nullptr;
-								switch (lBaseType)
+								OBJECT_TYPE lObjectType = ObjectTypeClass::StringTypeToEnumType(lElementType["type"]);
+								ObjectTypeClass *lpObjectType = nullptr;
+								switch (lObjectType)
 								{
-									case BASE_OBJECT_TYPE::IMAGE:
+									case OBJECT_TYPE::IMAGE:
 									{
-										vector<uint8_t> lLocation = lBaseElement["location"];
-										string lData = lBaseElement["data"];
-										lpBaseObject = new ImageObjectClass(lLocation, lData);
+										vector<uint8_t> lLocation = lElementType["location"];
+										string lData = lElementType["data"];
+										lpObjectType = new ImageObjectClass(lLocation, lData);
 									}
 									break;
 
-									case BASE_OBJECT_TYPE::TEXT:
+									case OBJECT_TYPE::TEXT:
 									{
-										vector<uint8_t> lLocation = lBaseElement["location"];
-										string lData = lBaseElement["data"];
-										lpBaseObject = new TextObjectClass(lLocation, lData);
+										vector<uint8_t> lLocation = lElementType["location"];
+										string lData = lElementType["data"];
+										lpObjectType = new TextObjectClass(lLocation, lData);
 									}
 									break;
 
 									default:
 										break;
 								}
-								(static_cast<MultiObjectClass *>(lpObject))->AddObject(lpBaseObject);
+								(static_cast<MultiObjectClass *>(lpObject))->AddObject(lpObjectType);
 							}
 						}
 						break;

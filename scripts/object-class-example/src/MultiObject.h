@@ -18,7 +18,6 @@
 #include "ObjectType.h"
 
 /* Local Forward Declarations ------------------------------------------------*/
-class BaseObjectClass;
 
 /* Exported Constants --------------------------------------------------------*/
 
@@ -32,12 +31,14 @@ public:
 
 	virtual OBJECT_TYPE GetObjectType() const;
 
-	void AddObject(BaseObjectClass *&aObject);
-	BaseObjectClass *GetByIndex(size_t aIndex);
+	void AddObject(ObjectTypeClass *&aObject);
+	ObjectTypeClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
 
 private:
-	std::vector<BaseObjectClass *> mObjects;
+	virtual void calculateLength();
+
+	std::vector<ObjectTypeClass *> mObjects;
 };
 
 /* Exported Functions --------------------------------------------------------*/
