@@ -1,9 +1,9 @@
 /*******************************************************************************
 ** @file       TextObject.h
 ** @class      TextObjectClass
- * @author     Name Name
- * @version    1.00
- * @date       November 3 2023
+* @author     Name Name
+* @version    1.00
+* @date       November 3 2023
 **
 ** @brief
 **
@@ -17,6 +17,8 @@
 
 #include "BaseObject.h"
 #include "ObjectType.h"
+#include "led-matrix.h"
+using namespace rgb_matrix;
 
 /* Local Forward Declarations ------------------------------------------------*/
 
@@ -24,8 +26,7 @@
 
 /* Exported Types ------------------------------------------------------------*/
 /* Exported Classes ----------------------------------------------------------*/
-class TextObjectClass : public BaseObjectClass
-  , public ObjectTypeClass
+class TextObjectClass : public BaseObjectClass, public ObjectTypeClass
 {
 public:
 	TextObjectClass(std::vector<uint8_t> aLocation, std::string aValue);
@@ -34,9 +35,12 @@ public:
 	virtual OBJECT_TYPE GetObjectType() const override;
 	TextObjectClass *clone() const override;
 
-private:
-	virtual void calculateLength() override;
+	rgb_matrix::Font *GetFont();
 
+private:
+	virtual void
+	calculateLength() override;
+	rgb_matrix::Font *mFont;
 	std::string mColor;
 };
 

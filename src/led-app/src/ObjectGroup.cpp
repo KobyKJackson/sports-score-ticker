@@ -15,13 +15,11 @@ using namespace std;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ObjectGroupClass::ObjectGroupClass(string aID) :
-  mID(aID), mUpdateTimestamp(chrono::steady_clock::now()), mLength(0), mXPosition(0), mYPosition(0)
+ObjectGroupClass::ObjectGroupClass(string aID) : mID(aID), mUpdateTimestamp(chrono::steady_clock::now()), mLength(0), mXPosition(0), mYPosition(0)
 {
 }
 
-ObjectGroupClass::ObjectGroupClass(const ObjectGroupClass &other) :
-  mID(other.mID), mLength(other.mLength), mXPosition(other.mXPosition), mYPosition(other.mYPosition), mUpdateTimestamp(other.mUpdateTimestamp)
+ObjectGroupClass::ObjectGroupClass(const ObjectGroupClass &other) : mID(other.mID), mLength(other.mLength), mXPosition(other.mXPosition), mYPosition(other.mYPosition), mUpdateTimestamp(other.mUpdateTimestamp)
 {
 	for (const auto &obj : other.mObjects)
 	{
@@ -41,17 +39,17 @@ string ObjectGroupClass::GetID() const
 	return this->mID;
 }
 
-uint32_t ObjectGroupClass::GetLength() const
+int ObjectGroupClass::GetLength() const
 {
 	return this->mLength;
 }
 
-uint32_t ObjectGroupClass::GetXPosition() const
+int ObjectGroupClass::GetXPosition() const
 {
 	return this->mXPosition;
 }
 
-void ObjectGroupClass::SetXPosition(uint32_t aValue)
+void ObjectGroupClass::SetXPosition(int aValue)
 {
 	this->mXPosition = aValue;
 	this->updateChilderenXPosition();

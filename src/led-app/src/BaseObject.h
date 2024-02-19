@@ -1,9 +1,9 @@
 /*******************************************************************************
 ** @file       BaseObject.h
 ** @class      BaseObjectClass
- * @author     Name Name
- * @version    1.00
- * @date       November 3 2023
+* @author     Name Name
+* @version    1.00
+* @date       November 3 2023
 **
 ** @brief
 **
@@ -20,7 +20,7 @@
 /* Local Forward Declarations ------------------------------------------------*/
 
 /* Exported Constants --------------------------------------------------------*/
-#define ROW_SIZE 16 //16 pixels
+#define ROW_SIZE 16 // 16 pixels
 
 /* Exported Types ------------------------------------------------------------*/
 enum class BASE_OBJECT_TYPE
@@ -42,12 +42,13 @@ public:
 	BASE_OBJECT_TYPE GetBaseObjectType() const;
 	std::string GetValue() const;
 	void SetValue(const std::string &aValue);
+	uint8_t GetYPosition();
 	uint8_t GetHeight();
 
 private:
 	BASE_OBJECT_TYPE mObjectType;
 	std::string mValue;
-	uint8_t mYPosition; //This will only ever have a max of ROW_SIZE * 3
+	uint8_t mYPosition; // This will only ever have a max of ROW_SIZE * 3
 	uint8_t mHeight;
 };
 

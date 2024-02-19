@@ -1,9 +1,9 @@
 /*******************************************************************************
 ** @file       ObjectType.h
 ** @class      ObjectTypeClass
- * @author     Name Name
- * @version    1.00
- * @date       November 3 2023
+* @author     Name Name
+* @version    1.00
+* @date       November 3 2023
 **
 ** @brief
 **
@@ -44,6 +44,7 @@ public:
 
 	uint32_t GetLength() const;
 
+	uint32_t GetXPosition() const;
 	void SetXPosition(uint32_t aValue);
 
 protected:

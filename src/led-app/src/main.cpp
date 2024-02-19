@@ -1,10 +1,18 @@
 #include <chrono>
 #include <thread>
 #include <signal.h>
+#include <iostream>
 
 #include "DisplayManager.h"
 #include "ObjectGroupManager.h"
 #include "ObjectType.h"
+#include "TextObject.h"
+
+#include "led-matrix.h"
+#include "graphics.h"
+
+using namespace rgb_matrix;
+using namespace std;
 
 #define PIXEL_WIDTH 64 * 1
 #define PIXEL_HEIGHT 32 * 2
@@ -33,7 +41,7 @@ int main()
 	signal(SIGTERM, InterruptHandler);
 	signal(SIGINT, InterruptHandler);
 
-	using namespace std::chrono;
+	using namespace chrono;
 	auto start = high_resolution_clock::now();
 
 	ObjectGroupManagerClass *lpObjectGroupManager = new ObjectGroupManagerClass();
@@ -43,19 +51,53 @@ int main()
 	int lLetterSpacing = 0;
 	float lSpeed = 7.0f;
 	int lDelaySpeed_usec = 1000000 / lSpeed / 10; // TODO: Figure this out lFont.CharacterWidth('W');
+	Color lColor(255, 255, 255);
+
+	// Setup Matrix
+	RGBMatrix::Options lMatrixOptions;
+	rgb_matrix::RuntimeOptions lRuntimeOptions;
+
+	lMatrixOptions.rows = 32;
+	lMatrixOptions.cols = 64;
+	lMatrixOptions.chain_length = 1;
+	lMatrixOptions.parallel = 1;
+	lMatrixOptions.hardware_mapping = "adafruit-hat"; // or "adafruit-hat" depending on your setup
+	lMatrixOptions.disable_hardware_pulsing = true;
+	// lRuntimeOptions.gpio_slowdown = 4;
+
+	RGBMatrix *lMatrix = CreateMatrixFromOptions(lMatrixOptions, lRuntimeOptions);
+	if (lMatrix == nullptr)
+	{
+		cerr << "Could not create matrix object." << endl;
+		return 1;
+	}
+
+	FrameCanvas *lOffscreenCanvas = lMatrix->CreateFrameCanvas();
+
+	lMatrix->SetPWMBits(1);
 
 	struct timespec lNextFrame = {0, 0};
 	uint64_t lFrameCounter = 0;
 
+	// TEST
+	const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/4x6.bdf";
+	rgb_matrix::Font lFont;
+	if (!lFont.LoadFont(lpFontFile))
+	{
+		fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+		return 1;
+	}
+	std::string TEXT = "Koby";
+	int lX = 64;
+	int lY = 0;
+
 	while (!IsInterruptReceived)
 	{
 		++lFrameCounter;
-		// lOffscreenCanvas->Fill(0, 0, 0);
+		lOffscreenCanvas->Fill(0, 0, 0);
 
 		for (auto &lpObjectGroup : lpDisplayManager->GetDisplayObjects())
 		{
-			lpObjectGroup.IncrementXPosition();
-
 			// Do the thing
 			for (auto &lpObject : lpObjectGroup.GetObjects())
 			{
@@ -69,7 +111,15 @@ int main()
 
 				case OBJECT_TYPE::TEXT:
 				{
-					// rgb_matrix::DrawText(lOffscreenCanvas, lFont, lX, lY + lFont.baseline(), lColor, NULL, TEXT.c_str(), lLetterSpacing);
+					TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObject);
+					rgb_matrix::DrawText(lOffscreenCanvas,
+										 *lpTextObject->GetFont(),
+										 lpTextObject->GetXPosition(),
+										 lpTextObject->GetYPosition() + ((*lpTextObject->GetFont()).baseline()),
+										 lColor,
+										 NULL,
+										 lpTextObject->GetValue().c_str(),
+										 lLetterSpacing);
 				}
 				break;
 
@@ -109,7 +159,16 @@ int main()
 					break;
 				}
 			}
+
+			lpObjectGroup.IncrementXPosition();
 		}
+
+		auto lLength = rgb_matrix::DrawText(lOffscreenCanvas, lFont,
+											lX, lY + lFont.baseline(),
+											lColor, NULL,
+											TEXT.c_str(), lLetterSpacing);
+
+		lX += -1;
 
 		// Make sure render-time delays are not influencing scroll-time
 		if (lNextFrame.tv_sec == 0 && lNextFrame.tv_nsec == 0)
@@ -120,14 +179,14 @@ int main()
 		else
 		{
 			AddMicros(&lNextFrame, lDelaySpeed_usec);
-			// TODO: Comment back in: clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &lNextFrame, NULL);
+			clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &lNextFrame, NULL);
 		}
 		// Swap the offscreen_canvas with canvas on vsync, avoids flickering
-		// lOffscreenCanvas = lMatrix->SwapOnVSync(lOffscreenCanvas);
+		lOffscreenCanvas = lMatrix->SwapOnVSync(lOffscreenCanvas);
 	}
 
-	// lMatrix->Clear();
-	// delete lMatrix;
+	lMatrix->Clear();
+	delete lMatrix;
 
 	delete lpDisplayManager;
 	delete lpObjectGroupManager;

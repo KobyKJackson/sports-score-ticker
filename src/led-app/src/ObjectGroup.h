@@ -33,10 +33,10 @@ public:
 	virtual ~ObjectGroupClass();
 
 	std::string GetID() const;
-	uint32_t GetLength() const;
+	int GetLength() const;
 
-	uint32_t GetXPosition() const;
-	void SetXPosition(uint32_t aValue);
+	int GetXPosition() const;
+	void SetXPosition(int aValue);
 	void IncrementXPosition();
 
 	void AddObject(ObjectTypeClass *&aObject);
@@ -60,8 +60,8 @@ private:
 	std::vector<ObjectTypeClass *> mObjects;
 	std::string mID;
 	std::chrono::time_point<std::chrono::steady_clock> mUpdateTimestamp;
-	uint32_t mLength;
-	uint32_t mXPosition;
+	int mLength;
+	int mXPosition;
 	uint8_t mYPosition; // This will only ever have a max of ROW_SIZE * 3
 };
 

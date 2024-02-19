@@ -11,11 +11,10 @@
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-BaseObjectClass::BaseObjectClass(BASE_OBJECT_TYPE aObjectType, std::vector<uint8_t> aLocation, std::string aValue) :
-  mObjectType(aObjectType),
-  mValue(aValue),
-  mYPosition((aLocation[0] - 1) * ROW_SIZE),
-  mHeight(aLocation.size() * ROW_SIZE)
+BaseObjectClass::BaseObjectClass(BASE_OBJECT_TYPE aObjectType, std::vector<uint8_t> aLocation, std::string aValue) : mObjectType(aObjectType),
+																													 mValue(aValue),
+																													 mYPosition((aLocation[0] - 1) * ROW_SIZE),
+																													 mHeight(aLocation.size() * ROW_SIZE)
 {
 }
 
@@ -54,6 +53,11 @@ std::string BaseObjectClass::GetValue() const
 void BaseObjectClass::SetValue(const std::string &aValue)
 {
 	this->mValue = aValue;
+}
+
+uint8_t BaseObjectClass::GetYPosition()
+{
+	return this->mYPosition;
 }
 
 uint8_t BaseObjectClass::GetHeight()

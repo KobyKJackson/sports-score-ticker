@@ -24,8 +24,7 @@ using namespace std;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ObjectGroupManagerClass::ObjectGroupManagerClass() :
-  mIsThreadRunning(true)
+ObjectGroupManagerClass::ObjectGroupManagerClass() : mIsThreadRunning(true)
 {
 	this->mThread = thread(&ObjectGroupManagerClass::threadFunction, this);
 }
@@ -115,51 +114,51 @@ void ObjectGroupManagerClass::PrintAllObjects()
 			ObjectTypeClass *lpObject = lpObjectGroup->GetByIndex(j);
 			switch (lpObject->GetObjectType())
 			{
-				case OBJECT_TYPE::IMAGE:
-				{
-					ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObject);
-					cout << "data: " << lpImageObject->GetValue() << endl;
-				}
-				break;
+			case OBJECT_TYPE::IMAGE:
+			{
+				ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObject);
+				cout << "data: " << lpImageObject->GetValue() << endl;
+			}
+			break;
 
-				case OBJECT_TYPE::TEXT:
-				{
-					TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObject);
-					cout << "data: " << lpTextObject->GetValue() << endl;
-				}
-				break;
+			case OBJECT_TYPE::TEXT:
+			{
+				TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObject);
+				cout << "data: " << lpTextObject->GetValue() << endl;
+			}
+			break;
 
-				case OBJECT_TYPE::MULTI:
+			case OBJECT_TYPE::MULTI:
+			{
+				MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
+				for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
 				{
-					MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
-					for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
+					ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
+					switch (lpObjectType->GetObjectType())
 					{
-						ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
-						switch (lpObjectType->GetObjectType())
-						{
-							case OBJECT_TYPE::IMAGE:
-							{
-								ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObjectType);
-								cout << "data: " << lpImageObject->GetValue() << endl;
-							}
-							break;
+					case OBJECT_TYPE::IMAGE:
+					{
+						ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObjectType);
+						cout << "data: " << lpImageObject->GetValue() << endl;
+					}
+					break;
 
-							case OBJECT_TYPE::TEXT:
-							{
-								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
-								cout << "data: " << lpTextObject->GetValue() << endl;
-							}
-							break;
+					case OBJECT_TYPE::TEXT:
+					{
+						TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
+						cout << "data: " << lpTextObject->GetValue() << endl;
+					}
+					break;
 
-							default:
-								break;
-						}
+					default:
+						break;
 					}
 				}
-				break;
+			}
+			break;
 
-				default:
-					break;
+			default:
+				break;
 			}
 		}
 	}
@@ -177,26 +176,26 @@ void ObjectGroupManagerClass::threadFunction()
 	while (this->mIsThreadRunning)
 	{
 		// Ping the server and update
-		//Read JSON
+		// Read JSON
 		json lJSONData;
 		try
 		{
 			ifstream f("../src/example.json");
 			lJSONData = json::parse(f);
-			cout << "Example element: " << lJSONData << endl;
+			// cout << "Example element: " << lJSONData << endl;
 		}
 		catch (json::parse_error &e)
 		{
 			cerr << "JSON parse error: " << e.what() << endl;
 		}
 
-		//Update Objects
+		// Update Objects
 		for (const auto &lGame : lJSONData["games"])
 		{
 			string lID = lGame["id"];
 			ObjectGroupClass *lpObjectGroup = this->GetByID(lID);
 
-			if (lpObjectGroup != nullptr) //TODO: Update, do this better, right now I just delete everything and reconstruct on update
+			if (lpObjectGroup != nullptr) // TODO: Update, do this better, right now I just delete everything and reconstruct on update
 			{
 				lpObjectGroup->RemoveAllObjects();
 			}
@@ -211,58 +210,58 @@ void ObjectGroupManagerClass::threadFunction()
 				ObjectTypeClass *lpObject = nullptr;
 				switch (lType)
 				{
-					case OBJECT_TYPE::IMAGE:
-					{
-						vector<uint8_t> lLocation = lElement["location"];
-						string lData = lElement["data"];
-						lpObject = new ImageObjectClass(lLocation, lData);
-					}
-					break;
+				case OBJECT_TYPE::IMAGE:
+				{
+					vector<uint8_t> lLocation = lElement["location"];
+					string lData = lElement["data"];
+					lpObject = new ImageObjectClass(lLocation, lData);
+				}
+				break;
 
-					case OBJECT_TYPE::TEXT:
-					{
-						vector<uint8_t> lLocation = lElement["location"];
-						string lData = lElement["data"];
-						lpObject = new TextObjectClass(lLocation, lData);
-					}
-					break;
+				case OBJECT_TYPE::TEXT:
+				{
+					vector<uint8_t> lLocation = lElement["location"];
+					string lData = lElement["data"];
+					lpObject = new TextObjectClass(lLocation, lData);
+				}
+				break;
 
-					case OBJECT_TYPE::MULTI:
-					{
-						lpObject = new MultiObjectClass();
+				case OBJECT_TYPE::MULTI:
+				{
+					lpObject = new MultiObjectClass();
 
-						for (const auto &lElementType : lElement["data"])
+					for (const auto &lElementType : lElement["data"])
+					{
+						OBJECT_TYPE lObjectType = ObjectTypeClass::StringTypeToEnumType(lElementType["type"]);
+						ObjectTypeClass *lpObjectType = nullptr;
+						switch (lObjectType)
 						{
-							OBJECT_TYPE lObjectType = ObjectTypeClass::StringTypeToEnumType(lElementType["type"]);
-							ObjectTypeClass *lpObjectType = nullptr;
-							switch (lObjectType)
-							{
-								case OBJECT_TYPE::IMAGE:
-								{
-									vector<uint8_t> lLocation = lElementType["location"];
-									string lData = lElementType["data"];
-									lpObjectType = new ImageObjectClass(lLocation, lData);
-								}
-								break;
-
-								case OBJECT_TYPE::TEXT:
-								{
-									vector<uint8_t> lLocation = lElementType["location"];
-									string lData = lElementType["data"];
-									lpObjectType = new TextObjectClass(lLocation, lData);
-								}
-								break;
-
-								default:
-									break;
-							}
-							(static_cast<MultiObjectClass *>(lpObject))->AddObject(lpObjectType);
+						case OBJECT_TYPE::IMAGE:
+						{
+							vector<uint8_t> lLocation = lElementType["location"];
+							string lData = lElementType["data"];
+							lpObjectType = new ImageObjectClass(lLocation, lData);
 						}
-					}
-					break;
-
-					default:
 						break;
+
+						case OBJECT_TYPE::TEXT:
+						{
+							vector<uint8_t> lLocation = lElementType["location"];
+							string lData = lElementType["data"];
+							lpObjectType = new TextObjectClass(lLocation, lData);
+						}
+						break;
+
+						default:
+							break;
+						}
+						(static_cast<MultiObjectClass *>(lpObject))->AddObject(lpObjectType);
+					}
+				}
+				break;
+
+				default:
+					break;
 				}
 				if (lpObject != nullptr)
 				{
@@ -272,7 +271,7 @@ void ObjectGroupManagerClass::threadFunction()
 			this->AddOrUpdate(lpObjectGroup);
 		}
 
-		//Check if any need to be removed
+		// Check if any need to be removed
 		for (const auto &lpObjectGroup : this->mObjectGroups)
 		{
 			if (OBJECT_TIMEOUT < chrono ::duration_cast<chrono::minutes>(chrono::steady_clock::now() - lpObjectGroup->GetUpdateTimestamp()).count())
@@ -281,8 +280,8 @@ void ObjectGroupManagerClass::threadFunction()
 			}
 		}
 
-		this->PrintAllObjects();
-		this_thread::sleep_for(chrono::seconds(2));
+		// this->PrintAllObjects();
+		this_thread::sleep_for(chrono::seconds(20));
 	}
 	cout << "ObjectGroupManagerClass thread is stopping." << endl;
 }

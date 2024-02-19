@@ -16,11 +16,10 @@ using namespace std;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-DisplayManagerClass::DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupManager, uint32_t aDisplayWidth) :
-  mObjectGroupManager(aObjectGroupManager),
-  mDisplayWidth(aDisplayWidth),
-  mObjectIndex(0),
-  mIsThreadRunning(true)
+DisplayManagerClass::DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupManager, uint32_t aDisplayWidth) : mObjectGroupManager(aObjectGroupManager),
+																												 mDisplayWidth(aDisplayWidth),
+																												 mObjectIndex(0),
+																												 mIsThreadRunning(true)
 {
 	this->mThread = thread(&DisplayManagerClass::threadFunction, this);
 }
@@ -63,7 +62,7 @@ void DisplayManagerClass::threadFunction()
 	while (this->mIsThreadRunning)
 	{
 		if ((this->mDisplayObjects.size() == 0) ||
-		    (this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() == this->mDisplayWidth)) //Should we add an object?
+			(this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() == this->mDisplayWidth)) // Should we add an object?
 		{
 			unique_lock<mutex> lLock(this->mDataLock);
 			ObjectGroupClass *lpObjectGroup = this->mObjectGroupManager->GetByIndex(this->mObjectIndex);
@@ -87,7 +86,7 @@ void DisplayManagerClass::threadFunction()
 		}
 
 		if ((this->mDisplayObjects.size() != 0) &&
-		    (this->mDisplayObjects[0].GetXPosition() < (-1 * this->mDisplayObjects[0].GetLength()))) //Should we delete an object?
+			(this->mDisplayObjects[0].GetXPosition() < (-this->mDisplayObjects[0].GetLength()))) // Should we delete an object?
 		{
 			unique_lock<mutex> lLock(this->mDataLock);
 			if (!this->mDisplayObjects.empty())

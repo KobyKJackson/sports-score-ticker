@@ -22,16 +22,16 @@ ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) : O
 {
 	string lFileName = this->getFilePathFromUrl(this->GetValue(), "../data/images");
 
-	if (fs::exists(fs::path(lFileName)))
+	// if (fs::exists(fs::path(lFileName)))
 	{
-		cout << "Image file already exists for: " << aValue << endl;
+		//		cout << "Image file already exists for: " << aValue << endl;
 		this->SetValue(lFileName);
 	}
-	else
-	{
-		cout << "File does not exist, proceed with downloading and conversion." << endl;
-		// Download and convert
-	}
+	//	else
+	//	{
+	//		cout << "File does not exist, proceed with downloading and conversion." << endl;
+	// Download and convert
+	//	}
 	this->calculateLength();
 }
 
@@ -70,6 +70,9 @@ string ImageObjectClass::getFilePathFromUrl(const string &aURL, const string &aP
 /* Private Class Methods -----------------------------------------------------*/
 void ImageObjectClass::calculateLength()
 {
+	// TODO: Fix this
+	this->mLength = 64;
+	/*
 	string lValue = this->GetValue();
 
 	ifstream lFile(lValue, ios::binary);
@@ -95,6 +98,7 @@ void ImageObjectClass::calculateLength()
 	uint32_t lWidth = 0, lHeight = 0;
 	lFile >> lWidth >> lHeight;
 	this->mLength = lWidth;
+	*/
 }
 
 /*

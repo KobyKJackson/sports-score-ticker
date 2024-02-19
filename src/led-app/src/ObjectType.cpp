@@ -11,9 +11,8 @@
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ObjectTypeClass::ObjectTypeClass() :
-  mLength(0),
-  mXPosition(0)
+ObjectTypeClass::ObjectTypeClass() : mLength(0),
+									 mXPosition(0)
 {
 }
 
@@ -46,6 +45,11 @@ OBJECT_TYPE ObjectTypeClass::StringTypeToEnumType(const std::string &aValue)
 uint32_t ObjectTypeClass::GetLength() const
 {
 	return this->mLength;
+}
+
+uint32_t ObjectTypeClass::GetXPosition() const
+{
+	return this->mXPosition;
 }
 
 void ObjectTypeClass::SetXPosition(uint32_t aValue)
