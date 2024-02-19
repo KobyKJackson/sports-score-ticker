@@ -1,9 +1,9 @@
 /*******************************************************************************
 ** @file       ObjectGroup.h
 ** @class      ObjectGroupClass
- * @author     Name Name
- * @version    1.00
- * @date       November 3 2023
+* @author     Name Name
+* @version    1.00
+* @date       November 3 2023
 **
 ** @brief
 **
@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <chrono>
 
 /* Local Forward Declarations ------------------------------------------------*/
 class ObjectTypeClass;
@@ -61,7 +62,7 @@ private:
 	std::chrono::time_point<std::chrono::steady_clock> mUpdateTimestamp;
 	uint32_t mLength;
 	uint32_t mXPosition;
-	uint8_t mYPosition; //This will only ever have a max of ROW_SIZE * 3
+	uint8_t mYPosition; // This will only ever have a max of ROW_SIZE * 3
 };
 
 /* Exported Functions --------------------------------------------------------*/

@@ -1,5 +1,6 @@
 #include <chrono>
 #include <thread>
+#include <signal.h>
 
 #include "DisplayManager.h"
 #include "ObjectGroupManager.h"
@@ -38,74 +39,74 @@ int main()
 	ObjectGroupManagerClass *lpObjectGroupManager = new ObjectGroupManagerClass();
 	DisplayManagerClass *lpDisplayManager = new DisplayManagerClass(lpObjectGroupManager, PIXEL_WIDTH);
 
-	//Customize
+	// Customize
 	int lLetterSpacing = 0;
 	float lSpeed = 7.0f;
-	int lDelaySpeed_usec = 1000000 / lSpeed / 10; //TODO: Figure this out lFont.CharacterWidth('W');
+	int lDelaySpeed_usec = 1000000 / lSpeed / 10; // TODO: Figure this out lFont.CharacterWidth('W');
 
-	struct timespec lNextFrame = { 0, 0 };
+	struct timespec lNextFrame = {0, 0};
 	uint64_t lFrameCounter = 0;
 
 	while (!IsInterruptReceived)
 	{
 		++lFrameCounter;
-		//lOffscreenCanvas->Fill(0, 0, 0);
+		// lOffscreenCanvas->Fill(0, 0, 0);
 
 		for (auto &lpObjectGroup : lpDisplayManager->GetDisplayObjects())
 		{
 			lpObjectGroup.IncrementXPosition();
 
-			//Do the thing
+			// Do the thing
 			for (auto &lpObject : lpObjectGroup.GetObjects())
 			{
 				switch (lpObject->GetObjectType())
 				{
-					case OBJECT_TYPE::IMAGE:
-					{
-						//Do nothing right now
-					}
-					break;
+				case OBJECT_TYPE::IMAGE:
+				{
+					// Do nothing right now
+				}
+				break;
 
-					case OBJECT_TYPE::TEXT:
-					{
-						//rgb_matrix::DrawText(lOffscreenCanvas, lFont, lX, lY + lFont.baseline(), lColor, NULL, TEXT.c_str(), lLetterSpacing);
-					}
-					break;
+				case OBJECT_TYPE::TEXT:
+				{
+					// rgb_matrix::DrawText(lOffscreenCanvas, lFont, lX, lY + lFont.baseline(), lColor, NULL, TEXT.c_str(), lLetterSpacing);
+				}
+				break;
 
-					case OBJECT_TYPE::MULTI:
+				case OBJECT_TYPE::MULTI:
+				{
+					// Do nothing right now
+					/*
+					MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
+					for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
 					{
-						//Do nothing right now
-						/*
-						MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
-						for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
+						ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
+						switch (lpObjectType->GetObjectType())
 						{
-							ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
-							switch (lpObjectType->GetObjectType())
+							case OBJECT_TYPE::IMAGE:
 							{
-								case OBJECT_TYPE::IMAGE:
-								{
-									ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObjectType);
-									cout << "data: " << lpImageObject->GetValue() << endl;
-								}
-								break;
-
-								case OBJECT_TYPE::TEXT:
-								{
-									TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
-									cout << "data: " << lpTextObject->GetValue() << endl;
-								}
-								break;
-
-								default:
-									break;
+								ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObjectType);
+								cout << "data: " << lpImageObject->GetValue() << endl;
 							}
-						}
-						*/
-					}
-					break;
+							break;
 
-					default:
-						break;
+							case OBJECT_TYPE::TEXT:
+							{
+								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
+								cout << "data: " << lpTextObject->GetValue() << endl;
+							}
+							break;
+
+							default:
+								break;
+						}
+					}
+					*/
+				}
+				break;
+
+				default:
+					break;
 				}
 			}
 		}
@@ -122,11 +123,11 @@ int main()
 			// TODO: Comment back in: clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &lNextFrame, NULL);
 		}
 		// Swap the offscreen_canvas with canvas on vsync, avoids flickering
-		//lOffscreenCanvas = lMatrix->SwapOnVSync(lOffscreenCanvas);
+		// lOffscreenCanvas = lMatrix->SwapOnVSync(lOffscreenCanvas);
 	}
 
-	//lMatrix->Clear();
-	//delete lMatrix;
+	// lMatrix->Clear();
+	// delete lMatrix;
 
 	delete lpDisplayManager;
 	delete lpObjectGroupManager;

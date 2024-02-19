@@ -7,7 +7,8 @@
 #include "ImageObject.h"
 
 #include <filesystem> // Include the filesystem library
-#include "ImageUtility.h"
+// #include "ImageUtility.h"
+#include <iostream>
 
 using namespace std;
 namespace fs = filesystem;
@@ -17,8 +18,7 @@ namespace fs = filesystem;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) :
-  ObjectTypeClass(), BaseObjectClass(BASE_OBJECT_TYPE::IMAGE, aLocation, aValue)
+ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) : ObjectTypeClass(), BaseObjectClass(BASE_OBJECT_TYPE::IMAGE, aLocation, aValue)
 {
 	string lFileName = this->getFilePathFromUrl(this->GetValue(), "../data/images");
 
@@ -30,7 +30,7 @@ ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) :
 	else
 	{
 		cout << "File does not exist, proceed with downloading and conversion." << endl;
-		//Download and convert
+		// Download and convert
 	}
 	this->calculateLength();
 }
@@ -97,6 +97,7 @@ void ImageObjectClass::calculateLength()
 	this->mLength = lWidth;
 }
 
+/*
 void ImageObjectClass::DownloadAndConvertFile()
 {
 	ImageUtilityClass *lpImageUtility = new ImageUtilityClass();
@@ -162,3 +163,4 @@ void ImageObjectClass::DownloadAndConvertFile()
 	png_image_free(&image);
 	delete lpImageUtility;
 }
+*/
