@@ -30,6 +30,11 @@ OBJECT_TYPE TextObjectClass::GetObjectType() const
 {
 	return OBJECT_TYPE::TEXT;
 };
+
+TextObjectClass *TextObjectClass::clone() const
+{
+	return new TextObjectClass(*this);
+}
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/

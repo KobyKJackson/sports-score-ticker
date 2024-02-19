@@ -62,7 +62,7 @@ void DisplayManagerClass::threadFunction()
 			ObjectGroupClass *lpObjectGroup = this->mObjectGroupManager->GetByIndex(this->mObjectIndex);
 			if (lpObjectGroup != nullptr)
 			{
-				this->mDisplayObjects.push_back(lpObjectGroup);
+				this->mDisplayObjects.push_back(*lpObjectGroup);
 				this->mObjectIndex++;
 			}
 		}

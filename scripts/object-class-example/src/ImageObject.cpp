@@ -45,6 +45,11 @@ OBJECT_TYPE ImageObjectClass::GetObjectType() const
 {
 	return OBJECT_TYPE::IMAGE;
 };
+
+ImageObjectClass *ImageObjectClass::clone() const
+{
+	return new ImageObjectClass(*this);
+}
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/

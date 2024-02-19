@@ -29,14 +29,15 @@ public:
 	MultiObjectClass();
 	virtual ~MultiObjectClass();
 
-	virtual OBJECT_TYPE GetObjectType() const;
+	virtual OBJECT_TYPE GetObjectType() const override;
+	MultiObjectClass *clone() const override;
 
 	void AddObject(ObjectTypeClass *&aObject);
 	ObjectTypeClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
 
 private:
-	virtual void calculateLength();
+	virtual void calculateLength() override;
 
 	std::vector<ObjectTypeClass *> mObjects;
 };

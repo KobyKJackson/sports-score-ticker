@@ -20,6 +20,14 @@ ObjectGroupClass::ObjectGroupClass(string aID) :
 {
 }
 
+ObjectGroupClass::ObjectGroupClass(const ObjectGroupClass &other) :
+  mID(other.mID), mLength(other.mLength), mXPosition(other.mXPosition), mYPosition(other.mYPosition), mUpdateTimestamp(other.mUpdateTimestamp)
+{
+	for (const auto &obj : other.mObjects)
+	{
+		mObjects.push_back(obj->clone()); // Use clone to deep copy each object
+	}
+}
 /* Class Destructor ----------------------------------------------------------*/
 ObjectGroupClass::~ObjectGroupClass()
 {

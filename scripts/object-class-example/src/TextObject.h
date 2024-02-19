@@ -31,10 +31,11 @@ public:
 	TextObjectClass(std::vector<uint8_t> aLocation, std::string aValue);
 	virtual ~TextObjectClass();
 
-	virtual OBJECT_TYPE GetObjectType() const;
+	virtual OBJECT_TYPE GetObjectType() const override;
+	TextObjectClass *clone() const override;
 
 private:
-	virtual void calculateLength();
+	virtual void calculateLength() override;
 
 	std::string mColor;
 };

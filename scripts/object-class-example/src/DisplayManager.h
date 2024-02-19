@@ -18,9 +18,10 @@
 #include <thread>
 #include <vector>
 
+#include "ObjectGroup.h"
+#include "ObjectGroupManager.h"
+
 /* Local Forward Declarations ------------------------------------------------*/
-class ObjectGroupManagerClass;
-class ObjectGroupClass;
 
 /* Exported Constants --------------------------------------------------------*/
 
@@ -38,7 +39,7 @@ public:
 private:
 	void threadFunction();
 	ObjectGroupManagerClass *mObjectGroupManager;
-	std::vector<ObjectGroupClass *> mDisplayObjects;
+	std::vector<ObjectGroupClass> mDisplayObjects;
 
 	uint32_t mObjectIndex;
 

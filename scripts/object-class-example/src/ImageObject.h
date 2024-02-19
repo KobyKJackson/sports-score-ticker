@@ -31,10 +31,11 @@ public:
 	ImageObjectClass(std::vector<uint8_t> aLocation, std::string aValue);
 	virtual ~ImageObjectClass();
 
-	virtual OBJECT_TYPE GetObjectType() const;
+	virtual OBJECT_TYPE GetObjectType() const override;
+	ImageObjectClass *clone() const override;
 
 private:
-	virtual void calculateLength();
+	virtual void calculateLength() override;
 	static std::string getFilePathFromUrl(const std::string &aURL, const std::string &aPath);
 	void DownloadAndConvertFile();
 };

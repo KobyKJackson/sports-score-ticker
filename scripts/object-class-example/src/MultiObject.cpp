@@ -29,6 +29,10 @@ OBJECT_TYPE MultiObjectClass::GetObjectType() const
 	return OBJECT_TYPE::MULTI;
 };
 
+MultiObjectClass *MultiObjectClass::clone() const
+{
+	return new MultiObjectClass(*this);
+}
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/

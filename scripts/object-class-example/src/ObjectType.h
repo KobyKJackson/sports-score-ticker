@@ -38,6 +38,7 @@ public:
 	virtual ~ObjectTypeClass();
 
 	virtual OBJECT_TYPE GetObjectType() const = 0;
+	virtual ObjectTypeClass *clone() const = 0; // Pure virtual clone method
 
 	static OBJECT_TYPE StringTypeToEnumType(const std::string &aValue);
 

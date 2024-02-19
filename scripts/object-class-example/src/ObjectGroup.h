@@ -28,6 +28,7 @@ class ObjectGroupClass
 {
 public:
 	ObjectGroupClass(std::string aID);
+	ObjectGroupClass(const ObjectGroupClass &aValue);
 	virtual ~ObjectGroupClass();
 
 	std::string GetID() const;
