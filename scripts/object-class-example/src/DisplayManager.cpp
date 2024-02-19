@@ -45,6 +45,11 @@ mutex &DisplayManagerClass::GetDataLock()
 	return this->mDataLock;
 }
 
+vector<ObjectGroupClass> DisplayManagerClass::GetDisplayObjects()
+{
+	return this->mDisplayObjects;
+}
+
 /* Protected Static Class Methods --------------------------------------------*/
 
 /* Protected Class Methods ---------------------------------------------------*/

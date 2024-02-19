@@ -48,6 +48,11 @@ uint32_t ObjectTypeClass::GetLength() const
 	return this->mLength;
 }
 
+void ObjectTypeClass::SetXPosition(uint32_t aValue)
+{
+	this->mXPosition = aValue;
+}
+
 /* Protected Static Class Methods --------------------------------------------*/
 
 /* Protected Class Methods ---------------------------------------------------*/

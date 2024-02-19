@@ -44,6 +44,8 @@ public:
 
 	uint32_t GetLength() const;
 
+	void SetXPosition(uint32_t aValue);
+
 protected:
 	uint32_t mLength;
 

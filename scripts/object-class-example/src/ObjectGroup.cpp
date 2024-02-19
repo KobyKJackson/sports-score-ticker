@@ -54,11 +54,19 @@ uint32_t ObjectGroupClass::GetXPosition() const
 void ObjectGroupClass::SetXPosition(uint32_t aValue)
 {
 	this->mXPosition = aValue;
+	this->updateChilderenXPosition();
+}
+
+void ObjectGroupClass::IncrementXPosition()
+{
+	this->mXPosition--;
+	this->updateChilderenXPosition();
 }
 
 void ObjectGroupClass::AddObject(ObjectTypeClass *&aObject)
 {
 	this->mObjects.push_back(aObject);
+	this->calculateLength();
 }
 
 void ObjectGroupClass::RemoveAllObjects()
@@ -88,6 +96,11 @@ size_t ObjectGroupClass::GetNumberOfObjects()
 	return this->mObjects.size();
 }
 
+std::vector<ObjectTypeClass *> ObjectGroupClass::GetObjects()
+{
+	return this->mObjects;
+}
+
 chrono::time_point<chrono::steady_clock> ObjectGroupClass::GetUpdateTimestamp()
 {
 	return this->mUpdateTimestamp;
@@ -102,10 +115,20 @@ chrono::time_point<chrono::steady_clock> ObjectGroupClass::GetUpdateTimestamp()
 /* Private Class Methods -----------------------------------------------------*/
 void ObjectGroupClass::calculateLength()
 {
-	uint32_t lTotalWidth = 0;
+	uint32_t lTotalLength = 0;
 	for (const auto &lpObject : this->mObjects)
 	{
-		lTotalWidth += lpObject->GetLength();
+		lTotalLength += lpObject->GetLength();
 	}
-	this->mLength = lTotalWidth;
+	this->mLength = lTotalLength;
+}
+
+void ObjectGroupClass::updateChilderenXPosition()
+{
+	uint32_t lRunningXPosition = this->mXPosition;
+	for (const auto &lpObject : this->mObjects)
+	{
+		lpObject->SetXPosition(lRunningXPosition);
+		lRunningXPosition += lpObject->GetLength();
+	}
 }

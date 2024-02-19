@@ -36,11 +36,14 @@ public:
 
 	uint32_t GetXPosition() const;
 	void SetXPosition(uint32_t aValue);
+	void IncrementXPosition();
 
 	void AddObject(ObjectTypeClass *&aObject);
 	void RemoveAllObjects();
 	ObjectTypeClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
+	std::vector<ObjectTypeClass *> GetObjects();
+
 	std::chrono::time_point<std::chrono::steady_clock> GetUpdateTimestamp();
 
 	bool
@@ -51,6 +54,7 @@ public:
 
 private:
 	void calculateLength();
+	void updateChilderenXPosition();
 
 	std::vector<ObjectTypeClass *> mObjects;
 	std::string mID;

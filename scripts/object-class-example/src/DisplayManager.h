@@ -36,6 +36,8 @@ public:
 
 	std::mutex &GetDataLock();
 
+	std::vector<ObjectGroupClass> GetDisplayObjects();
+
 private:
 	void threadFunction();
 
