@@ -41,6 +41,21 @@ string ObjectGroupClass::GetID() const
 	return this->mID;
 }
 
+uint32_t ObjectGroupClass::GetLength() const
+{
+	return this->mLength;
+}
+
+uint32_t ObjectGroupClass::GetXPosition() const
+{
+	return this->mXPosition;
+}
+
+void ObjectGroupClass::SetXPosition(uint32_t aValue)
+{
+	this->mXPosition = aValue;
+}
+
 void ObjectGroupClass::AddObject(ObjectTypeClass *&aObject)
 {
 	this->mObjects.push_back(aObject);

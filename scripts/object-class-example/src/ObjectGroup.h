@@ -32,6 +32,11 @@ public:
 	virtual ~ObjectGroupClass();
 
 	std::string GetID() const;
+	uint32_t GetLength() const;
+
+	uint32_t GetXPosition() const;
+	void SetXPosition(uint32_t aValue);
+
 	void AddObject(ObjectTypeClass *&aObject);
 	void RemoveAllObjects();
 	ObjectTypeClass *GetByIndex(size_t aIndex);

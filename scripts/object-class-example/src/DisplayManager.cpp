@@ -16,8 +16,9 @@ using namespace std;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-DisplayManagerClass::DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupManager) :
+DisplayManagerClass::DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupManager, uint32_t aDisplayWidth) :
   mObjectGroupManager(aObjectGroupManager),
+  mDisplayWidth(aDisplayWidth),
   mObjectIndex(0),
   mIsThreadRunning(true)
 {
@@ -56,24 +57,43 @@ void DisplayManagerClass::threadFunction()
 	cout << "DisplayManagerClass thread is running." << endl;
 	while (this->mIsThreadRunning)
 	{
-		if (true) //Should we add an object?
+		if ((this->mDisplayObjects.size() == 0) ||
+		    (this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() == this->mDisplayWidth)) //Should we add an object?
 		{
 			unique_lock<mutex> lLock(this->mDataLock);
 			ObjectGroupClass *lpObjectGroup = this->mObjectGroupManager->GetByIndex(this->mObjectIndex);
 			if (lpObjectGroup != nullptr)
 			{
+				uint32_t lTotalWidth = this->mDisplayWidth;
+
+				if (this->mDisplayObjects.size() != 0)
+				{
+					for (const auto &lpObject : this->mDisplayObjects)
+					{
+						lTotalWidth += lpObject.GetLength();
+					}
+					lTotalWidth += mDisplayObjects[0].GetXPosition();
+				}
+
+				lpObjectGroup->SetXPosition(lTotalWidth);
 				this->mDisplayObjects.push_back(*lpObjectGroup);
 				this->mObjectIndex++;
 			}
 		}
 
-		if (true) //Should we delete an object?
+		if ((this->mDisplayObjects.size() != 0) &&
+		    (this->mDisplayObjects[0].GetXPosition() < (-1 * this->mDisplayObjects[0].GetLength()))) //Should we delete an object?
 		{
 			unique_lock<mutex> lLock(this->mDataLock);
 			if (!this->mDisplayObjects.empty())
 			{
 				this->mDisplayObjects.erase(this->mDisplayObjects.begin());
 			}
+		}
+
+		if (this->mObjectIndex >= this->mObjectGroupManager->GetNumberOfObjectGroups())
+		{
+			this->mObjectIndex = 0;
 		}
 
 		this_thread::sleep_for(chrono::seconds(1));

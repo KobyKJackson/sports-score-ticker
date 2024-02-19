@@ -31,18 +31,18 @@
 class DisplayManagerClass
 {
 public:
-	DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupManager);
+	DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupManager, uint32_t aDisplayWidth);
 	virtual ~DisplayManagerClass();
 
 	std::mutex &GetDataLock();
 
 private:
 	void threadFunction();
+
 	ObjectGroupManagerClass *mObjectGroupManager;
 	std::vector<ObjectGroupClass> mDisplayObjects;
-
+	uint32_t mDisplayWidth;
 	uint32_t mObjectIndex;
-
 	std::mutex mDataLock;
 	std::thread mThread;
 	bool mIsThreadRunning;
