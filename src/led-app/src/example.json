@@ -1,0 +1,3844 @@
+{
+    "games": [
+        {
+            "id": "401585389",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/ind.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Pacers",
+                            "color": "002d62",
+                            "altColor": "fdbb30"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Hornets",
+                            "color": "008ca8",
+                            "altColor": "1d1060"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "102"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "111"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 22 M. Turner"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 6 T. Haliburton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 21 G. Williams"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 M. Bridges"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585390",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phi.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cle.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "76ers",
+                            "color": "1d428a",
+                            "altColor": "e01234"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Cavaliers",
+                            "color": "860038",
+                            "altColor": "bc945c"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "123"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "121"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 24 B. Hield"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 8 P. Reed"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 36 D. Mitchell"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 J. Allen"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585391",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/chi.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/atl.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Bulls",
+                            "color": "ce1141",
+                            "altColor": "000000"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Hawks",
+                            "color": "c8102e",
+                            "altColor": "fdb927"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "136"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "126"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 29 D. DeRozan"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 11 N. Vucevic"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 28 B. Bogdanovic"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 12 O. Okongwu"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585392",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sa.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/tor.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Spurs",
+                            "color": "000000",
+                            "altColor": "c4ced4"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Raptors",
+                            "color": "d91244",
+                            "altColor": "000000"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "122"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "99"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 27 V. Wembanyama"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 14 V. Wembanyama"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 18 G. Dick"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 9 S. Barnes"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585393",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/ny.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/hou.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Knicks",
+                            "color": "1d428a",
+                            "altColor": "f58426"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Rockets",
+                            "color": "ce1141",
+                            "altColor": "000000"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "103"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "105"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 27 J. Brunson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 17 P. Achiuwa"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 23 D. Brooks"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 13 A. Thompson"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585394",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/no.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Pelicans",
+                            "color": "0a2240",
+                            "altColor": "b4975a"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Grizzlies",
+                            "color": "5d76a9",
+                            "altColor": "12173f"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "96"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "87"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 17 H. Jones"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 9 H. Jones"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 22 J. Jackson Jr."
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 7 L. Stevens"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585395",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/den.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mil.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Nuggets",
+                            "color": "0e2240",
+                            "altColor": "fec524"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Bucks",
+                            "color": "00471b",
+                            "altColor": "eee1c6"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "95"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "112"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 29 N. Jokic"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 12 N. Jokic"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 36 G. Antetokounmpo"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 18 G. Antetokounmpo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585396",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/wsh.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/dal.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Wizards",
+                            "color": "e31837",
+                            "altColor": "002b5c"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Mavericks",
+                            "color": "0064b1",
+                            "altColor": "bbc4ca"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "104"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "112"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 25 D. Avdija"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 13 M. Bagley III"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 26 L. Doncic"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 17 D. Gafford"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585397",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/gs.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/utah.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Warriors",
+                            "color": "fdb927",
+                            "altColor": "1d428a"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Jazz",
+                            "color": "000000",
+                            "altColor": "fff21f"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "129"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "107"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 26 K. Thompson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 10 D. Green"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 22 C. Sexton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 9 W. Kessler"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585398",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/min.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lac.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Timberwolves",
+                            "color": "266092",
+                            "altColor": "79bc43"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Clippers",
+                            "color": "1d428a",
+                            "altColor": "c8102e"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "121"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "100"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 24 K. Towns"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 11 R. Gobert"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 18 P. George"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 11 I. Zubac"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585399",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bos.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bkn.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Celtics",
+                            "color": "008348",
+                            "altColor": "ffffff"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Nets",
+                            "color": "000000",
+                            "altColor": "ffffff"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "118"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "110"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 41 J. Tatum"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 14 J. Tatum"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 27 M. Bridges"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 8 N. Claxton"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585400",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/okc.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/orl.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Thunder",
+                            "color": "007ac1",
+                            "altColor": "ef3b24"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Magic",
+                            "color": "0077c0",
+                            "altColor": "c4ced4"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "127"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "113"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 33 J. Williams"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 9 C. Holmgren"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 23 P. Banchero"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 7 J. Suggs"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585401",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mia.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mil.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Heat",
+                            "color": "98002e",
+                            "altColor": "000000"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Bucks",
+                            "color": "00471b",
+                            "altColor": "eee1c6"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "123"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "97"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 24 N. Jovic"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 12 B. Adebayo"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 23 G. Antetokounmpo"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 11 G. Antetokounmpo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585402",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sac.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phx.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Kings",
+                            "color": "5a2d81",
+                            "altColor": "6a7a82"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Suns",
+                            "color": "29127a",
+                            "altColor": "e56020"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "125"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "130"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 40 D. Fox"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 18 D. Sabonis"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 28 K. Durant"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 11 K. Durant"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585403",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/min.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/por.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Timberwolves",
+                            "color": "266092",
+                            "altColor": "79bc43"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Trail Blazers",
+                            "color": "e03a3e",
+                            "altColor": "000000"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "121"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "109"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 41 A. Edwards"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 15 R. Gobert"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 22 D. Ayton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 16 D. Ayton"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585404",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/det.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lal.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Pistons",
+                            "color": "1d428a",
+                            "altColor": "c8102e"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Lakers",
+                            "color": "552583",
+                            "altColor": "fdb927"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "111"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "125"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 19 A. Thompson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 9 J. Wiseman"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 25 L. James"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 14 A. Davis"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585405",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/atl.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Hawks",
+                            "color": "c8102e",
+                            "altColor": "fdb927"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Hornets",
+                            "color": "008ca8",
+                            "altColor": "1d1060"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "99"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "122"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 21 D. Hunter"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 12 J. Johnson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 26 B. Miller"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 G. Williams"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585406",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/ny.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/orl.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Knicks",
+                            "color": "1d428a",
+                            "altColor": "f58426"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Magic",
+                            "color": "0077c0",
+                            "altColor": "c4ced4"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "100"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "118"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 33 J. Brunson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 14 P. Achiuwa"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 36 P. Banchero"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 6 P. Banchero"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585407",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mia.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phi.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Heat",
+                            "color": "98002e",
+                            "altColor": "000000"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "76ers",
+                            "color": "1d428a",
+                            "altColor": "e01234"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "109"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "104"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 23 B. Adebayo"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 13 B. Adebayo"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 30 T. Maxey"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 12 P. Reed"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585408",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bkn.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bos.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Nets",
+                            "color": "000000",
+                            "altColor": "ffffff"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Celtics",
+                            "color": "008348",
+                            "altColor": "ffffff"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "86"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "136"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 15 T. Watford"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 8 N. Claxton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 28 P. Pritchard"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 8 L. Kornet"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585409",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/chi.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cle.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Bulls",
+                            "color": "ce1141",
+                            "altColor": "000000"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Cavaliers",
+                            "color": "860038",
+                            "altColor": "bc945c"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "105"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "108"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 32 C. White"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 15 A. Drummond"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 30 D. Mitchell"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 J. Allen"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585410",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/ind.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/tor.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Pacers",
+                            "color": "002d62",
+                            "altColor": "fdbb30"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Raptors",
+                            "color": "d91244",
+                            "altColor": "000000"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "127"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "125"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 23 P. Siakam"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 11 I. Jackson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 29 S. Barnes"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 12 S. Barnes"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585411",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/hou.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Rockets",
+                            "color": "ce1141",
+                            "altColor": "000000"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Grizzlies",
+                            "color": "5d76a9",
+                            "altColor": "12173f"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "113"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "121"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 19 A. Thompson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 12 A. Thompson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 20 G. Jackson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 9 G. Jackson"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585412",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/wsh.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/no.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Wizards",
+                            "color": "e31837",
+                            "altColor": "002b5c"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Pelicans",
+                            "color": "0a2240",
+                            "altColor": "b4975a"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "126"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "133"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 43 D. Avdija"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 15 D. Avdija"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 36 Z. Williamson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 6 Z. Williamson"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585413",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sa.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/dal.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Spurs",
+                            "color": "000000",
+                            "altColor": "c4ced4"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Mavericks",
+                            "color": "0064b1",
+                            "altColor": "bbc4ca"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "93"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "116"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 26 V. Wembanyama"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 12 Z. Collins"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 34 K. Irving"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 D. Gafford"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585414",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sac.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/den.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Kings",
+                            "color": "5a2d81",
+                            "altColor": "6a7a82"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Nuggets",
+                            "color": "0e2240",
+                            "altColor": "fec524"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "102"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "98"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 30 D. Fox"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 13 D. Sabonis"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 25 A. Gordon"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 15 A. Gordon"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585415",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/det.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phx.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Pistons",
+                            "color": "1d428a",
+                            "altColor": "c8102e"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Suns",
+                            "color": "29127a",
+                            "altColor": "e56020"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "100"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "116"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 18 S. Fontecchio"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 9 S. Milton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 25 K. Durant"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 13 J. Nurkic"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585416",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lal.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/utah.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Lakers",
+                            "color": "552583",
+                            "altColor": "fdb927"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Jazz",
+                            "color": "000000",
+                            "altColor": "fff21f"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "138"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "122"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 37 A. Davis"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 15 A. Davis"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 18 C. Sexton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 J. Collins"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585417",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lac.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/gs.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Clippers",
+                            "color": "1d428a",
+                            "altColor": "c8102e"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Warriors",
+                            "color": "fdb927",
+                            "altColor": "1d428a"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "130"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "125"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 26 J. Harden"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 10 I. Zubac"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 41 S. Curry"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 10 D. Green"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585418",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mil.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Bucks",
+                            "color": "00471b",
+                            "altColor": "eee1c6"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Grizzlies",
+                            "color": "5d76a9",
+                            "altColor": "12173f"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "110"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "113"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 35 G. Antetokounmpo"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 11 B. Lopez"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 27 Z. Williams"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 12 V. Williams Jr."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401636113",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/gs.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/utah.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Warriors",
+                            "color": "fdb927",
+                            "altColor": "1d428a"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Jazz",
+                            "color": "000000",
+                            "altColor": "fff21f"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "140"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "137"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 35 K. Thompson"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 7 A. Wiggins"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 35 C. Sexton"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 14 L. Markkanen"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "401585419",
+            "data": [
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/min.png"
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "@"
+                },
+                {
+                    "type": "image",
+                    "location": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "data": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/por.png"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "Timberwolves",
+                            "color": "266092",
+                            "altColor": "79bc43"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "Trail Blazers",
+                            "color": "e03a3e",
+                            "altColor": "000000"
+                        }
+                    ]
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1,
+                                2
+                            ],
+                            "data": "128"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3,
+                                4
+                            ],
+                            "data": "91"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "location": [
+                        2,
+                        3
+                    ],
+                    "data": "Final"
+                },
+                {
+                    "type": "multi",
+                    "data": [
+                        {
+                            "type": "text",
+                            "location": [
+                                1
+                            ],
+                            "data": "PTS 34 A. Edwards"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                2
+                            ],
+                            "data": "REB 12 R. Gobert"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                3
+                            ],
+                            "data": "PTS 20 J. Grant"
+                        },
+                        {
+                            "type": "text",
+                            "location": [
+                                4
+                            ],
+                            "data": "REB 5 T. Camara"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
