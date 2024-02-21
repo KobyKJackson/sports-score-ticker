@@ -6,21 +6,26 @@
 /* Includes ------------------------------------------------------------------*/
 #include "MultiObject.h"
 
+#include <algorithm>
 #include "BaseObject.h"
 
+using namespace std;
 /* Exported Data -------------------------------------------------------------*/
 
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-MultiObjectClass::MultiObjectClass() :
-  ObjectTypeClass()
+MultiObjectClass::MultiObjectClass() : ObjectTypeClass()
 {
 }
 
 /* Class Destructor ----------------------------------------------------------*/
 MultiObjectClass::~MultiObjectClass()
 {
+	for (ObjectTypeClass *lpObject : this->mObjects)
+	{
+		delete lpObject;
+	}
 }
 
 /* Public Virtual Class Methods ----------------------------------------------*/
@@ -31,15 +36,29 @@ OBJECT_TYPE MultiObjectClass::GetObjectType() const
 
 MultiObjectClass *MultiObjectClass::clone() const
 {
-	return new MultiObjectClass(*this);
+	MultiObjectClass *lpMultiObjectClass = new MultiObjectClass(*this);
+
+	lpMultiObjectClass->RemoveAllObjects();
+
+	for (uint8_t i = 0; i < this->mObjects.size(); i++)
+	{
+		lpMultiObjectClass->AddObject(this->mObjects[i]->clone());
+	}
+
+	return lpMultiObjectClass;
 }
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/
-void MultiObjectClass::AddObject(ObjectTypeClass *&aObject)
+void MultiObjectClass::AddObject(ObjectTypeClass *aObject)
 {
 	this->mObjects.push_back(aObject);
 	this->calculateLength();
+}
+
+void MultiObjectClass::RemoveAllObjects()
+{
+	this->mObjects.clear();
 }
 
 ObjectTypeClass *MultiObjectClass::GetByIndex(size_t aIndex)
@@ -59,6 +78,15 @@ size_t MultiObjectClass::GetNumberOfObjects()
 	return this->mObjects.size();
 }
 
+void MultiObjectClass::SetXPosition(int aValue)
+{
+	this->mXPosition = aValue;
+	for (const auto &lpObject : this->mObjects)
+	{
+		lpObject->SetXPosition(this->mXPosition);
+	}
+}
+
 /* Protected Static Class Methods --------------------------------------------*/
 
 /* Protected Class Methods ---------------------------------------------------*/
@@ -66,12 +94,15 @@ size_t MultiObjectClass::GetNumberOfObjects()
 /* Private Virtual Class Methods ----------------------------------------------*/
 void MultiObjectClass::calculateLength()
 {
-	uint32_t lTotalWidth = 0;
+	uint32_t lLength = 0;
 	for (const auto &lpObject : this->mObjects)
 	{
-		lTotalWidth += lpObject->GetLength();
+		if (lpObject->GetLength() > lLength)
+		{
+			lLength = lpObject->GetLength();
+		}
 	}
-	this->mLength = lTotalWidth;
+	this->mLength = lLength;
 }
 /* Private Static Class Methods ----------------------------------------------*/
 

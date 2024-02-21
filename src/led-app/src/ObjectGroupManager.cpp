@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <pthread.h>
 #include "BaseObject.h"
 #include "ImageObject.h"
 #include "MultiObject.h"
@@ -27,6 +28,7 @@ using namespace std;
 ObjectGroupManagerClass::ObjectGroupManagerClass() : mIsThreadRunning(true)
 {
 	this->mThread = thread(&ObjectGroupManagerClass::threadFunction, this);
+	pthread_setname_np(this->mThread.native_handle(), "objManager");
 }
 
 /* Class Destructor ----------------------------------------------------------*/
@@ -201,6 +203,7 @@ void ObjectGroupManagerClass::threadFunction()
 			}
 			else // New Game
 			{
+				cout << "Adding new: " << lID << endl;
 				lpObjectGroup = new ObjectGroupClass(lID);
 			}
 
@@ -281,7 +284,7 @@ void ObjectGroupManagerClass::threadFunction()
 		}
 
 		// this->PrintAllObjects();
-		this_thread::sleep_for(chrono::seconds(20));
+		this_thread::sleep_for(chrono::seconds(2));
 	}
 	cout << "ObjectGroupManagerClass thread is stopping." << endl;
 }

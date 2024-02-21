@@ -1,9 +1,9 @@
 /*******************************************************************************
 ** @file       MultiObject.h
 ** @class      MultiObjectClass
- * @author     Name Name
- * @version    1.00
- * @date       November 3 2023
+* @author     Name Name
+* @version    1.00
+* @date       November 3 2023
 **
 ** @brief
 **
@@ -32,9 +32,11 @@ public:
 	virtual OBJECT_TYPE GetObjectType() const override;
 	MultiObjectClass *clone() const override;
 
-	void AddObject(ObjectTypeClass *&aObject);
+	void AddObject(ObjectTypeClass *aObject);
+	void RemoveAllObjects();
 	ObjectTypeClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
+	void SetXPosition(int aValue);
 
 private:
 	virtual void calculateLength() override;

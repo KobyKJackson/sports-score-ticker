@@ -26,6 +26,7 @@ ObjectGroupClass::ObjectGroupClass(const ObjectGroupClass &other) : mID(other.mI
 		mObjects.push_back(obj->clone()); // Use clone to deep copy each object
 	}
 }
+
 /* Class Destructor ----------------------------------------------------------*/
 ObjectGroupClass::~ObjectGroupClass()
 {

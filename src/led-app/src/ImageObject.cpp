@@ -71,7 +71,7 @@ string ImageObjectClass::getFilePathFromUrl(const string &aURL, const string &aP
 void ImageObjectClass::calculateLength()
 {
 	// TODO: Fix this
-	this->mLength = 64;
+	this->mLength = 4;
 	/*
 	string lValue = this->GetValue();
 

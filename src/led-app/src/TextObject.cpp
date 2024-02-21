@@ -41,6 +41,7 @@ TextObjectClass::TextObjectClass(vector<uint8_t> aLocation, string aValue) : Obj
 /* Class Destructor ----------------------------------------------------------*/
 TextObjectClass::~TextObjectClass()
 {
+	delete this->mFont;
 }
 
 /* Public Virtual Class Methods ----------------------------------------------*/
@@ -51,7 +52,29 @@ OBJECT_TYPE TextObjectClass::GetObjectType() const
 
 TextObjectClass *TextObjectClass::clone() const
 {
-	return new TextObjectClass(*this);
+	TextObjectClass *lpTextObjectClass = new TextObjectClass(*this);
+
+	Font *lpFont = new Font();
+	if (((BaseObjectClass *)this)->GetHeight() == 16)
+	{
+		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
+		if (!lpFont->LoadFont(lpFontFile))
+		{
+			fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+		}
+	}
+	else if (((BaseObjectClass *)this)->GetHeight() == 32)
+	{
+		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/9x18.bdf";
+		if (!lpFont->LoadFont(lpFontFile))
+		{
+			fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+		}
+	}
+
+	lpTextObjectClass->setFont(lpFont);
+
+	return lpTextObjectClass;
 }
 /* Public Static Class Methods -----------------------------------------------*/
 
@@ -87,3 +110,7 @@ void TextObjectClass::calculateLength()
 /* Private Static Class Methods ----------------------------------------------*/
 
 /* Private Class Methods -----------------------------------------------------*/
+void TextObjectClass::setFont(rgb_matrix::Font *aValue)
+{
+	this->mFont = aValue;
+}

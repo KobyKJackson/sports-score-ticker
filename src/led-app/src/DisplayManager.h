@@ -1,9 +1,9 @@
 /*******************************************************************************
 ** @file       DisplayManager.h
 ** @class      DisplayManagerClass
- * @author     Name Name
- * @version    1.00
- * @date       November 3 2023
+* @author     Name Name
+* @version    1.00
+* @date       November 3 2023
 **
 ** @brief
 **
@@ -36,7 +36,7 @@ public:
 
 	std::mutex &GetDataLock();
 
-	std::vector<ObjectGroupClass> GetDisplayObjects();
+	std::vector<ObjectGroupClass> &GetDisplayObjects();
 
 private:
 	void threadFunction();

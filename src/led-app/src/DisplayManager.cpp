@@ -7,6 +7,7 @@
 #include "DisplayManager.h"
 
 #include <iostream>
+#include <pthread.h>
 #include "ObjectGroupManager.h"
 
 using namespace std;
@@ -22,6 +23,8 @@ DisplayManagerClass::DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupMa
 																												 mIsThreadRunning(true)
 {
 	this->mThread = thread(&DisplayManagerClass::threadFunction, this);
+
+	pthread_setname_np(this->mThread.native_handle(), "disManager");
 }
 
 /* Class Destructor ----------------------------------------------------------*/
@@ -44,7 +47,7 @@ mutex &DisplayManagerClass::GetDataLock()
 	return this->mDataLock;
 }
 
-vector<ObjectGroupClass> DisplayManagerClass::GetDisplayObjects()
+vector<ObjectGroupClass> &DisplayManagerClass::GetDisplayObjects()
 {
 	return this->mDisplayObjects;
 }

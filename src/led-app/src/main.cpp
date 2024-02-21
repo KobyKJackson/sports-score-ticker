@@ -7,6 +7,7 @@
 #include "ObjectGroupManager.h"
 #include "ObjectType.h"
 #include "TextObject.h"
+#include "MultiObject.h"
 
 #include "led-matrix.h"
 #include "graphics.h"
@@ -49,7 +50,7 @@ int main()
 
 	// Customize
 	int lLetterSpacing = 0;
-	float lSpeed = 7.0f;
+	float lSpeed = 1.0f;
 	int lDelaySpeed_usec = 1000000 / lSpeed / 10; // TODO: Figure this out lFont.CharacterWidth('W');
 	Color lColor(255, 255, 255);
 
@@ -63,7 +64,7 @@ int main()
 	lMatrixOptions.parallel = 1;
 	lMatrixOptions.hardware_mapping = "adafruit-hat"; // or "adafruit-hat" depending on your setup
 	lMatrixOptions.disable_hardware_pulsing = true;
-	// lRuntimeOptions.gpio_slowdown = 4;
+	lRuntimeOptions.gpio_slowdown = 4;
 
 	RGBMatrix *lMatrix = CreateMatrixFromOptions(lMatrixOptions, lRuntimeOptions);
 	if (lMatrix == nullptr)
@@ -87,9 +88,6 @@ int main()
 		fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
 		return 1;
 	}
-	std::string TEXT = "Koby";
-	int lX = 64;
-	int lY = 0;
 
 	while (!IsInterruptReceived)
 	{
@@ -120,38 +118,43 @@ int main()
 										 NULL,
 										 lpTextObject->GetValue().c_str(),
 										 lLetterSpacing);
+					// cout << lpTextObject->GetValue().c_str() << ": " << lpTextObject->GetXPosition() << ", Length: " << lpObjectGroup.GetLength() << endl;
 				}
 				break;
 
 				case OBJECT_TYPE::MULTI:
 				{
-					// Do nothing right now
-					/*
 					MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
 					for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
 					{
 						ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
 						switch (lpObjectType->GetObjectType())
 						{
-							case OBJECT_TYPE::IMAGE:
-							{
-								ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObjectType);
-								cout << "data: " << lpImageObject->GetValue() << endl;
-							}
-							break;
+						case OBJECT_TYPE::IMAGE:
+						{
+							// Do nothing
+						}
+						break;
 
-							case OBJECT_TYPE::TEXT:
-							{
-								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
-								cout << "data: " << lpTextObject->GetValue() << endl;
-							}
-							break;
+						case OBJECT_TYPE::TEXT:
+						{
+							TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
+							rgb_matrix::DrawText(lOffscreenCanvas,
+												 *lpTextObject->GetFont(),
+												 lpTextObject->GetXPosition(),
+												 lpTextObject->GetYPosition() + ((*lpTextObject->GetFont()).baseline()),
+												 lColor,
+												 NULL,
+												 lpTextObject->GetValue().c_str(),
+												 lLetterSpacing);
+							// cout << lpTextObject->GetValue().c_str() << ": " << lpTextObject->GetXPosition() << ", Length: " << lpObjectGroup.GetLength() << endl;
+						}
+						break;
 
-							default:
-								break;
+						default:
+							break;
 						}
 					}
-					*/
 				}
 				break;
 
@@ -162,13 +165,6 @@ int main()
 
 			lpObjectGroup.IncrementXPosition();
 		}
-
-		auto lLength = rgb_matrix::DrawText(lOffscreenCanvas, lFont,
-											lX, lY + lFont.baseline(),
-											lColor, NULL,
-											TEXT.c_str(), lLetterSpacing);
-
-		lX += -1;
 
 		// Make sure render-time delays are not influencing scroll-time
 		if (lNextFrame.tv_sec == 0 && lNextFrame.tv_nsec == 0)

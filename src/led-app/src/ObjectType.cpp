@@ -47,12 +47,12 @@ uint32_t ObjectTypeClass::GetLength() const
 	return this->mLength;
 }
 
-uint32_t ObjectTypeClass::GetXPosition() const
+int ObjectTypeClass::GetXPosition() const
 {
 	return this->mXPosition;
 }
 
-void ObjectTypeClass::SetXPosition(uint32_t aValue)
+void ObjectTypeClass::SetXPosition(int aValue)
 {
 	this->mXPosition = aValue;
 }

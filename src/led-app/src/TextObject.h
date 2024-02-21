@@ -38,8 +38,9 @@ public:
 	rgb_matrix::Font *GetFont();
 
 private:
-	virtual void
-	calculateLength() override;
+	virtual void calculateLength() override;
+	void setFont(rgb_matrix::Font *aValue);
+
 	rgb_matrix::Font *mFont;
 	std::string mColor;
 };

@@ -44,16 +44,15 @@ public:
 
 	uint32_t GetLength() const;
 
-	uint32_t GetXPosition() const;
-	void SetXPosition(uint32_t aValue);
+	int GetXPosition() const;
+	virtual void SetXPosition(int aValue);
 
 protected:
 	uint32_t mLength;
+	int mXPosition;
 
 private:
 	virtual void calculateLength() = 0;
-
-	uint32_t mXPosition;
 };
 
 /* Exported Functions --------------------------------------------------------*/
