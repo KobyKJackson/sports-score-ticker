@@ -56,6 +56,7 @@
 
 
 // This file contains all macro definitions affecting or depending on the ABI
+#define JSON_ASSERT(x) ((void)0)
 
 #ifndef JSON_SKIP_LIBRARY_VERSION_CHECK
     #if defined(NLOHMANN_JSON_VERSION_MAJOR) && defined(NLOHMANN_JSON_VERSION_MINOR) && defined(NLOHMANN_JSON_VERSION_PATCH)

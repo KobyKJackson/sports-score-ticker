@@ -3,19 +3,20 @@
 #include <signal.h>
 #include <iostream>
 
+#include "led-matrix.h"
+#include "graphics.h"
+#include <Magick++.h>
 #include "DisplayManager.h"
 #include "ObjectGroupManager.h"
 #include "ObjectType.h"
 #include "TextObject.h"
+#include "ImageObject.h"
 #include "MultiObject.h"
-
-#include "led-matrix.h"
-#include "graphics.h"
 
 using namespace rgb_matrix;
 using namespace std;
 
-#define PIXEL_WIDTH 64 * 1
+#define PIXEL_WIDTH 64 * 5
 #define PIXEL_HEIGHT 32 * 2
 
 volatile bool IsInterruptReceived = false;
@@ -37,7 +38,7 @@ static void AddMicros(struct timespec *aAccumulator, long mMicros)
 	}
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	signal(SIGTERM, InterruptHandler);
 	signal(SIGINT, InterruptHandler);
@@ -50,21 +51,23 @@ int main()
 
 	// Customize
 	int lLetterSpacing = 0;
-	float lSpeed = 1.0f;
+	float lSpeed = 3.0f;
 	int lDelaySpeed_usec = 1000000 / lSpeed / 10; // TODO: Figure this out lFont.CharacterWidth('W');
 	Color lColor(255, 255, 255);
 
 	// Setup Matrix
 	RGBMatrix::Options lMatrixOptions;
 	rgb_matrix::RuntimeOptions lRuntimeOptions;
+	Magick::InitializeMagick(*argv);
 
 	lMatrixOptions.rows = 32;
 	lMatrixOptions.cols = 64;
-	lMatrixOptions.chain_length = 1;
+	lMatrixOptions.chain_length = 10;
 	lMatrixOptions.parallel = 1;
+	lMatrixOptions.pixel_mapper_config = "U-mapper;Rotate:180";
 	lMatrixOptions.hardware_mapping = "adafruit-hat"; // or "adafruit-hat" depending on your setup
 	lMatrixOptions.disable_hardware_pulsing = true;
-	lRuntimeOptions.gpio_slowdown = 4;
+	lRuntimeOptions.gpio_slowdown = 3;
 
 	RGBMatrix *lMatrix = CreateMatrixFromOptions(lMatrixOptions, lRuntimeOptions);
 	if (lMatrix == nullptr)
@@ -80,15 +83,6 @@ int main()
 	struct timespec lNextFrame = {0, 0};
 	uint64_t lFrameCounter = 0;
 
-	// TEST
-	const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/4x6.bdf";
-	rgb_matrix::Font lFont;
-	if (!lFont.LoadFont(lpFontFile))
-	{
-		fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
-		return 1;
-	}
-
 	while (!IsInterruptReceived)
 	{
 		++lFrameCounter;
@@ -103,7 +97,19 @@ int main()
 				{
 				case OBJECT_TYPE::IMAGE:
 				{
-					// Do nothing right now
+					ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObject);
+
+					Magick::Image lImage = lpImageObject->GetImage();
+
+					for (int img_y = 0; img_y < lpImageObject->GetHeight(); ++img_y)
+					{
+						for (int img_x = 0; img_x < lpImageObject->GetLength(); ++img_x)
+						{
+							Magick::ColorRGB rgb(lImage.pixelColor(img_x, img_y));
+							lOffscreenCanvas->SetPixel(lpImageObject->GetXPosition() + img_x, lpImageObject->GetYPosition() + img_y,
+													   rgb.red() * 255, rgb.green() * 255, rgb.blue() * 255);
+						}
+					}
 				}
 				break;
 

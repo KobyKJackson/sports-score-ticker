@@ -65,7 +65,7 @@ void DisplayManagerClass::threadFunction()
 	while (this->mIsThreadRunning)
 	{
 		if ((this->mDisplayObjects.size() == 0) ||
-			(this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() == this->mDisplayWidth)) // Should we add an object?
+			(this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() <= this->mDisplayWidth)) // Should we add an object?
 		{
 			unique_lock<mutex> lLock(this->mDataLock);
 			ObjectGroupClass *lpObjectGroup = this->mObjectGroupManager->GetByIndex(this->mObjectIndex);
@@ -78,8 +78,9 @@ void DisplayManagerClass::threadFunction()
 					for (const auto &lpObject : this->mDisplayObjects)
 					{
 						lTotalWidth += lpObject.GetLength();
+						lTotalWidth += lpObject.GetXPosition();
 					}
-					lTotalWidth += mDisplayObjects[0].GetXPosition();
+					lTotalWidth -= mDisplayWidth;
 				}
 
 				lpObjectGroup->SetXPosition(lTotalWidth);

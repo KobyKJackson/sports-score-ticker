@@ -13,11 +13,9 @@ enable_testing()
 
 # Find the CURL package
 find_package(CURL REQUIRED)
-#find_package(PNG REQUIRED)
+find_package(ImageMagick COMPONENTS Magick++ REQUIRED)
 
 
-# Include directories for CURL and JSON
-#include_directories(${PNG_INCLUDE_DIR})
 include_directories(${CURL_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/libs/rpi-rgb-led-matrix/include)
 link_directories(${CMAKE_SOURCE_DIR}/libs/rpi-rgb-led-matrix/lib)
@@ -31,8 +29,8 @@ set(sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MultiObject.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroupManager.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/ImageUtility.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayManager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/json.hpp
 )
 
 set(headers
@@ -43,17 +41,16 @@ set(headers
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MultiObject.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectGroupManager.h
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/ImageUtility.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayManager.h
 )
 
 add_executable(led-app ${sources})
 
-target_link_libraries(led-app  ${CURL_LIBRARIES} rgbmatrix) #${PNG_LIBRARY}
+target_link_libraries(led-app  ${CURL_LIBRARIES} rgbmatrix ${ImageMagick_LIBRARIES})
+target_include_directories(led-app PRIVATE ${ImageMagick_INCLUDE_DIRS})
 target_compile_features(led-app PRIVATE cxx_std_17)
-add_definitions(-DCURL_STATICLIB)
+target_compile_definitions(led-app PRIVATE CURL_STATICLIB JSON_ASSERT\(x\)=\(void\)0)
 
 
-
-add_executable(led-app-tests tests/test_dummy.cpp)
-add_test(NAME run-tests COMMAND led-app-tests)
+#add_executable(led-app-tests tests/test_dummy.cpp)
+#add_test(NAME run-tests COMMAND led-app-tests)

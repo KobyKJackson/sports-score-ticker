@@ -6,8 +6,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "ImageObject.h"
 
-#include <filesystem> // Include the filesystem library
-// #include "ImageUtility.h"
+#include <filesystem>
+#include <curl/curl.h>
+#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -22,16 +23,27 @@ ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) : O
 {
 	string lFileName = this->getFilePathFromUrl(this->GetValue(), "../data/images");
 
-	// if (fs::exists(fs::path(lFileName)))
+	if (fs::exists(fs::path(lFileName)))
 	{
-		//		cout << "Image file already exists for: " << aValue << endl;
+		cout << "Image file already exists for: " << aValue << endl;
 		this->SetValue(lFileName);
+		this->createImage();
 	}
-	//	else
-	//	{
-	//		cout << "File does not exist, proceed with downloading and conversion." << endl;
-	// Download and convert
-	//	}
+	else
+	{
+		cout << "File does not exist, proceed with downloading and conversion." << endl;
+
+		if (this->downloadImage(aValue, lFileName))
+		{
+			cout << "Download successful" << endl;
+			this->SetValue(lFileName);
+			this->createImage();
+		}
+		else
+		{
+			cout << "Download failed" << endl;
+		}
+	}
 	this->calculateLength();
 }
 
@@ -53,7 +65,10 @@ ImageObjectClass *ImageObjectClass::clone() const
 /* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/
-
+Magick::Image ImageObjectClass::GetImage() const
+{
+	return this->mImage;
+};
 /* Protected Static Class Methods --------------------------------------------*/
 
 /* Protected Class Methods ---------------------------------------------------*/
@@ -62,109 +77,49 @@ ImageObjectClass *ImageObjectClass::clone() const
 string ImageObjectClass::getFilePathFromUrl(const string &aURL, const string &aPath)
 {
 	string lFileName = aURL.substr(aURL.find_last_of('/') + 1);
-	string lOutputFilename = lFileName.substr(0, lFileName.find_last_of('.')) + ".ppm";
+	string lOutputFilename = lFileName.substr(0, lFileName.find_last_of('.')) + ".png";
 
 	return aPath + "/" + lOutputFilename;
+}
+
+size_t ImageObjectClass::writeData(void *ptr, size_t size, size_t nmemb, FILE *stream)
+{
+	size_t written = fwrite(ptr, size, nmemb, stream);
+	return written;
 }
 
 /* Private Class Methods -----------------------------------------------------*/
 void ImageObjectClass::calculateLength()
 {
-	// TODO: Fix this
-	this->mLength = 4;
-	/*
-	string lValue = this->GetValue();
-
-	ifstream lFile(lValue, ios::binary);
-	if (!lFile.is_open())
-	{
-		cerr << "Failed to open file: " << lValue << endl;
-		return;
-	}
-
-	string lLine;
-	getline(lFile, lLine); // Read the magic number line
-	if (lLine != "P6")
-	{
-		cerr << "Unsupported PPM format or incorrect file: " << lLine << endl;
-		return;
-	}
-
-	while (lFile.peek() == '#')
-	{
-		getline(lFile, lLine);
-	}
-
-	uint32_t lWidth = 0, lHeight = 0;
-	lFile >> lWidth >> lHeight;
-	this->mLength = lWidth;
-	*/
+	this->mLength = this->mImage.columns();
 }
 
-/*
-void ImageObjectClass::DownloadAndConvertFile()
+bool ImageObjectClass::downloadImage(const string &aUrl, const string &aFilename)
 {
-	ImageUtilityClass *lpImageUtility = new ImageUtilityClass();
-	string outputFolder = "images";
-	vector<unsigned char> buffer;
-	uint8_t maxHeight = this->GetHeight();
-
-	string lValue = this->GetValue();
-
-	if (!lpImageUtility->DownloadPNGImage(lValue, buffer))
+	CURL *curl;
+	FILE *fp;
+	CURLcode res;
+	curl = curl_easy_init();
+	if (curl)
 	{
-		cerr << "Failed to download image." << endl;
+		fp = fopen(aFilename.c_str(), "wb");
+		curl_easy_setopt(curl, CURLOPT_URL, aUrl.c_str());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ImageObjectClass::writeData);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+		res = curl_easy_perform(curl);
+		curl_easy_cleanup(curl);
+		fclose(fp);
+		return (res == CURLE_OK);
 	}
-
-	string filename = lValue.substr(lValue.find_last_of('/') + 1);
-	string outputFilename = filename.substr(0, filename.find_last_of('.')) + ".ppm";
-	string outputFilePath = outputFolder + "/" + outputFilename;
-
-	png_image image;
-	memset(&image, 0, (sizeof image));
-	image.version = PNG_IMAGE_VERSION;
-
-	if (png_image_begin_read_from_memory(&image, buffer.data(), buffer.size()))
-	{
-		image.format = PNG_FORMAT_RGB;
-		png_bytep buffer = new png_byte[PNG_IMAGE_SIZE(image)];
-		png_bytep row_pointers[image.height];
-
-		for (size_t y = 0; y < image.height; y++)
-		{
-			row_pointers[y] = &buffer[y * image.width * 3];
-		}
-
-		if (png_image_finish_read(&image, nullptr, buffer, 0, nullptr))
-		{
-			int resizedWidth = image.width, resizedHeight = image.height;
-			if (image.height > maxHeight)
-			{
-				resizedHeight = maxHeight;
-				resizedWidth = (image.width * maxHeight) / image.height;
-				png_bytep *resizedPixels = nullptr;
-				lpImageUtility->ResizeImageSimpleNearestNeighbor(row_pointers, image.width, image.height, resizedPixels, resizedWidth, resizedHeight);
-				lpImageUtility->SavePPM(outputFilePath, resizedPixels, resizedWidth, resizedHeight);
-				for (int y = 0; y < resizedHeight; ++y)
-				{
-					delete[] resizedPixels[y];
-				}
-				delete[] resizedPixels;
-			}
-		}
-		else
-		{
-			cerr << "Failed to read PNG image." << endl;
-		}
-
-		delete[] buffer;
-	}
-	else
-	{
-		cerr << "Failed to start reading PNG image." << endl;
-	}
-
-	png_image_free(&image);
-	delete lpImageUtility;
+	return false;
 }
-*/
+
+void ImageObjectClass::createImage()
+{
+	this->mImage.read(this->GetValue());
+
+	// Scale image to the desired height while maintaining aspect ratio
+	double scale_factor = static_cast<double>(this->GetHeight()) / this->mImage.rows();
+	int target_width = static_cast<int>(this->mImage.columns() * scale_factor);
+	this->mImage.scale(Magick::Geometry(this->GetHeight(), this->GetHeight()));
+}
