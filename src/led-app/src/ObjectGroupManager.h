@@ -14,6 +14,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <atomic>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -42,8 +44,9 @@ public:
 private:
 	void threadFunction();
 	std::vector<ObjectGroupClass *> mObjectGroups;
+	std::mutex mMutex;
 	std::thread mThread;
-	bool mIsThreadRunning;
+	std::atomic<bool> mIsThreadRunning;
 };
 
 /* Exported Functions --------------------------------------------------------*/

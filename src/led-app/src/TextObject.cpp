@@ -23,7 +23,7 @@ TextObjectClass::TextObjectClass(vector<uint8_t> aLocation, string aValue) : Obj
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
 		if (!this->mFont->LoadFont(lpFontFile))
 		{
-			fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+			cerr << "Couldn't load font '" << lpFontFile << "'" << endl;
 		}
 	}
 	else if (this->GetHeight() == 32)
@@ -31,7 +31,16 @@ TextObjectClass::TextObjectClass(vector<uint8_t> aLocation, string aValue) : Obj
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/9x18.bdf";
 		if (!this->mFont->LoadFont(lpFontFile))
 		{
-			fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+			cerr << "Couldn't load font '" << lpFontFile << "'" << endl;
+		}
+	}
+	else
+	{
+		cerr << "Unsupported text height: " << this->GetHeight() << ", defaulting to 6x12 font" << endl;
+		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
+		if (!this->mFont->LoadFont(lpFontFile))
+		{
+			cerr << "Couldn't load fallback font '" << lpFontFile << "'" << endl;
 		}
 	}
 
@@ -55,20 +64,28 @@ TextObjectClass *TextObjectClass::clone() const
 	TextObjectClass *lpTextObjectClass = new TextObjectClass(*this);
 
 	Font *lpFont = new Font();
-	if (((BaseObjectClass *)this)->GetHeight() == 16)
+	if (static_cast<const BaseObjectClass *>(this)->GetHeight() == 16)
 	{
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
 		if (!lpFont->LoadFont(lpFontFile))
 		{
-			fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+			cerr << "Couldn't load font '" << lpFontFile << "'" << endl;
 		}
 	}
-	else if (((BaseObjectClass *)this)->GetHeight() == 32)
+	else if (static_cast<const BaseObjectClass *>(this)->GetHeight() == 32)
 	{
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/9x18.bdf";
 		if (!lpFont->LoadFont(lpFontFile))
 		{
-			fprintf(stderr, "Couldn't load font '%s'\n", lpFontFile);
+			cerr << "Couldn't load font '" << lpFontFile << "'" << endl;
+		}
+	}
+	else
+	{
+		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
+		if (!lpFont->LoadFont(lpFontFile))
+		{
+			cerr << "Couldn't load fallback font '" << lpFontFile << "'" << endl;
 		}
 	}
 

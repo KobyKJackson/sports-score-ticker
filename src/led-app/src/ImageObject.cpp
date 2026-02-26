@@ -103,6 +103,12 @@ bool ImageObjectClass::downloadImage(const string &aUrl, const string &aFilename
 	if (curl)
 	{
 		fp = fopen(aFilename.c_str(), "wb");
+		if (!fp)
+		{
+			cerr << "Could not open file for writing: " << aFilename << endl;
+			curl_easy_cleanup(curl);
+			return false;
+		}
 		curl_easy_setopt(curl, CURLOPT_URL, aUrl.c_str());
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ImageObjectClass::writeData);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
@@ -121,5 +127,5 @@ void ImageObjectClass::createImage()
 	// Scale image to the desired height while maintaining aspect ratio
 	double scale_factor = static_cast<double>(this->GetHeight()) / this->mImage.rows();
 	int target_width = static_cast<int>(this->mImage.columns() * scale_factor);
-	this->mImage.scale(Magick::Geometry(this->GetHeight(), this->GetHeight()));
+	this->mImage.scale(Magick::Geometry(target_width, this->GetHeight()));
 }

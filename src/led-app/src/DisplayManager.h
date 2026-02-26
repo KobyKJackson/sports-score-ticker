@@ -14,6 +14,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <atomic>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -47,7 +48,7 @@ private:
 	uint32_t mObjectIndex;
 	std::mutex mDataLock;
 	std::thread mThread;
-	bool mIsThreadRunning;
+	std::atomic<bool> mIsThreadRunning;
 };
 
 /* Exported Functions --------------------------------------------------------*/

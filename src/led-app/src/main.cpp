@@ -1,4 +1,6 @@
+#include <atomic>
 #include <chrono>
+#include <mutex>
 #include <thread>
 #include <signal.h>
 #include <iostream>
@@ -16,10 +18,10 @@
 using namespace rgb_matrix;
 using namespace std;
 
-#define PIXEL_WIDTH 64 * 5
-#define PIXEL_HEIGHT 32 * 2
+constexpr int PIXEL_WIDTH = 64 * 5;
+constexpr int PIXEL_HEIGHT = 32 * 2;
 
-volatile bool IsInterruptReceived = false;
+std::atomic<bool> IsInterruptReceived{false};
 static void InterruptHandler(int aSig)
 {
 	IsInterruptReceived = true;
@@ -42,9 +44,6 @@ int main(int argc, char *argv[])
 {
 	signal(SIGTERM, InterruptHandler);
 	signal(SIGINT, InterruptHandler);
-
-	using namespace chrono;
-	auto start = high_resolution_clock::now();
 
 	ObjectGroupManagerClass *lpObjectGroupManager = new ObjectGroupManagerClass();
 	DisplayManagerClass *lpDisplayManager = new DisplayManagerClass(lpObjectGroupManager, PIXEL_WIDTH);
@@ -88,88 +87,89 @@ int main(int argc, char *argv[])
 		++lFrameCounter;
 		lOffscreenCanvas->Fill(0, 0, 0);
 
-		for (auto &lpObjectGroup : lpDisplayManager->GetDisplayObjects())
 		{
-			// Do the thing
-			for (auto &lpObject : lpObjectGroup.GetObjects())
+			std::lock_guard<std::mutex> lRenderLock(lpDisplayManager->GetDataLock());
+			for (auto &lpObjectGroup : lpDisplayManager->GetDisplayObjects())
 			{
-				switch (lpObject->GetObjectType())
+				// Do the thing
+				for (auto &lpObject : lpObjectGroup.GetObjects())
 				{
-				case OBJECT_TYPE::IMAGE:
-				{
-					ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObject);
-
-					Magick::Image lImage = lpImageObject->GetImage();
-
-					for (int img_y = 0; img_y < lpImageObject->GetHeight(); ++img_y)
+					switch (lpObject->GetObjectType())
 					{
-						for (int img_x = 0; img_x < lpImageObject->GetLength(); ++img_x)
+					case OBJECT_TYPE::IMAGE:
+					{
+						ImageObjectClass *lpImageObject = static_cast<ImageObjectClass *>(lpObject);
+
+						Magick::Image lImage = lpImageObject->GetImage();
+
+						for (int img_y = 0; img_y < lpImageObject->GetHeight(); ++img_y)
 						{
-							Magick::ColorRGB rgb(lImage.pixelColor(img_x, img_y));
-							lOffscreenCanvas->SetPixel(lpImageObject->GetXPosition() + img_x, lpImageObject->GetYPosition() + img_y,
-													   rgb.red() * 255, rgb.green() * 255, rgb.blue() * 255);
+							for (int img_x = 0; img_x < lpImageObject->GetLength(); ++img_x)
+							{
+								Magick::ColorRGB rgb(lImage.pixelColor(img_x, img_y));
+								lOffscreenCanvas->SetPixel(lpImageObject->GetXPosition() + img_x, lpImageObject->GetYPosition() + img_y,
+														   rgb.red() * 255, rgb.green() * 255, rgb.blue() * 255);
+							}
 						}
 					}
-				}
-				break;
-
-				case OBJECT_TYPE::TEXT:
-				{
-					TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObject);
-					rgb_matrix::DrawText(lOffscreenCanvas,
-										 *lpTextObject->GetFont(),
-										 lpTextObject->GetXPosition(),
-										 lpTextObject->GetYPosition() + ((*lpTextObject->GetFont()).baseline()),
-										 lColor,
-										 NULL,
-										 lpTextObject->GetValue().c_str(),
-										 lLetterSpacing);
-					// cout << lpTextObject->GetValue().c_str() << ": " << lpTextObject->GetXPosition() << ", Length: " << lpObjectGroup.GetLength() << endl;
-				}
-				break;
-
-				case OBJECT_TYPE::MULTI:
-				{
-					MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
-					for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
-					{
-						ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
-						switch (lpObjectType->GetObjectType())
-						{
-						case OBJECT_TYPE::IMAGE:
-						{
-							// Do nothing
-						}
-						break;
-
-						case OBJECT_TYPE::TEXT:
-						{
-							TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
-							rgb_matrix::DrawText(lOffscreenCanvas,
-												 *lpTextObject->GetFont(),
-												 lpTextObject->GetXPosition(),
-												 lpTextObject->GetYPosition() + ((*lpTextObject->GetFont()).baseline()),
-												 lColor,
-												 NULL,
-												 lpTextObject->GetValue().c_str(),
-												 lLetterSpacing);
-							// cout << lpTextObject->GetValue().c_str() << ": " << lpTextObject->GetXPosition() << ", Length: " << lpObjectGroup.GetLength() << endl;
-						}
-						break;
-
-						default:
-							break;
-						}
-					}
-				}
-				break;
-
-				default:
 					break;
-				}
-			}
 
-			lpObjectGroup.IncrementXPosition();
+					case OBJECT_TYPE::TEXT:
+					{
+						TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObject);
+						rgb_matrix::DrawText(lOffscreenCanvas,
+											 *lpTextObject->GetFont(),
+											 lpTextObject->GetXPosition(),
+											 lpTextObject->GetYPosition() + ((*lpTextObject->GetFont()).baseline()),
+											 lColor,
+											 NULL,
+											 lpTextObject->GetValue().c_str(),
+											 lLetterSpacing);
+					}
+					break;
+
+					case OBJECT_TYPE::MULTI:
+					{
+						MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
+						for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
+						{
+							ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
+							switch (lpObjectType->GetObjectType())
+							{
+							case OBJECT_TYPE::IMAGE:
+							{
+								// Do nothing
+							}
+							break;
+
+							case OBJECT_TYPE::TEXT:
+							{
+								TextObjectClass *lpTextObject = static_cast<TextObjectClass *>(lpObjectType);
+								rgb_matrix::DrawText(lOffscreenCanvas,
+													 *lpTextObject->GetFont(),
+													 lpTextObject->GetXPosition(),
+													 lpTextObject->GetYPosition() + ((*lpTextObject->GetFont()).baseline()),
+													 lColor,
+													 NULL,
+													 lpTextObject->GetValue().c_str(),
+													 lLetterSpacing);
+							}
+							break;
+
+							default:
+								break;
+							}
+						}
+					}
+					break;
+
+					default:
+						break;
+					}
+				}
+
+				lpObjectGroup.IncrementXPosition();
+			}
 		}
 
 		// Make sure render-time delays are not influencing scroll-time

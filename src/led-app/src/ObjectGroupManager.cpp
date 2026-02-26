@@ -39,6 +39,11 @@ ObjectGroupManagerClass::~ObjectGroupManagerClass()
 	{
 		this->mThread.join();
 	}
+	for (auto *lpObject : this->mObjectGroups)
+	{
+		delete lpObject;
+	}
+	this->mObjectGroups.clear();
 }
 
 /* Public Static Class Methods -----------------------------------------------*/
@@ -46,11 +51,13 @@ ObjectGroupManagerClass::~ObjectGroupManagerClass()
 /* Public Class Methods ------------------------------------------------------*/
 void ObjectGroupManagerClass::AddOrUpdate(ObjectGroupClass *&aObjectGroup)
 {
+	lock_guard<mutex> lLock(this->mMutex);
 	bool found = false;
 	for (auto &lpObject : this->mObjectGroups)
 	{
 		if (lpObject->GetID() == aObjectGroup->GetID())
 		{
+			delete lpObject;
 			lpObject = aObjectGroup;
 			found = true;
 			break;
@@ -65,10 +72,12 @@ void ObjectGroupManagerClass::AddOrUpdate(ObjectGroupClass *&aObjectGroup)
 
 bool ObjectGroupManagerClass::RemoveByID(string aID)
 {
+	lock_guard<mutex> lLock(this->mMutex);
 	for (auto it = this->mObjectGroups.begin(); it != this->mObjectGroups.end(); ++it)
 	{
 		if ((*it)->GetID() == aID)
 		{
+			delete *it;
 			this->mObjectGroups.erase(it);
 			return true;
 		}
@@ -78,6 +87,7 @@ bool ObjectGroupManagerClass::RemoveByID(string aID)
 
 ObjectGroupClass *ObjectGroupManagerClass::GetByID(string aID)
 {
+	lock_guard<mutex> lLock(this->mMutex);
 	for (const auto &lObjectGroup : this->mObjectGroups)
 	{
 		if (lObjectGroup->GetID() == aID)
@@ -90,6 +100,7 @@ ObjectGroupClass *ObjectGroupManagerClass::GetByID(string aID)
 
 ObjectGroupClass *ObjectGroupManagerClass::GetByIndex(size_t aIndex)
 {
+	lock_guard<mutex> lLock(this->mMutex);
 	if (aIndex < this->mObjectGroups.size())
 	{
 		return this->mObjectGroups[aIndex];
@@ -102,6 +113,7 @@ ObjectGroupClass *ObjectGroupManagerClass::GetByIndex(size_t aIndex)
 
 size_t ObjectGroupManagerClass::GetNumberOfObjectGroups()
 {
+	lock_guard<mutex> lLock(this->mMutex);
 	return this->mObjectGroups.size();
 }
 
@@ -184,11 +196,19 @@ void ObjectGroupManagerClass::threadFunction()
 		{
 			ifstream f("../src/example.json");
 			lJSONData = json::parse(f);
-			// cout << "Example element: " << lJSONData << endl;
 		}
 		catch (json::parse_error &e)
 		{
 			cerr << "JSON parse error: " << e.what() << endl;
+			this_thread::sleep_for(chrono::seconds(2));
+			continue;
+		}
+
+		if (!lJSONData.contains("games"))
+		{
+			cerr << "JSON data missing 'games' key" << endl;
+			this_thread::sleep_for(chrono::seconds(2));
+			continue;
 		}
 
 		// Update Objects
@@ -275,11 +295,20 @@ void ObjectGroupManagerClass::threadFunction()
 		}
 
 		// Check if any need to be removed
-		for (const auto &lpObjectGroup : this->mObjectGroups)
 		{
-			if (OBJECT_TIMEOUT < chrono ::duration_cast<chrono::minutes>(chrono::steady_clock::now() - lpObjectGroup->GetUpdateTimestamp()).count())
+			lock_guard<mutex> lLock(this->mMutex);
+			auto it = this->mObjectGroups.begin();
+			while (it != this->mObjectGroups.end())
 			{
-				// TODO: Delete lpObjectGroup
+				if (OBJECT_TIMEOUT < chrono::duration_cast<chrono::minutes>(chrono::steady_clock::now() - (*it)->GetUpdateTimestamp()).count())
+				{
+					delete *it;
+					it = this->mObjectGroups.erase(it);
+				}
+				else
+				{
+					++it;
+				}
 			}
 		}
 

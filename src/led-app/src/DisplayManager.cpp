@@ -30,9 +30,7 @@ DisplayManagerClass::DisplayManagerClass(ObjectGroupManagerClass *aObjectGroupMa
 /* Class Destructor ----------------------------------------------------------*/
 DisplayManagerClass::~DisplayManagerClass()
 {
-	lock_guard<mutex> lLock(this->mDataLock);
 	this->mIsThreadRunning = false;
-
 	if (this->mThread.joinable())
 	{
 		this->mThread.join();
@@ -64,36 +62,37 @@ void DisplayManagerClass::threadFunction()
 	cout << "DisplayManagerClass thread is running." << endl;
 	while (this->mIsThreadRunning)
 	{
-		if ((this->mDisplayObjects.size() == 0) ||
-			(this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() <= this->mDisplayWidth)) // Should we add an object?
 		{
 			unique_lock<mutex> lLock(this->mDataLock);
-			ObjectGroupClass *lpObjectGroup = this->mObjectGroupManager->GetByIndex(this->mObjectIndex);
-			if (lpObjectGroup != nullptr)
+
+			// Should we add an object?
+			if ((this->mDisplayObjects.size() == 0) ||
+				(this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetXPosition() + this->mDisplayObjects[this->mDisplayObjects.size() - 1].GetLength() <= this->mDisplayWidth))
 			{
-				uint32_t lTotalWidth = this->mDisplayWidth;
-
-				if (this->mDisplayObjects.size() != 0)
+				ObjectGroupClass *lpObjectGroup = this->mObjectGroupManager->GetByIndex(this->mObjectIndex);
+				if (lpObjectGroup != nullptr)
 				{
-					for (const auto &lpObject : this->mDisplayObjects)
+					uint32_t lTotalWidth = this->mDisplayWidth;
+
+					if (this->mDisplayObjects.size() != 0)
 					{
-						lTotalWidth += lpObject.GetLength();
-						lTotalWidth += lpObject.GetXPosition();
+						for (const auto &lpObject : this->mDisplayObjects)
+						{
+							lTotalWidth += lpObject.GetLength();
+							lTotalWidth += lpObject.GetXPosition();
+						}
+						lTotalWidth -= mDisplayWidth;
 					}
-					lTotalWidth -= mDisplayWidth;
+
+					lpObjectGroup->SetXPosition(lTotalWidth);
+					this->mDisplayObjects.push_back(*lpObjectGroup);
+					this->mObjectIndex++;
 				}
-
-				lpObjectGroup->SetXPosition(lTotalWidth);
-				this->mDisplayObjects.push_back(*lpObjectGroup);
-				this->mObjectIndex++;
 			}
-		}
 
-		if ((this->mDisplayObjects.size() != 0) &&
-			(this->mDisplayObjects[0].GetXPosition() < (-this->mDisplayObjects[0].GetLength()))) // Should we delete an object?
-		{
-			unique_lock<mutex> lLock(this->mDataLock);
-			if (!this->mDisplayObjects.empty())
+			// Should we delete an object?
+			if (!this->mDisplayObjects.empty() &&
+				(this->mDisplayObjects[0].GetXPosition() < (-this->mDisplayObjects[0].GetLength())))
 			{
 				this->mDisplayObjects.erase(this->mDisplayObjects.begin());
 			}

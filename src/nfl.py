@@ -41,9 +41,13 @@ def get_nfl_games(previous_hours=36, upcoming_hours=300):
 
     url = f"http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates={start_str}-{end_str}"
 
-    response = requests.get(url)
+    try:
+        response = requests.get(url, timeout=10)
+    except requests.RequestException as e:
+        print(f"NFL API request failed: {e}")
+        return []
     if response.status_code != 200:
-        return ["Failed to retrieve data"]
+        return []
 
     data = response.json()
 
