@@ -1,447 +1,98 @@
-import time
-import requests
+"""Flask API server for the Sports Score Ticker.
+
+Fetches live sports data from ESPN via provider classes and serves it
+as JSON for both the React UI and the C++ LED application.
+"""
+
 import json
+import logging
+import time
 import threading
-from threading import Lock
 from collections import OrderedDict
+from threading import Lock
+
 from flask import Flask, jsonify
-from flask_cors import CORS, cross_origin  # Import CORS
+from flask_cors import CORS, cross_origin
 
+from sports import ALL_PROVIDERS
 
-from nba import *
-from nfl import *
+# Configuration
+API_PORT = 5001
+API_HOST = "0.0.0.0"
+UPDATE_INTERVAL_SECONDS = 1
+JSON_OUTPUT_PATH = "led-app/src/example.json"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 
 
-def printAPI():
-    today = datetime.now()
-    start_date = today - timedelta(hours=12)
-    end_date = today + timedelta(hours=24)
-    start_str = start_date.strftime("%Y%m%d")
-    end_str = end_date.strftime("%Y%m%d")
-
-    url = f"http://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={start_str}-{end_str}"
-
-    response = requests.get(url)
-    if response.status_code != 200:
-        print("Failed to retrieve data")
-
-    data = response.json()
-
-    # Save the entire API response in a separate file
-    with open("nbaOut.json", "w") as api_file:
-        json.dump(data, api_file, indent=4)
-
-    today = datetime.now()
-    start_date = today - timedelta(hours=1)
-    end_date = today + timedelta(hours=200)
-    start_str = start_date.strftime("%Y%m%d")
-    end_str = end_date.strftime("%Y%m%d")
-
-    url = f"http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates={start_str}-{end_str}"
-
-    response = requests.get(url)
-    if response.status_code != 200:
-        print("Failed to retrieve data")
-
-    data = response.json()
-
-    # Save the entire API response in a separate file
-    with open("nflOut.json", "w") as api_file:
-        json.dump(data, api_file, indent=4)
-
-    exit()
-
-
 class ThreadSafeData:
     def __init__(self):
-        self.data = OrderedDict()
+        self.data: OrderedDict = OrderedDict()
         self.lock = Lock()
 
-    def updateData(self, id, data):
+    def update(self, game_id: str, game_data: dict) -> None:
         with self.lock:
-            self.data[id] = data
+            self.data[game_id] = game_data
 
-    def getData(self):
+    def get_all(self) -> dict:
         with self.lock:
             return dict(self.data)
 
 
-data = ThreadSafeData()
+game_data = ThreadSafeData()
+
+# Instantiate all providers
+providers = [ProviderClass() for ProviderClass in ALL_PROVIDERS]
 
 
-def update_game_info():
+def update_game_info() -> None:
+    """Background loop that fetches and formats game data from all providers."""
     while True:
         try:
-            _process_games()
-        except Exception as e:
-            print(f"Error updating games: {e}")
-        time.sleep(1)
+            for provider in providers:
+                for game in provider.get_games():
+                    display = provider.format_display_data(game)
+                    game_data.update(display["id"], display)
+
+            # Write JSON for the C++ LED app
+            _write_json_for_led_app()
+        except Exception:
+            logger.exception("Error updating game data")
+
+        time.sleep(UPDATE_INTERVAL_SECONDS)
 
 
-def _process_games():
-    for game in get_nba_games():
-        gameData = {
-            "id": game["id"],
-            "data": [
-                {
-                    "type": "image",
-                    "location": [1, 2, 3, 4],
-                    "data": game["away"]["logo"],
-                },
-                {"type": "text", "location": [2, 3], "data": "@"},
-                {
-                    "type": "image",
-                    "location": [1, 2, 3, 4],
-                    "data": game["home"]["logo"],
-                },
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1, 2],
-                            "data": game["away"]["name"],
-                            "color": game["away"]["color"],
-                            "altColor": game["away"]["altColor"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3, 4],
-                            "data": game["home"]["name"],
-                            "color": game["home"]["color"],
-                            "altColor": game["home"]["altColor"],
-                        },
-                    ],
-                },
-            ],
-        }
-        if game["status"] == "STATUS_IN_PROGRESS":
-            period = game["period"]
-            if period > 4:
-                period = "OT" + str((period - 4))
-            else:
-                period = "Q" + str(period)
-            clock = game["clock"]
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1, 2],
-                            "data": game["away"]["score"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3, 4],
-                            "data": game["home"]["score"],
-                        },
-                    ],
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "text",
-                    "location": [2, 3],
-                    "data": f"{period} {clock}",
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1],
-                            "data": "PTS "
-                            + str(game["away"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [2],
-                            "data": "REB "
-                            + str(game["away"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Reb"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3],
-                            "data": "PTS "
-                            + str(game["home"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [4],
-                            "data": "REB "
-                            + str(game["home"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Reb"]["name"],
-                        },
-                    ],
-                }
-            )
-            data.updateData(game["id"], gameData)
-        elif game["status"] == "STATUS_HALFTIME":
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1, 2],
-                            "data": game["away"]["score"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3, 4],
-                            "data": game["home"]["score"],
-                        },
-                    ],
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "text",
-                    "location": [2, 3],
-                    "data": "HALF",
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1],
-                            "data": "PTS "
-                            + str(game["away"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [2],
-                            "data": "REB "
-                            + str(game["away"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Reb"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3],
-                            "data": "PTS "
-                            + str(game["home"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [4],
-                            "data": "REB "
-                            + str(game["home"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Reb"]["name"],
-                        },
-                    ],
-                },
-            )
-            data.updateData(game["id"], gameData)
-        elif game["status"] == "STATUS_END_PERIOD":
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1, 2],
-                            "data": game["away"]["score"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3, 4],
-                            "data": game["home"]["score"],
-                        },
-                    ],
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "text",
-                    "location": [2, 3],
-                    "data": f"END Q{game['period']}",
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1],
-                            "data": "PTS "
-                            + str(game["away"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [2],
-                            "data": "REB "
-                            + str(game["away"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Reb"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3],
-                            "data": "PTS "
-                            + str(game["home"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [4],
-                            "data": "REB "
-                            + str(game["home"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Reb"]["name"],
-                        },
-                    ],
-                },
-            )
-            data.updateData(game["id"], gameData)
-        elif game["status"] == "STATUS_FINAL":
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1, 2],
-                            "data": game["away"]["score"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3, 4],
-                            "data": game["home"]["score"],
-                        },
-                    ],
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "text",
-                    "location": [2, 3],
-                    "data": f"{game['statusDetail']}",
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1],
-                            "data": "PTS "
-                            + str(game["away"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [2],
-                            "data": "REB "
-                            + str(game["away"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["away"]["leaders"]["Reb"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [3],
-                            "data": "PTS "
-                            + str(game["home"]["leaders"]["Pts"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Pts"]["name"],
-                        },
-                        {
-                            "type": "text",
-                            "location": [4],
-                            "data": "REB "
-                            + str(game["home"]["leaders"]["Reb"]["value"])
-                            + " "
-                            + game["home"]["leaders"]["Reb"]["name"],
-                        },
-                    ],
-                },
-            )
-            data.updateData(game["id"], gameData)
-        else:  # For scheduled games
-            homeOdds = ""
-            awayOdds = ""
-            if "odds" in game:
-                if game["odds"]["favorite"] == "home":
-                    homeOdds = game["odds"]["spread"]
-                    awayOdds = game["odds"]["overUnder"]
-                else:
-                    awayOdds = game["odds"]["spread"]
-                    homeOdds = game["odds"]["overUnder"]
-
-            gameData["data"][3]["data"][0]["data"] += f" ({game['away']['record']})"
-            gameData["data"][3]["data"][1]["data"] += f" ({game['home']['record']})"
-            gameData["data"].append(
-                {
-                    "type": "multi",
-                    "data": [
-                        {
-                            "type": "text",
-                            "location": [1, 2],
-                            "data": awayOdds,
-                        },
-                        {
-                            "type": "text",
-                            "location": [3, 4],
-                            "data": homeOdds,
-                        },
-                    ],
-                }
-            )
-            gameData["data"].append(
-                {
-                    "type": "text",
-                    "location": [2, 3],
-                    "data": f"{game['start'].strftime('%-m/%-d %-I:%M %p')}",
-                },
-            )
-            data.updateData(game["id"], gameData)
+def _write_json_for_led_app() -> None:
+    """Write current game data to JSON file consumed by the C++ app."""
+    try:
+        all_data = game_data.get_all()
+        output = {"games": list(all_data.values())}
+        with open(JSON_OUTPUT_PATH, "w") as f:
+            json.dump(output, f, default=str)
+    except Exception:
+        logger.exception("Failed to write JSON for LED app")
 
 
-def activate_game_updates():
+def activate_game_updates() -> None:
     """Start the background thread for game updates."""
-    thread = threading.Thread(target=update_game_info)
-    thread.daemon = True
+    thread = threading.Thread(target=update_game_info, daemon=True)
     thread.start()
 
 
 @app.route("/api/data", methods=["GET"])
 @cross_origin()
-def get_text():
-    send = list(data.getData().values())
-
-    return jsonify(send)
+def get_data():
+    return jsonify(list(game_data.get_all().values()))
 
 
 if __name__ == "__main__":
-    # printAPI()
     activate_game_updates()
-    app.run(debug=False, port=5001, host="0.0.0.0")
-    exit()
+    app.run(debug=False, port=API_PORT, host=API_HOST)

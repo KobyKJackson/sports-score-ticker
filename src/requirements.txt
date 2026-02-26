@@ -1,0 +1,6 @@
+flask>=3.0,<4
+flask-cors>=4.0,<5
+requests>=2.31,<3
+pytz>=2024.1
+tzlocal>=5.0,<6
+Pillow>=10.0,<11
