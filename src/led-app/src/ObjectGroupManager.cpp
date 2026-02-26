@@ -9,11 +9,10 @@
 #include <fstream>
 #include <iostream>
 #include <pthread.h>
-#include "BaseObject.h"
+#include "DisplayObject.h"
 #include "ImageObject.h"
 #include "MultiObject.h"
 #include "ObjectGroup.h"
-#include "ObjectType.h"
 #include "TextObject.h"
 #include "json.hpp"
 
@@ -125,7 +124,7 @@ void ObjectGroupManagerClass::PrintAllObjects()
 
 		for (uint8_t j = 0; j < lpObjectGroup->GetNumberOfObjects(); j++)
 		{
-			ObjectTypeClass *lpObject = lpObjectGroup->GetByIndex(j);
+			DisplayObjectClass *lpObject = lpObjectGroup->GetByIndex(j);
 			switch (lpObject->GetObjectType())
 			{
 			case OBJECT_TYPE::IMAGE:
@@ -147,7 +146,7 @@ void ObjectGroupManagerClass::PrintAllObjects()
 				MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
 				for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
 				{
-					ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
+					DisplayObjectClass *lpObjectType = lpMultiObject->GetByIndex(k);
 					switch (lpObjectType->GetObjectType())
 					{
 					case OBJECT_TYPE::IMAGE:
@@ -229,8 +228,8 @@ void ObjectGroupManagerClass::threadFunction()
 
 			for (const auto &lElement : lGame["data"])
 			{
-				OBJECT_TYPE lType = ObjectTypeClass::StringTypeToEnumType(lElement["type"]);
-				ObjectTypeClass *lpObject = nullptr;
+				OBJECT_TYPE lType = DisplayObjectClass::StringTypeToEnumType(lElement["type"]);
+				DisplayObjectClass *lpObject = nullptr;
 				switch (lType)
 				{
 				case OBJECT_TYPE::IMAGE:
@@ -255,8 +254,8 @@ void ObjectGroupManagerClass::threadFunction()
 
 					for (const auto &lElementType : lElement["data"])
 					{
-						OBJECT_TYPE lObjectType = ObjectTypeClass::StringTypeToEnumType(lElementType["type"]);
-						ObjectTypeClass *lpObjectType = nullptr;
+						OBJECT_TYPE lObjectType = DisplayObjectClass::StringTypeToEnumType(lElementType["type"]);
+						DisplayObjectClass *lpObjectType = nullptr;
 						switch (lObjectType)
 						{
 						case OBJECT_TYPE::IMAGE:

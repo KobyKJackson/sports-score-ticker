@@ -19,7 +19,7 @@ namespace fs = filesystem;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) : ObjectTypeClass(), BaseObjectClass(BASE_OBJECT_TYPE::IMAGE, aLocation, aValue)
+ImageObjectClass::ImageObjectClass(vector<uint8_t> aLocation, string aValue) : DisplayObjectClass(OBJECT_TYPE::IMAGE, aLocation, aValue)
 {
 	string lFileName = this->getFilePathFromUrl(this->GetValue(), "../data/images");
 

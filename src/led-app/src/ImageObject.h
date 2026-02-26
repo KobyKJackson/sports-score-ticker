@@ -16,18 +16,12 @@
 #include <stdint.h>
 #include <string>
 
-#include "BaseObject.h"
-#include "ObjectType.h"
+#include "DisplayObject.h"
 #include <Magick++.h>
 #include <magick/image.h>
 
-/* Local Forward Declarations ------------------------------------------------*/
-
-/* Exported Constants --------------------------------------------------------*/
-
-/* Exported Types ------------------------------------------------------------*/
 /* Exported Classes ----------------------------------------------------------*/
-class ImageObjectClass : public BaseObjectClass, public ObjectTypeClass
+class ImageObjectClass : public DisplayObjectClass
 {
 public:
 	ImageObjectClass(std::vector<uint8_t> aLocation, std::string aValue);

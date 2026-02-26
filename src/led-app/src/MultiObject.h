@@ -15,15 +15,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 
-#include "ObjectType.h"
+#include "DisplayObject.h"
 
-/* Local Forward Declarations ------------------------------------------------*/
-
-/* Exported Constants --------------------------------------------------------*/
-
-/* Exported Types ------------------------------------------------------------*/
 /* Exported Classes ----------------------------------------------------------*/
-class MultiObjectClass : public ObjectTypeClass
+class MultiObjectClass : public DisplayObjectClass
 {
 public:
 	MultiObjectClass();
@@ -32,16 +27,16 @@ public:
 	virtual OBJECT_TYPE GetObjectType() const override;
 	MultiObjectClass *clone() const override;
 
-	void AddObject(ObjectTypeClass *aObject);
+	void AddObject(DisplayObjectClass *aObject);
 	void RemoveAllObjects();
-	ObjectTypeClass *GetByIndex(size_t aIndex);
+	DisplayObjectClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
 	void SetXPosition(int aValue);
 
 private:
 	virtual void calculateLength() override;
 
-	std::vector<ObjectTypeClass *> mObjects;
+	std::vector<DisplayObjectClass *> mObjects;
 };
 
 /* Exported Functions --------------------------------------------------------*/

@@ -6,23 +6,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "MultiObject.h"
 
-#include <algorithm>
-#include "BaseObject.h"
-
 using namespace std;
-/* Exported Data -------------------------------------------------------------*/
-
-/* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-MultiObjectClass::MultiObjectClass() : ObjectTypeClass()
+MultiObjectClass::MultiObjectClass() : DisplayObjectClass()
 {
 }
 
 /* Class Destructor ----------------------------------------------------------*/
 MultiObjectClass::~MultiObjectClass()
 {
-	for (ObjectTypeClass *lpObject : this->mObjects)
+	for (DisplayObjectClass *lpObject : this->mObjects)
 	{
 		delete lpObject;
 	}
@@ -36,21 +30,18 @@ OBJECT_TYPE MultiObjectClass::GetObjectType() const
 
 MultiObjectClass *MultiObjectClass::clone() const
 {
-	MultiObjectClass *lpMultiObjectClass = new MultiObjectClass(*this);
+	MultiObjectClass *lpMultiObjectClass = new MultiObjectClass();
 
-	lpMultiObjectClass->RemoveAllObjects();
-
-	for (uint8_t i = 0; i < this->mObjects.size(); i++)
+	for (size_t i = 0; i < this->mObjects.size(); i++)
 	{
 		lpMultiObjectClass->AddObject(this->mObjects[i]->clone());
 	}
 
 	return lpMultiObjectClass;
 }
-/* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/
-void MultiObjectClass::AddObject(ObjectTypeClass *aObject)
+void MultiObjectClass::AddObject(DisplayObjectClass *aObject)
 {
 	this->mObjects.push_back(aObject);
 	this->calculateLength();
@@ -58,10 +49,14 @@ void MultiObjectClass::AddObject(ObjectTypeClass *aObject)
 
 void MultiObjectClass::RemoveAllObjects()
 {
+	for (DisplayObjectClass *lpObject : this->mObjects)
+	{
+		delete lpObject;
+	}
 	this->mObjects.clear();
 }
 
-ObjectTypeClass *MultiObjectClass::GetByIndex(size_t aIndex)
+DisplayObjectClass *MultiObjectClass::GetByIndex(size_t aIndex)
 {
 	if (aIndex < this->mObjects.size())
 	{

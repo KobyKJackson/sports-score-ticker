@@ -14,10 +14,9 @@ using namespace std;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-TextObjectClass::TextObjectClass(vector<uint8_t> aLocation, string aValue) : ObjectTypeClass(),
-																			 BaseObjectClass(BASE_OBJECT_TYPE::TEXT, aLocation, aValue)
+TextObjectClass::TextObjectClass(vector<uint8_t> aLocation, string aValue) : DisplayObjectClass(OBJECT_TYPE::TEXT, aLocation, aValue)
 {
-	this->mFont = new Font();
+	this->mFont = new rgb_matrix::Font();
 	if (this->GetHeight() == 16)
 	{
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
@@ -63,8 +62,8 @@ TextObjectClass *TextObjectClass::clone() const
 {
 	TextObjectClass *lpTextObjectClass = new TextObjectClass(*this);
 
-	Font *lpFont = new Font();
-	if (static_cast<const BaseObjectClass *>(this)->GetHeight() == 16)
+	rgb_matrix::Font *lpFont = new rgb_matrix::Font();
+	if (this->GetHeight() == 16)
 	{
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/6x12.bdf";
 		if (!lpFont->LoadFont(lpFontFile))
@@ -72,7 +71,7 @@ TextObjectClass *TextObjectClass::clone() const
 			cerr << "Couldn't load font '" << lpFontFile << "'" << endl;
 		}
 	}
-	else if (static_cast<const BaseObjectClass *>(this)->GetHeight() == 32)
+	else if (this->GetHeight() == 32)
 	{
 		const char *lpFontFile = "../libs/rpi-rgb-led-matrix/fonts/9x18.bdf";
 		if (!lpFont->LoadFont(lpFontFile))

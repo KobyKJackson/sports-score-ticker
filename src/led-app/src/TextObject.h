@@ -15,18 +15,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 
-#include "BaseObject.h"
-#include "ObjectType.h"
+#include "DisplayObject.h"
 #include "led-matrix.h"
-using namespace rgb_matrix;
 
-/* Local Forward Declarations ------------------------------------------------*/
-
-/* Exported Constants --------------------------------------------------------*/
-
-/* Exported Types ------------------------------------------------------------*/
 /* Exported Classes ----------------------------------------------------------*/
-class TextObjectClass : public BaseObjectClass, public ObjectTypeClass
+class TextObjectClass : public DisplayObjectClass
 {
 public:
 	TextObjectClass(std::vector<uint8_t> aLocation, std::string aValue);

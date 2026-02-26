@@ -22,8 +22,7 @@ link_directories(${CMAKE_SOURCE_DIR}/libs/rpi-rgb-led-matrix/lib)
 
 set(sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/BaseObject.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectType.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayObject.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TextObject.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageObject.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MultiObject.cpp
@@ -34,8 +33,7 @@ set(sources
 )
 
 set(headers
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/BaseObject.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectType.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayObject.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TextObject.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageObject.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MultiObject.h

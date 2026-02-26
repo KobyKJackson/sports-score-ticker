@@ -6,13 +6,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "ObjectGroup.h"
 
-#include "ObjectType.h"
+#include "DisplayObject.h"
 
 using namespace std;
-
-/* Exported Data -------------------------------------------------------------*/
-
-/* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
 ObjectGroupClass::ObjectGroupClass(string aID) : mID(aID), mUpdateTimestamp(chrono::steady_clock::now()), mLength(0), mXPosition(0), mYPosition(0)
@@ -23,16 +19,18 @@ ObjectGroupClass::ObjectGroupClass(const ObjectGroupClass &other) : mID(other.mI
 {
 	for (const auto &obj : other.mObjects)
 	{
-		mObjects.push_back(obj->clone()); // Use clone to deep copy each object
+		mObjects.push_back(obj->clone());
 	}
 }
 
 /* Class Destructor ----------------------------------------------------------*/
 ObjectGroupClass::~ObjectGroupClass()
 {
+	for (DisplayObjectClass *lpObject : this->mObjects)
+	{
+		delete lpObject;
+	}
 }
-
-/* Public Static Class Methods -----------------------------------------------*/
 
 /* Public Class Methods ------------------------------------------------------*/
 string ObjectGroupClass::GetID() const
@@ -53,16 +51,16 @@ int ObjectGroupClass::GetXPosition() const
 void ObjectGroupClass::SetXPosition(int aValue)
 {
 	this->mXPosition = aValue;
-	this->updateChilderenXPosition();
+	this->updateChildrenXPosition();
 }
 
 void ObjectGroupClass::IncrementXPosition()
 {
 	this->mXPosition--;
-	this->updateChilderenXPosition();
+	this->updateChildrenXPosition();
 }
 
-void ObjectGroupClass::AddObject(ObjectTypeClass *&aObject)
+void ObjectGroupClass::AddObject(DisplayObjectClass *&aObject)
 {
 	this->mObjects.push_back(aObject);
 	this->calculateLength();
@@ -70,15 +68,14 @@ void ObjectGroupClass::AddObject(ObjectTypeClass *&aObject)
 
 void ObjectGroupClass::RemoveAllObjects()
 {
-	for (ObjectTypeClass *lpObject : this->mObjects)
+	for (DisplayObjectClass *lpObject : this->mObjects)
 	{
 		delete lpObject;
 	}
-
 	this->mObjects.clear();
 }
 
-ObjectTypeClass *ObjectGroupClass::GetByIndex(size_t aIndex)
+DisplayObjectClass *ObjectGroupClass::GetByIndex(size_t aIndex)
 {
 	if (aIndex < this->mObjects.size())
 	{
@@ -95,7 +92,7 @@ size_t ObjectGroupClass::GetNumberOfObjects()
 	return this->mObjects.size();
 }
 
-std::vector<ObjectTypeClass *> ObjectGroupClass::GetObjects()
+std::vector<DisplayObjectClass *> ObjectGroupClass::GetObjects()
 {
 	return this->mObjects;
 }
@@ -104,12 +101,6 @@ chrono::time_point<chrono::steady_clock> ObjectGroupClass::GetUpdateTimestamp()
 {
 	return this->mUpdateTimestamp;
 }
-
-/* Protected Static Class Methods --------------------------------------------*/
-
-/* Protected Class Methods ---------------------------------------------------*/
-
-/* Private Static Class Methods ----------------------------------------------*/
 
 /* Private Class Methods -----------------------------------------------------*/
 void ObjectGroupClass::calculateLength()
@@ -122,7 +113,7 @@ void ObjectGroupClass::calculateLength()
 	this->mLength = lTotalLength;
 }
 
-void ObjectGroupClass::updateChilderenXPosition()
+void ObjectGroupClass::updateChildrenXPosition()
 {
 	uint32_t lRunningXPosition = this->mXPosition;
 	for (const auto &lpObject : this->mObjects)

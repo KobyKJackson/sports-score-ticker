@@ -10,7 +10,7 @@
 #include <Magick++.h>
 #include "DisplayManager.h"
 #include "ObjectGroupManager.h"
-#include "ObjectType.h"
+#include "DisplayObject.h"
 #include "TextObject.h"
 #include "ImageObject.h"
 #include "MultiObject.h"
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 						MultiObjectClass *lpMultiObject = static_cast<MultiObjectClass *>(lpObject);
 						for (uint8_t k = 0; k < lpMultiObject->GetNumberOfObjects(); k++)
 						{
-							ObjectTypeClass *lpObjectType = lpMultiObject->GetByIndex(k);
+							DisplayObjectClass *lpObjectType = lpMultiObject->GetByIndex(k);
 							switch (lpObjectType->GetObjectType())
 							{
 							case OBJECT_TYPE::IMAGE:

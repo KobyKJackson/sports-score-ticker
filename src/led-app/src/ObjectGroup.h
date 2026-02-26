@@ -19,10 +19,7 @@
 #include <chrono>
 
 /* Local Forward Declarations ------------------------------------------------*/
-class ObjectTypeClass;
-/* Exported Constants --------------------------------------------------------*/
-
-/* Exported Types ------------------------------------------------------------*/
+class DisplayObjectClass;
 
 /* Exported Classes ----------------------------------------------------------*/
 class ObjectGroupClass
@@ -39,11 +36,11 @@ public:
 	void SetXPosition(int aValue);
 	void IncrementXPosition();
 
-	void AddObject(ObjectTypeClass *&aObject);
+	void AddObject(DisplayObjectClass *&aObject);
 	void RemoveAllObjects();
-	ObjectTypeClass *GetByIndex(size_t aIndex);
+	DisplayObjectClass *GetByIndex(size_t aIndex);
 	size_t GetNumberOfObjects();
-	std::vector<ObjectTypeClass *> GetObjects();
+	std::vector<DisplayObjectClass *> GetObjects();
 
 	std::chrono::time_point<std::chrono::steady_clock> GetUpdateTimestamp();
 
@@ -55,9 +52,9 @@ public:
 
 private:
 	void calculateLength();
-	void updateChilderenXPosition();
+	void updateChildrenXPosition();
 
-	std::vector<ObjectTypeClass *> mObjects;
+	std::vector<DisplayObjectClass *> mObjects;
 	std::string mID;
 	std::chrono::time_point<std::chrono::steady_clock> mUpdateTimestamp;
 	int mLength;
