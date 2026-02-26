@@ -24,7 +24,7 @@ using namespace std;
 /* Static Class Member Initialization ----------------------------------------*/
 
 /* Class Constructors --------------------------------------------------------*/
-ObjectGroupManagerClass::ObjectGroupManagerClass() : mIsThreadRunning(true)
+ObjectGroupManagerClass::ObjectGroupManagerClass(const string &aJsonPath) : mIsThreadRunning(true), mJsonPath(aJsonPath)
 {
 	this->mThread = thread(&ObjectGroupManagerClass::threadFunction, this);
 	pthread_setname_np(this->mThread.native_handle(), "objManager");
@@ -193,7 +193,7 @@ void ObjectGroupManagerClass::threadFunction()
 		json lJSONData;
 		try
 		{
-			ifstream f("../src/example.json");
+			ifstream f(this->mJsonPath);
 			lJSONData = json::parse(f);
 		}
 		catch (json::parse_error &e)
@@ -299,7 +299,7 @@ void ObjectGroupManagerClass::threadFunction()
 			auto it = this->mObjectGroups.begin();
 			while (it != this->mObjectGroups.end())
 			{
-				if (OBJECT_TIMEOUT < chrono::duration_cast<chrono::minutes>(chrono::steady_clock::now() - (*it)->GetUpdateTimestamp()).count())
+				if (OBJECT_TIMEOUT_MINUTES < chrono::duration_cast<chrono::minutes>(chrono::steady_clock::now() - (*it)->GetUpdateTimestamp()).count())
 				{
 					delete *it;
 					it = this->mObjectGroups.erase(it);

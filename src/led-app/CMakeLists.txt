@@ -1,20 +1,23 @@
 cmake_minimum_required(VERSION 3.10)
 project(led-app)
 
-add_definitions(-w)
-
 # Set the C++ standard to C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_BUILD_TYPE Debug)
 
+# Default to Release build, allow override with -DCMAKE_BUILD_TYPE=Debug
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Enable warnings instead of suppressing them
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter)
 
 enable_testing()
 
 # Find the CURL package
 find_package(CURL REQUIRED)
 find_package(ImageMagick COMPONENTS Magick++ REQUIRED)
-
 
 include_directories(${CURL_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/libs/rpi-rgb-led-matrix/include)
@@ -44,11 +47,10 @@ set(headers
 
 add_executable(led-app ${sources})
 
-target_link_libraries(led-app  ${CURL_LIBRARIES} rgbmatrix ${ImageMagick_LIBRARIES})
+target_link_libraries(led-app ${CURL_LIBRARIES} rgbmatrix ${ImageMagick_LIBRARIES})
 target_include_directories(led-app PRIVATE ${ImageMagick_INCLUDE_DIRS})
 target_compile_features(led-app PRIVATE cxx_std_17)
 target_compile_definitions(led-app PRIVATE CURL_STATICLIB JSON_ASSERT\(x\)=\(void\)0)
-
 
 #add_executable(led-app-tests tests/test_dummy.cpp)
 #add_test(NAME run-tests COMMAND led-app-tests)

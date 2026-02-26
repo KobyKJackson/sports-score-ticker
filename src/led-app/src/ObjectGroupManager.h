@@ -24,14 +24,14 @@
 class ObjectGroupClass;
 
 /* Exported Constants --------------------------------------------------------*/
-#define OBJECT_TIMEOUT 10 //minutes
-/* Exported Types ------------------------------------------------------------*/
+constexpr int OBJECT_TIMEOUT_MINUTES = 10;
+constexpr const char *DEFAULT_JSON_PATH = "../src/example.json";
 
 /* Exported Classes ----------------------------------------------------------*/
 class ObjectGroupManagerClass
 {
 public:
-	ObjectGroupManagerClass();
+	ObjectGroupManagerClass(const std::string &aJsonPath = DEFAULT_JSON_PATH);
 	virtual ~ObjectGroupManagerClass();
 
 	void AddOrUpdate(ObjectGroupClass *&aValue);
@@ -43,6 +43,7 @@ public:
 
 private:
 	void threadFunction();
+	std::string mJsonPath;
 	std::vector<ObjectGroupClass *> mObjectGroups;
 	std::mutex mMutex;
 	std::thread mThread;
