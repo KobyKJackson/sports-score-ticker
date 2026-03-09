@@ -1,0 +1,22 @@
+[Unit]
+Description=Sports Score Fetcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/sports-score-ticker
+ExecStart=/usr/bin/python3 /home/pi/sports-score-ticker/fetcher/score_fetcher.py
+Restart=always
+RestartSec=10
+Environment=TICKER_CONFIG=/home/pi/sports-score-ticker/config/ticker.json
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=score-fetcher
+
+[Install]
+WantedBy=multi-user.target
