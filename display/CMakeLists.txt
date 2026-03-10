@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
-project(led_ticker C)
+project(led_ticker CXX)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_C_FLAGS_RELEASE "-O2")
-set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 
 # rpi-rgb-led-matrix library
 set(RGB_LIB_DIR ${CMAKE_SOURCE_DIR}/libs/rpi-rgb-led-matrix)
@@ -27,10 +27,10 @@ endif()
 
 # Source files
 set(SOURCES
-    src/main.c
-    src/score_reader.c
-    src/ticker.c
-    src/logo_cache.c
+    src/main.cpp
+    src/score_reader.cpp
+    src/ticker.cpp
+    src/logo_cache.cpp
 )
 
 add_executable(led_ticker ${SOURCES})
@@ -41,13 +41,12 @@ target_include_directories(led_ticker PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 
-# Link rpi-rgb-led-matrix (static library, written in C++ with C bindings)
+# Link rpi-rgb-led-matrix
 target_link_libraries(led_ticker
     ${RGB_LIBDIR}/librgbmatrix.a
     m
     pthread
     rt
-    stdc++
 )
 
 # Install target

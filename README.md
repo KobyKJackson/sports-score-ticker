@@ -123,17 +123,15 @@ sports-score-ticker/
 │   ├── espn.py               # ESPN API client
 │   ├── models.py             # Data models
 │   └── requirements.txt      # Python dependencies
-├── display/                  # C LED display application
+├── display/                  # C++ LED display application
 │   ├── src/
-│   │   ├── main.c            # Entry point
-│   │   ├── ticker.c/h        # Scrolling ticker renderer
-│   │   ├── score_reader.c/h  # JSON data reader
-│   │   ├── logo_cache.c/h    # Team logo PPM cache
-│   │   └── text_render.c/h   # Text rendering helpers
+│   │   ├── main.cpp          # Entry point (uses rpi-rgb-led-matrix C++ API)
+│   │   ├── ticker.hpp/cpp    # Scrolling ticker renderer class
+│   │   ├── score_reader.hpp/cpp # JSON parser with std::string/vector
+│   │   └── logo_cache.hpp/cpp   # Team logo PPM cache class
 │   ├── libs/
 │   │   └── rpi-rgb-led-matrix # Git submodule
-│   ├── fonts/                # BDF fonts for the display
-│   └── CMakeLists.txt        # Build configuration
+│   └── CMakeLists.txt        # CMake build (C++17)
 ├── config/
 │   └── ticker.json           # Runtime configuration
 ├── deploy/
