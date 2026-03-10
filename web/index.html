@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sports Score Ticker</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- LED Panel Simulator -->
+  <section id="simulator-section">
+    <div id="simulator-header">
+      <h2>LED Panel Simulator</h2>
+      <span id="sim-info">320 x 64 pixels &mdash; 10x P4 panels (2 rows of 5)</span>
+      <div id="sim-controls">
+        <label>Zoom:
+          <select id="pixel-scale">
+            <option value="2">2x</option>
+            <option value="3" selected>3x</option>
+            <option value="4">4x</option>
+            <option value="5">5x</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="show-grid"> Grid
+        </label>
+        <span id="fps-display">0 FPS</span>
+      </div>
+    </div>
+    <div id="canvas-wrapper">
+      <canvas id="led-canvas"></canvas>
+    </div>
+  </section>
+
+  <!-- Config Editor -->
+  <section id="config-section">
+    <h2>Configuration</h2>
+    <div id="config-status"></div>
+    <form id="config-form">
+      <!-- Sports toggles -->
+      <fieldset>
+        <legend>Sports</legend>
+        <div id="sports-toggles">
+          <label><input type="checkbox" name="sport" value="nba"> NBA</label>
+          <label><input type="checkbox" name="sport" value="nfl"> NFL</label>
+          <label><input type="checkbox" name="sport" value="mlb"> MLB</label>
+          <label><input type="checkbox" name="sport" value="nhl"> NHL</label>
+          <label><input type="checkbox" name="sport" value="ncaaf"> College Football</label>
+          <label><input type="checkbox" name="sport" value="ncaam"> College Basketball</label>
+        </div>
+      </fieldset>
+
+      <!-- Display settings -->
+      <fieldset>
+        <legend>Display</legend>
+        <div class="field">
+          <label for="scroll-speed">Scroll Speed</label>
+          <input type="range" id="scroll-speed" min="1" max="10" value="1">
+          <span id="scroll-speed-val">1</span>
+        </div>
+        <div class="field">
+          <label for="brightness">Brightness</label>
+          <input type="range" id="brightness" min="1" max="100" value="80">
+          <span id="brightness-val">80%</span>
+        </div>
+      </fieldset>
+
+      <!-- Fetcher settings -->
+      <fieldset>
+        <legend>Data</legend>
+        <div class="field">
+          <label for="update-interval">Update Interval</label>
+          <input type="range" id="update-interval" min="5" max="120" step="5" value="30">
+          <span id="update-interval-val">30s</span>
+        </div>
+        <div class="field">
+          <label for="timezone">Timezone</label>
+          <select id="timezone">
+            <option value="America/New_York">Eastern</option>
+            <option value="America/Chicago">Central</option>
+            <option value="America/Denver">Mountain</option>
+            <option value="America/Los_Angeles">Pacific</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <!-- Toggles -->
+      <fieldset>
+        <legend>Content</legend>
+        <div id="content-toggles">
+          <label><input type="checkbox" id="show-betting" checked> Show Betting Lines</label>
+          <label><input type="checkbox" id="show-venue" checked> Show Venue</label>
+        </div>
+      </fieldset>
+
+      <div id="config-buttons">
+        <button type="button" id="btn-save">Save Config</button>
+        <button type="button" id="btn-reset">Reset to Defaults</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script src="/static/ticker.js"></script>
+</body>
+</html>

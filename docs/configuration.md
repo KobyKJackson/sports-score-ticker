@@ -90,6 +90,35 @@ Whether to display the venue/location for games.
 }
 ```
 
+## Web Frontend
+
+The score fetcher serves a web UI at `http://<host>:5001` with two features:
+
+### LED Panel Simulator
+A pixel-accurate 320x64 canvas that replicates the physical LED display in the browser. Useful for testing layout without hardware. Supports adjustable zoom (2x-5x), optional pixel grid overlay, and shows an FPS counter.
+
+### Config Editor
+A form-based editor that reads and writes configuration in real time via the REST API. Changes take effect immediately without restarting services.
+
+## REST API
+
+The score fetcher exposes these endpoints on port 5001 (configurable via `TICKER_WEB_PORT`):
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/scores` | Current score data (same format as `/tmp/scores.json`) |
+| GET | `/api/config` | Current configuration |
+| PUT | `/api/config` | Update configuration (JSON body with fields to change) |
+| POST | `/api/config/reset` | Reset configuration to defaults |
+
+### Example: Update config via API
+
+```bash
+curl -X PUT http://localhost:5001/api/config \
+  -H "Content-Type: application/json" \
+  -d '{"scroll_speed": 2, "brightness": 60}'
+```
+
 ## Environment Variables
 
 These override config file settings:
@@ -99,3 +128,4 @@ These override config file settings:
 | `TICKER_CONFIG` | Config file path | `/etc/ticker/ticker.json` |
 | `TICKER_DATA_FILE` | `data_file` | `/tmp/scores.json` |
 | `TICKER_BRIGHTNESS` | `brightness` | `60` |
+| `TICKER_WEB_PORT` | Web UI port | `5001` |

@@ -35,19 +35,21 @@ Two parallel chains of 5 panels each, connected to the Electrodragon driver boar
 
 ```
 ┌─────────────────┐       /tmp/scores.json       ┌──────────────────┐
-│  Python Fetcher  │ ──── writes JSON ──────────► │  C Display App   │
-│  (score_fetcher) │                              │  (led_ticker)    │
-│                  │                              │                  │
-│  ESPN APIs ─►    │                              │  ─► RGB Matrix   │
-│  Parse scores    │                              │  Scrolling ticker│
-│  Betting lines   │                              │  Team logos      │
-└─────────────────┘                               └──────────────────┘
-     systemd service                                  systemd service
-     runs as pi user                                  runs as root
+│  Python Fetcher  │ ──── writes JSON ──────────► │  C++ Display App │
+│  + Flask API     │                              │  (led_ticker)    │
+│  (score_fetcher) │                              │                  │
+│  ESPN APIs ─►    │    ┌──────────────────┐      │  ─► RGB Matrix   │
+│  Parse scores    │◄───│  Web Frontend    │      │  Scrolling ticker│
+│  Betting lines   │    │  LED Simulator   │      │  Team logos      │
+│  Config API      │    │  Config Editor   │      │                  │
+└─────────────────┘    └──────────────────┘      └──────────────────┘
+     systemd service        Browser                   systemd service
+     runs as pi user        port 5001                 runs as root
 ```
 
-1. **Python Fetcher** (`fetcher/`) - Polls ESPN APIs every 30s, writes structured JSON to `/tmp/scores.json`
-2. **C Display App** (`display/`) - Reads JSON, renders scrolling ticker on LED matrix using `rpi-rgb-led-matrix`
+1. **Python Fetcher + API** (`fetcher/`) - Polls ESPN APIs, writes JSON, serves REST API and web frontend via Flask
+2. **C++ Display App** (`display/`) - Reads JSON, renders scrolling ticker on LED matrix using `rpi-rgb-led-matrix`
+3. **Web Frontend** (`web/`) - Browser-based LED panel simulator (pixel-accurate 320x64 canvas) and live config editor
 
 ## Quick Start
 
@@ -85,12 +87,14 @@ pip3 install -r fetcher/requirements.txt
 ### 5. Run
 
 ```bash
-# Terminal 1: Start the score fetcher
+# Terminal 1: Start the score fetcher + web UI
 python3 fetcher/score_fetcher.py
 
 # Terminal 2: Start the LED display (requires root for GPIO)
 sudo ./display/build/led_ticker
 ```
+
+Open `http://<pi-ip>:5001` in a browser for the LED panel simulator and config editor.
 
 ### 6. (Optional) Install as services
 
@@ -138,6 +142,11 @@ sports-score-ticker/
 │   ├── install.sh            # Service installer
 │   ├── score-fetcher.service  # systemd unit
 │   └── led-ticker.service    # systemd unit
+├── web/                     # Web frontend
+│   ├── index.html           # Main page (simulator + config editor)
+│   └── static/
+│       ├── style.css        # Styles
+│       └── ticker.js        # LED simulator canvas + config API client
 ├── logos/                    # Team logo PPM files (auto-downloaded)
 └── docs/
     ├── hardware-setup.md     # Wiring and panel assembly guide
