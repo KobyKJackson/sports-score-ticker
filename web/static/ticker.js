@@ -11,7 +11,7 @@
   const DISPLAY_H = 64;
   const GAME_CARD_GAP = 10;
   const SPORT_DIVIDER_W = 20;
-  const LOGO_SIZE = 28;
+  const LOGO_SIZE = 60;
 
   // Color palette (match C++)
   const WHITE  = [255, 255, 255];
@@ -37,42 +37,59 @@
     nhl: "NHL", ncaaf: "CFB", ncaam: "CBB",
   };
 
+  function formatHours(h) {
+    if (h === 0) return "0h";
+    if (h < 24) return h + "h";
+    const days = Math.floor(h / 24);
+    const rem = h % 24;
+    return rem === 0 ? days + "d" : days + "d " + rem + "h";
+  }
+
   // --- Bitmap font (6x10) ---
   // Minimal bitmap font for ASCII 32-127, matching 6x10 BDF
   // Each character is 6 pixels wide, 10 pixels tall
   // Stored as array of 10 rows of 6-bit values per character
 
   const FONT_W = 6;
-  const FONT_H = 10;
-  const LARGE_FONT_W = 9;
-  const LARGE_FONT_H = 15;
+  const FONT_H = 14;
+  const LARGE_FONT_W = 10;
+  const LARGE_FONT_H = 24;
+  const TINY_FONT_H = 11;
 
   // We'll use canvas-based text rendering scaled to pixel grid
   // This gives us a clean bitmap look while supporting full ASCII
 
   let fontCanvas, fontCtx;
   let largeFontCanvas, largeFontCtx;
+  let tinyFontCanvas, tinyFontCtx;
 
   function initFontRenderers() {
     fontCanvas = document.createElement("canvas");
     fontCanvas.width = 512;
-    fontCanvas.height = 16;
+    fontCanvas.height = 18;
     fontCtx = fontCanvas.getContext("2d");
     fontCtx.imageSmoothingEnabled = false;
 
     largeFontCanvas = document.createElement("canvas");
     largeFontCanvas.width = 512;
-    largeFontCanvas.height = 20;
+    largeFontCanvas.height = 32;
     largeFontCtx = largeFontCanvas.getContext("2d");
     largeFontCtx.imageSmoothingEnabled = false;
+
+    tinyFontCanvas = document.createElement("canvas");
+    tinyFontCanvas.width = 512;
+    tinyFontCanvas.height = 14;
+    tinyFontCtx = tinyFontCanvas.getContext("2d");
+    tinyFontCtx.imageSmoothingEnabled = false;
   }
 
   // Render text to a small off-screen canvas to get bitmap data
-  function getTextBitmap(text, large) {
-    const ctx = large ? largeFontCtx : fontCtx;
-    const cvs = large ? largeFontCanvas : fontCanvas;
-    const h = large ? LARGE_FONT_H : FONT_H;
-    const fontSize = large ? 13 : 9;
+  // large=true: 20px font  large=false: 12px font  tiny=true: 9px font
+  function getTextBitmap(text, large, tiny) {
+    const ctx = large ? largeFontCtx : (tiny ? tinyFontCtx : fontCtx);
+    const cvs = large ? largeFontCanvas : (tiny ? tinyFontCanvas : fontCanvas);
+    const h   = large ? LARGE_FONT_H   : (tiny ? TINY_FONT_H   : FONT_H);
+    const fontSize = large ? 20 : (tiny ? 9 : 12);
 
     ctx.clearRect(0, 0, cvs.width, cvs.height);
     ctx.fillStyle = "#ffffff";
@@ -105,12 +122,12 @@
     pixelBuffer[idx + 2] = b;
   }
 
-  function drawText(x, baselineY, color, text, large) {
-    const bmp = getTextBitmap(text, large);
+  function drawText(x, baselineY, color, text, large, tiny) {
+    const bmp = getTextBitmap(text, large, tiny);
     if (!bmp.pixels) return x;
     const h = bmp.height;
-    // baseline offset: for small font baseline~8, large baseline~12
-    const topY = baselineY - (large ? 12 : 8);
+    // baseline offset: large~17, small~10, tiny~7
+    const topY = baselineY - (large ? 17 : (tiny ? 7 : 10));
 
     for (let py = 0; py < h; py++) {
       for (let px = 0; px < bmp.width; px++) {
@@ -133,6 +150,7 @@
   // --- Score data model ---
 
   let scoreData = null;
+  let showBetting = true;
   let scrollX = 0;
   let totalStripWidth = 0;
   let cards = [];
@@ -153,40 +171,63 @@
     return SPORT_LABELS[sport] || "???";
   }
 
-  function textWidth(text, large) {
-    const bmp = getTextBitmap(text, large);
+  function textWidth(text, large, tiny) {
+    const bmp = getTextBitmap(text, large, tiny);
     return bmp.width;
+  }
+
+  // Returns the x that centers `w` pixels within [lo, hi]
+  function centerX(lo, hi, w) {
+    return Math.floor(lo + (hi - lo - w) / 2);
   }
 
   // Calculate width of a game card (match C++ calc_card_width)
   function calcCardWidth(game) {
-    let w = LOGO_SIZE + 4;
+    // Line 1: teams + scores
+    let line1 = 0;
+    if (game.away_team.rank && game.away_team.rank > 0)
+      line1 += textWidth("#" + game.away_team.rank, false) + 2;
+    line1 += textWidth(game.away_team.abbreviation, true) + 4;
 
-    w += textWidth(game.away_team.abbreviation, false) + 4;
+    const hasScores = game.status !== "scheduled" &&
+                      game.home_team.score !== null && game.home_team.score !== undefined &&
+                      game.away_team.score !== null && game.away_team.score !== undefined;
+    if (hasScores) {
+      line1 += textWidth(String(game.away_team.score), true) + 3;
+      line1 += textWidth("@", true) + 6;
+      line1 += textWidth(String(game.home_team.score), true) + 4;
+    } else {
+      line1 += textWidth("@", true) + 6;
+    }
+    if (game.home_team.rank && game.home_team.rank > 0)
+      line1 += textWidth("#" + game.home_team.rank, false) + 2;
+    line1 += textWidth(game.home_team.abbreviation, true) + 8;
 
-    if (game.home_team.score !== null && game.home_team.score !== undefined) {
-      w += textWidth(String(game.away_team.score), false) + 4;
-      w += 7; // " - "
-      w += textWidth(String(game.home_team.score), false) + 4;
+    // Line 2: status/time (tiny font for scheduled)
+    let line2 = 0;
+    if (game.status === "scheduled" && game.detail) {
+      line2 = textWidth(game.detail, false, true) + 8;  // tiny font
+    } else if (game.status === "final") {
+      line2 = textWidth("FINAL", false) + 8;
+    } else if ((game.status === "in_progress" || game.status === "halftime") &&
+               (game.period || game.clock)) {
+      if (game.period) line2 += textWidth(game.period, false) + 4;
+      if (game.clock)  line2 += textWidth(game.clock, false) + 4;
+      if (game.status === "halftime") line2 += textWidth("HALF", false) + 4;
+    } else if (game.detail) {
+      line2 = textWidth(game.detail, false) + 8;
     }
 
-    w += textWidth(game.home_team.abbreviation, false) + 8;
-
-    if (game.detail) w += textWidth(game.detail, false) + 8;
-
+    // Line 3: odds
+    let line3 = 0;
     if (game.odds && game.odds.spread) {
-      w += textWidth(game.odds.spread, false) + 4;
+      line3 = textWidth(game.odds.spread, false) + 8;
       if (game.odds.over_under)
-        w += textWidth(game.odds.over_under, false) + 8;
+        line3 += textWidth("  " + game.odds.over_under, false);
     }
 
-    if (game.venue) {
-      const vshort = game.venue.substring(0, 24);
-      w += textWidth(vshort, false) + 8;
-    }
-
-    w += GAME_CARD_GAP;
-    return w;
+    const textW = Math.max(line1, line2, line3);
+    return LOGO_SIZE + 4 + textW + 4 + LOGO_SIZE + GAME_CARD_GAP;
   }
 
   function updateGames(data) {
@@ -222,17 +263,81 @@
     drawText(x + 2, 36, WHITE, sportLabel(sport), false);
   }
 
-  // Simple team logo placeholder (colored square with letter)
-  function drawLogo(x, y, team, sport) {
+  // --- Team logo loading ---
+  // Fetches actual ESPN logos via the /api/logo proxy, caches rendered pixels.
+
+  const logoPixelCache = new Map();  // key → Uint8ClampedArray (LOGO_SIZE*LOGO_SIZE*4) or "loading"
+
+  function loadLogo(team, sport, logoUrl) {
+    const key = sport + "_" + team;
+    if (logoPixelCache.has(key)) return;
+    if (!logoUrl) return;
+
+    logoPixelCache.set(key, "loading");
+    const img = new Image();
+    img.onload = () => {
+      const srcW = img.naturalWidth || img.width;
+      const srcH = img.naturalHeight || img.height;
+
+      // Find bounding box of non-transparent pixels so all logos fill the same visual size
+      const src = document.createElement("canvas");
+      src.width = srcW;
+      src.height = srcH;
+      const sctx = src.getContext("2d");
+      sctx.drawImage(img, 0, 0);
+      let srcData;
+      try {
+        srcData = sctx.getImageData(0, 0, srcW, srcH).data;
+      } catch (e) {
+        logoPixelCache.delete(key);
+        return;
+      }
+
+      let minX = srcW, minY = srcH, maxX = 0, maxY = 0;
+      for (let y = 0; y < srcH; y++) {
+        for (let x = 0; x < srcW; x++) {
+          if (srcData[(y * srcW + x) * 4 + 3] > 10) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (maxX <= minX || maxY <= minY) { minX = 0; minY = 0; maxX = srcW - 1; maxY = srcH - 1; }
+
+      const contentW = maxX - minX + 1;
+      const contentH = maxY - minY + 1;
+      const pad = 2;
+      const scale = Math.min((LOGO_SIZE - pad * 2) / contentW, (LOGO_SIZE - pad * 2) / contentH);
+      const dstW = Math.round(contentW * scale);
+      const dstH = Math.round(contentH * scale);
+      const dstX = Math.round((LOGO_SIZE - dstW) / 2);
+      const dstY = Math.round((LOGO_SIZE - dstH) / 2);
+
+      const tmp = document.createElement("canvas");
+      tmp.width = LOGO_SIZE;
+      tmp.height = LOGO_SIZE;
+      const tctx = tmp.getContext("2d");
+      tctx.imageSmoothingEnabled = true;
+      tctx.drawImage(img, minX, minY, contentW, contentH, dstX, dstY, dstW, dstH);
+      try {
+        logoPixelCache.set(key, tctx.getImageData(0, 0, LOGO_SIZE, LOGO_SIZE).data);
+      } catch (e) {
+        logoPixelCache.delete(key);
+      }
+    };
+    img.onerror = () => logoPixelCache.delete(key);
+    img.src = "/api/logo?url=" + encodeURIComponent(logoUrl);
+  }
+
+  function drawLogoFallback(x, y, team, sport) {
     const sc = sportColor(sport);
-    // Draw a small colored square
     for (let dy = 0; dy < LOGO_SIZE; dy++) {
       for (let dx = 0; dx < LOGO_SIZE; dx++) {
-        // Border
         if (dx === 0 || dx === LOGO_SIZE - 1 || dy === 0 || dy === LOGO_SIZE - 1) {
           setPixel(x + dx, y + dy, sc[0], sc[1], sc[2]);
         } else {
-          // Inner slightly lighter
           setPixel(x + dx, y + dy,
             Math.min(255, sc[0] + 30),
             Math.min(255, sc[1] + 30),
@@ -240,110 +345,134 @@
         }
       }
     }
-    // Draw team abbreviation initial centered
-    const initial = team.substring(0, 3);
-    drawText(x + 3, y + 18, WHITE, initial, false);
+    drawText(x + 3, y + Math.floor(LOGO_SIZE * 0.6), WHITE, team.substring(0, 3), false);
+  }
+
+  function drawLogo(x, y, team, sport, logoUrl) {
+    const key = sport + "_" + team;
+    const cached = logoPixelCache.get(key);
+
+    if (cached && cached !== "loading") {
+      for (let py = 0; py < LOGO_SIZE; py++) {
+        for (let px = 0; px < LOGO_SIZE; px++) {
+          const i = (py * LOGO_SIZE + px) * 4;
+          if (cached[i + 3] > 50) {
+            setPixel(x + px, y + py, cached[i], cached[i + 1], cached[i + 2]);
+          }
+        }
+      }
+      return;
+    }
+
+    // Trigger fetch if not already loading
+    if (!cached && logoUrl) loadLogo(team, sport, logoUrl);
+    drawLogoFallback(x, y, team, sport);
   }
 
   function renderGameCard(card, xStart) {
     const g = card.game;
-    let x = xStart;
 
-    // Logo
-    drawLogo(x, 2, g.away_team.abbreviation, g.sport);
-    x += LOGO_SIZE + 4;
+    // Away logo (left, full height)
+    drawLogo(xStart, 2, g.away_team.abbreviation, g.sport, g.away_team.logo_url);
 
-    // Line 1: Teams and scores (baseline y=20)
-    const line1Y = 20;
+    const textStartX = xStart + LOGO_SIZE + 4;
 
-    // Away rank
-    if (g.away_team.rank && g.away_team.rank > 0) {
-      x = drawText(x, line1Y - 4, YELLOW, "#" + g.away_team.rank, false);
-      x += 2;
-    }
+    // Text area dimensions from pre-calculated card width
+    // calcCardWidth: LOGO_SIZE + 4 + textW + 4 + LOGO_SIZE + GAME_CARD_GAP
+    const textW = card.totalWidth - 2 * LOGO_SIZE - 8 - GAME_CARD_GAP;
+    const textEndX = textStartX + textW;
 
-    // Away abbreviation
-    x = drawText(x, line1Y, WHITE, g.away_team.abbreviation, true);
-    x += 4;
-
-    // Scores
+    // Line 1: Teams and scores (large font, baseline y=26)
+    const line1Y = 26;
     const awayScore = g.away_team.score;
     const homeScore = g.home_team.score;
-    if (awayScore !== null && awayScore !== undefined &&
-        homeScore !== null && homeScore !== undefined) {
+    const hasScores = g.status !== "scheduled" && awayScore != null && homeScore != null;
+
+    // Measure line1 width to center it between the logos
+    let line1W = 0;
+    if (g.away_team.rank > 0) line1W += textWidth("#" + g.away_team.rank, false) + 2;
+    line1W += textWidth(g.away_team.abbreviation, true) + 4;
+    if (hasScores) {
+      line1W += textWidth(String(awayScore), true) + 3 + textWidth("@", true) + 3 + textWidth(String(homeScore), true) + 4;
+    } else {
+      line1W += textWidth("@", true) + 4;
+    }
+    if (g.home_team.rank > 0) line1W += textWidth("#" + g.home_team.rank, false) + 2;
+    line1W += textWidth(g.home_team.abbreviation, true);
+
+    let x = centerX(textStartX, textEndX, line1W);
+
+    if (g.away_team.rank && g.away_team.rank > 0) {
+      x = drawText(x, line1Y - 6, YELLOW, "#" + g.away_team.rank, false);
+      x += 2;
+    }
+    x = drawText(x, line1Y, WHITE, g.away_team.abbreviation, true);
+    x += 4;
+    if (hasScores) {
       const awayWinning = awayScore > homeScore;
       const homeWinning = homeScore > awayScore;
-
       x = drawText(x, line1Y, awayWinning ? WHITE : GRAY, String(awayScore), true);
       x += 3;
-      x = drawText(x, line1Y, DIM, "-", true);
+      x = drawText(x, line1Y, DIM, "@", true);
       x += 3;
       x = drawText(x, line1Y, homeWinning ? WHITE : GRAY, String(homeScore), true);
       x += 4;
+    } else {
+      x = drawText(x, line1Y, DIM, "@", true);
+      x += 4;
     }
-
-    // Home rank
     if (g.home_team.rank && g.home_team.rank > 0) {
-      x = drawText(x, line1Y - 4, YELLOW, "#" + g.home_team.rank, false);
+      x = drawText(x, line1Y - 6, YELLOW, "#" + g.home_team.rank, false);
       x += 2;
     }
-
-    // Home abbreviation
     x = drawText(x, line1Y, WHITE, g.home_team.abbreviation, true);
-    x += 6;
 
-    // Line 2: Status, odds, venue (baseline y=48)
-    let line2X = xStart + LOGO_SIZE + 4;
-    const line2Y = 48;
     const stc = statusColor(g.status);
 
+    // --- Line 2: Status/time, centered (baseline y=43) ---
+    const line2Y = 43;
+
     if (g.status === "in_progress" || g.status === "halftime") {
-      if (g.period) {
-        line2X = drawText(line2X, line2Y, stc, g.period, false);
-        line2X += 4;
-      }
-      if (g.clock) {
-        line2X = drawText(line2X, line2Y, WHITE, g.clock, false);
-        line2X += 8;
-      }
-      if (g.status === "halftime") {
-        line2X = drawText(line2X, line2Y, YELLOW, "HALF", false);
-        line2X += 8;
-      }
+      // Build parts: period, clock, HALF — centered together under the score
+      const parts = [];
+      if (g.period) parts.push({ text: g.period, color: stc });
+      if (g.clock)  parts.push({ text: g.clock,  color: WHITE });
+      if (g.status === "halftime") parts.push({ text: "HALF", color: YELLOW });
+      const totalW = parts.reduce((s, p, i) =>
+        s + textWidth(p.text, false) + (i < parts.length - 1 ? 4 : 0), 0);
+      let cx = centerX(textStartX, textEndX, totalW);
+      parts.forEach((p, i) => {
+        cx = drawText(cx, line2Y, p.color, p.text, false);
+        if (i < parts.length - 1) cx += 4;
+      });
     } else if (g.status === "final") {
-      line2X = drawText(line2X, line2Y, RED, "FINAL", false);
-      line2X += 8;
-    } else if (g.status === "scheduled") {
-      if (g.detail) {
-        line2X = drawText(line2X, line2Y, CYAN, g.detail, false);
-        line2X += 8;
-      }
+      const fw = textWidth("FINAL", false);
+      drawText(centerX(textStartX, textEndX, fw), line2Y, RED, "FINAL", false);
+    } else if (g.status === "scheduled" && g.detail) {
+      // Tiny (9px) font — scheduled detail strings can be very long
+      const dw = textWidth(g.detail, false, true);
+      drawText(centerX(textStartX, textEndX, dw), line2Y, CYAN, g.detail, false, true);
     } else if (g.detail) {
-      line2X = drawText(line2X, line2Y, stc, g.detail, false);
-      line2X += 8;
+      const dw = textWidth(g.detail, false);
+      drawText(centerX(textStartX, textEndX, dw), line2Y, stc, g.detail, false);
     }
 
-    // Betting odds
-    if (g.odds) {
-      drawText(line2X - 4, line2Y, DIM, "|", false);
-      if (g.odds.spread) {
-        line2X = drawText(line2X, line2Y, ORANGE, g.odds.spread, false);
-        line2X += 4;
+    // --- Line 3: Odds, centered (baseline y=56) ---
+    const line3Y = 56;
+    if (g.odds && showBetting) {
+      let oddsText = "";
+      if (g.odds.spread)     oddsText += g.odds.spread;
+      if (g.odds.over_under) oddsText += (oddsText ? "  " : "") + g.odds.over_under;
+      if (oddsText) {
+        const ow = textWidth(oddsText, false);
+        drawText(centerX(textStartX, textEndX, ow), line3Y, ORANGE, oddsText, false);
       }
-      if (g.odds.over_under) {
-        line2X = drawText(line2X, line2Y, ORANGE, g.odds.over_under, false);
-        line2X += 8;
-      }
     }
 
-    // Venue
-    if (g.venue) {
-      drawText(line2X - 4, line2Y, DIM, "|", false);
-      const venueShort = g.venue.substring(0, 24);
-      line2X = drawText(line2X, line2Y, GRAY, venueShort, false);
-    }
+    // Home logo (right, full height)
+    drawLogo(textEndX + 4, 2, g.home_team.abbreviation, g.sport, g.home_team.logo_url);
 
-    return Math.max(x, line2X) - xStart + GAME_CARD_GAP;
+    return textEndX + 4 + LOGO_SIZE - xStart + GAME_CARD_GAP;
   }
 
   function renderFrame() {
@@ -355,7 +484,7 @@
     }
 
     // Render strip twice for seamless looping (match C++)
-    let stripX = -scrollX;
+    let stripX = -Math.floor(scrollX);
 
     for (let pass = 0; pass < 2; pass++) {
       let cx = stripX;
@@ -454,7 +583,7 @@
   let lastFpsTime = 0;
 
   function advance() {
-    scrollX += scrollSpeed;
+    scrollX += scrollSpeed / 4;
     if (totalStripWidth > 0 && scrollX >= totalStripWidth) {
       scrollX -= totalStripWidth;
     }
@@ -541,6 +670,18 @@
       fetchInterval = config.update_interval_seconds * 1000;
     }
 
+    // Time window
+    const hoursBackEl = document.getElementById("hours-back");
+    if (hoursBackEl && config.hours_back !== undefined) {
+      hoursBackEl.value = config.hours_back;
+      document.getElementById("hours-back-val").textContent = formatHours(config.hours_back);
+    }
+    const hoursAheadEl = document.getElementById("hours-ahead");
+    if (hoursAheadEl && config.hours_ahead !== undefined) {
+      hoursAheadEl.value = config.hours_ahead;
+      document.getElementById("hours-ahead-val").textContent = formatHours(config.hours_ahead);
+    }
+
     // Timezone
     const tzEl = document.getElementById("timezone");
     if (tzEl && config.timezone) {
@@ -549,8 +690,10 @@
 
     // Content toggles
     const bettingEl = document.getElementById("show-betting");
-    if (bettingEl && config.show_betting !== undefined)
+    if (bettingEl && config.show_betting !== undefined) {
       bettingEl.checked = config.show_betting;
+      showBetting = config.show_betting;
+    }
 
     const venueEl = document.getElementById("show-venue");
     if (venueEl && config.show_venue !== undefined)
@@ -568,6 +711,8 @@
       scroll_speed: parseInt(document.getElementById("scroll-speed").value, 10),
       brightness: parseInt(document.getElementById("brightness").value, 10),
       update_interval_seconds: parseInt(document.getElementById("update-interval").value, 10),
+      hours_back: parseInt(document.getElementById("hours-back").value, 10),
+      hours_ahead: parseInt(document.getElementById("hours-ahead").value, 10),
       timezone: document.getElementById("timezone").value,
       show_betting: document.getElementById("show-betting").checked,
       show_venue: document.getElementById("show-venue").checked,
@@ -598,6 +743,7 @@
       }
       showStatus("Configuration saved.", false);
       scrollSpeed = config.scroll_speed;
+      showBetting = config.show_betting;
       fetchInterval = config.update_interval_seconds * 1000;
       startScoreFetcher();
     } catch (e) {
@@ -656,6 +802,12 @@
     });
     document.getElementById("update-interval").addEventListener("input", function () {
       document.getElementById("update-interval-val").textContent = this.value + "s";
+    });
+    document.getElementById("hours-back").addEventListener("input", function () {
+      document.getElementById("hours-back-val").textContent = formatHours(parseInt(this.value, 10));
+    });
+    document.getElementById("hours-ahead").addEventListener("input", function () {
+      document.getElementById("hours-ahead-val").textContent = formatHours(parseInt(this.value, 10));
     });
 
     // Config buttons

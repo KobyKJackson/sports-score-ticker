@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download team logos from ESPN and convert to PPM format for the LED display.
 
-Fetches team logos for all configured sports, resizes them to 28x28 pixels,
+Fetches team logos for all configured sports, resizes them to 64x64 pixels,
 and saves as PPM (P6) files that the C display application can read directly.
 
 Requires: Pillow (pip install Pillow)
@@ -22,9 +22,11 @@ ESPN_TEAMS = {
     "nfl": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams",
     "mlb": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams",
     "nhl": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams",
+    "ncaaf": "https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams",
+    "ncaam": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams",
 }
 
-LOGO_SIZE = 28  # pixels
+LOGO_SIZE = 64  # pixels
 
 
 def download_image(url: str) -> bytes | None:
@@ -54,8 +56,15 @@ def image_to_ppm(image_data: bytes, size: int) -> bytes | None:
         img = Image.open(BytesIO(image_data))
         img = img.convert("RGBA")
 
-        # Resize maintaining aspect ratio
-        img.thumbnail((size, size), Image.Resampling.LANCZOS)
+        # Crop to the bounding box of non-transparent pixels so all logos
+        # fill the same visual size regardless of source padding
+        bbox = img.split()[3].getbbox()  # alpha channel bounding box
+        if bbox:
+            img = img.crop(bbox)
+
+        # Resize maintaining aspect ratio, with a small padding margin
+        padded = size - 4
+        img.thumbnail((padded, padded), Image.Resampling.LANCZOS)
 
         # Create a black background and paste the logo centered
         bg = Image.new("RGB", (size, size), (0, 0, 0))
@@ -80,7 +89,9 @@ def fetch_teams(sport: str) -> list[dict]:
         return []
 
     try:
-        resp = requests.get(url, params={"limit": "100"}, timeout=10)
+        # Use a high limit — college sports have hundreds of teams
+        limit = "1000" if sport in ("ncaaf", "ncaam") else "100"
+        resp = requests.get(url, params={"limit": limit}, timeout=10)
         resp.raise_for_status()
         data = resp.json()
 
@@ -119,8 +130,8 @@ def main():
             abbrev = team["abbreviation"]
             logo_url = team["logo_url"]
 
-            # Output path: logos/abbrev.ppm (e.g., logos/lal.ppm)
-            out_path = logo_dir / f"{abbrev}.ppm"
+            # Output path: logos/{sport}_{abbrev}.ppm (e.g., logos/nba_lal.ppm)
+            out_path = logo_dir / f"{sport}_{abbrev}.ppm"
 
             if out_path.exists():
                 print(f"  {abbrev}: already exists, skipping")

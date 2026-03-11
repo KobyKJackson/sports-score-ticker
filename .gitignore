@@ -8,6 +8,7 @@ venv/
 
 # C build artifacts
 display/build/
+display/build-pi/
 *.o
 *.a
 *.so

@@ -8,6 +8,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+SKIP_BUILD="${SKIP_BUILD:-0}"
 
 echo "=== Sports Score Ticker Installer ==="
 echo "Project directory: $PROJECT_DIR"
@@ -18,40 +19,46 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Detect the actual user (not root)
-REAL_USER="${SUDO_USER:-pi}"
+# Detect the actual user; fall back to root if run directly as root (not via sudo)
+REAL_USER="${SUDO_USER:-root}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 echo "Installing for user: $REAL_USER (home: $REAL_HOME)"
 
 # 1. Install Python dependencies
 echo ""
 echo "--- Installing Python dependencies ---"
-pip3 install -r "$PROJECT_DIR/fetcher/requirements.txt"
+pip3 install --break-system-packages -r "$PROJECT_DIR/fetcher/requirements.txt"
 
-# 2. Build the LED matrix library if needed
-RGB_LIB="$PROJECT_DIR/display/libs/rpi-rgb-led-matrix"
-if [ ! -f "$RGB_LIB/lib/librgbmatrix.a" ]; then
+# 2. Build the native LED stack unless a prebuilt binary was pushed
+if [ "$SKIP_BUILD" = "1" ]; then
     echo ""
-    echo "--- Building rpi-rgb-led-matrix ---"
-    cd "$RGB_LIB"
+    echo "--- Skipping LED build (SKIP_BUILD=1) ---"
+    if [ ! -x "$PROJECT_DIR/display/build/led_ticker" ]; then
+        echo "Error: display/build/led_ticker is missing or not executable"
+        exit 1
+    fi
+else
+    RGB_LIB="$PROJECT_DIR/display/libs/rpi-rgb-led-matrix"
+    if [ ! -f "$RGB_LIB/lib/librgbmatrix.a" ]; then
+        echo ""
+        echo "--- Building rpi-rgb-led-matrix ---"
+        make -C "$RGB_LIB/lib" -j$(nproc)
+    fi
+
+    echo ""
+    echo "--- Building LED ticker ---"
+    mkdir -p "$PROJECT_DIR/display/build"
+    cd "$PROJECT_DIR/display/build"
+    cmake ..
     make -j$(nproc)
     cd "$PROJECT_DIR"
 fi
 
-# 3. Build the display application
-echo ""
-echo "--- Building LED ticker ---"
-mkdir -p "$PROJECT_DIR/display/build"
-cd "$PROJECT_DIR/display/build"
-cmake ..
-make -j$(nproc)
-cd "$PROJECT_DIR"
-
-# 4. Create logos directory
+# 3. Create logos directory
 mkdir -p "$PROJECT_DIR/logos"
 chown "$REAL_USER:$REAL_USER" "$PROJECT_DIR/logos"
 
-# 5. Update service files with actual paths
+# 4. Update service files with actual paths
 echo ""
 echo "--- Installing systemd services ---"
 
@@ -62,7 +69,7 @@ sed "s|/home/pi/sports-score-ticker|$PROJECT_DIR|g; s|User=pi|User=$REAL_USER|g;
 sed "s|/home/pi/sports-score-ticker|$PROJECT_DIR|g" \
     "$SCRIPT_DIR/led-ticker.service" > /etc/systemd/system/led-ticker.service
 
-# 6. Enable and start services
+# 5. Enable and start services
 systemctl daemon-reload
 systemctl enable score-fetcher.service
 systemctl enable led-ticker.service

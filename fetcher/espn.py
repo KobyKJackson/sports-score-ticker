@@ -1,5 +1,7 @@
 """ESPN API client for fetching live sports scores."""
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -17,16 +19,6 @@ ESPN_ENDPOINTS = {
     "nhl": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
     "ncaaf": "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard",
     "ncaam": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
-}
-
-# How far back/ahead to look for games per sport (hours)
-SPORT_WINDOWS = {
-    "nba": {"back": 18, "ahead": 12},
-    "nfl": {"back": 36, "ahead": 300},
-    "mlb": {"back": 18, "ahead": 12},
-    "nhl": {"back": 18, "ahead": 12},
-    "ncaaf": {"back": 36, "ahead": 300},
-    "ncaam": {"back": 18, "ahead": 12},
 }
 
 REQUEST_TIMEOUT = 10
@@ -185,19 +177,20 @@ def _parse_game(event: dict, sport: str) -> Game:
     )
 
 
-def fetch_scoreboard(sport: str) -> ScoreBoard:
+def fetch_scoreboard(sport: str, hours_back: int = 12, hours_ahead: int = 24) -> ScoreBoard:
     """Fetch the current scoreboard for a sport from ESPN.
 
     Returns a ScoreBoard with parsed games. On error, returns an empty ScoreBoard.
+    hours_back: show games that started up to this many hours ago.
+    hours_ahead: show games starting up to this many hours from now.
     """
     url = ESPN_ENDPOINTS.get(sport)
     if not url:
         log.error("Unknown sport: %s", sport)
         return ScoreBoard(sport=sport)
 
-    # Build date params for window
     now = datetime.now(timezone.utc)
-    window = SPORT_WINDOWS.get(sport, {"back": 18, "ahead": 12})
+    window = {"back": hours_back, "ahead": hours_ahead}
 
     # For most sports ESPN returns today's games by default
     # For college sports we might need a group param for top 25 / FBS

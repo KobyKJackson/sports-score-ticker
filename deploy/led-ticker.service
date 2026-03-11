@@ -8,7 +8,7 @@ Type=simple
 # Must run as root for GPIO access
 User=root
 WorkingDirectory=/home/pi/sports-score-ticker
-ExecStart=/home/pi/sports-score-ticker/display/build/led_ticker --led-rows=32 --led-cols=64 --led-chain=5 --led-parallel=2 --led-hardware-mapping=regular --led-slowdown-gpio=2 --led-brightness=80 --led-pwm-lsb-nanoseconds=130
+ExecStart=taskset -c 3 /home/pi/sports-score-ticker/display/build/led_ticker --led-no-hardware-pulse --led-slowdown-gpio=4 --led-pwm-lsb-nanoseconds=200 --led-pwm-bits=9
 Restart=always
 RestartSec=5
 Environment=TICKER_DATA_FILE=/tmp/scores.json

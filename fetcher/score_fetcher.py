@@ -13,9 +13,13 @@ import sys
 import tempfile
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from flask import Flask, jsonify, request, send_from_directory
+import requests
+
+from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 from espn import fetch_scoreboard
@@ -36,6 +40,8 @@ DEFAULT_CONFIG = {
     "scroll_speed": 1,
     "brightness": 80,
     "logo_dir": "logos/",
+    "hours_back": 12,
+    "hours_ahead": 24,
 }
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -53,6 +59,7 @@ def signal_handler(sig, frame):
     global running
     log.info("Shutting down...")
     running = False
+    sys.exit(0)
 
 
 def load_config() -> dict:
@@ -90,12 +97,38 @@ def save_config(config: dict):
         raise
 
 
-def fetch_all_scores(sports: list) -> list:
+def format_scheduled_detail(start_time: str, tz: ZoneInfo) -> str:
+    """Format a UTC ISO start_time as 'Mar 12 @ 7:30 PM' in the given timezone."""
+    try:
+        utc_dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+        local_dt = utc_dt.astimezone(tz)
+        # strftime with manual zero-stripping for cross-platform compatibility
+        month = local_dt.strftime("%b")
+        day = str(local_dt.day)
+        hour = str(local_dt.hour % 12 or 12)
+        minute = local_dt.strftime("%M")
+        ampm = local_dt.strftime("%p")
+        return f"{month} {day} @ {hour}:{minute} {ampm}"
+    except (ValueError, TypeError):
+        return ""
+
+
+def fetch_all_scores(sports: list, hours_back: int, hours_ahead: int, tz_name: str = "UTC") -> list:
     """Fetch scores for all configured sports and return combined list."""
+    try:
+        tz = ZoneInfo(tz_name)
+    except Exception:
+        tz = ZoneInfo("UTC")
+
     all_scoreboards = []
     for sport in sports:
         log.info("Fetching %s scores...", sport.upper())
-        board = fetch_scoreboard(sport)
+        board = fetch_scoreboard(sport, hours_back=hours_back, hours_ahead=hours_ahead)
+        for game in board.games:
+            if game.status == "scheduled" and game.start_time:
+                formatted = format_scheduled_detail(game.start_time, tz)
+                if formatted:
+                    game.detail = formatted
         if board.games:
             all_scoreboards.append(board.to_dict())
             log.info("  Got %d %s games", len(board.games), sport.upper())
@@ -117,6 +150,7 @@ def write_scores(data: list, data_file: str):
         fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".json")
         with os.fdopen(fd, "w") as f:
             json.dump(output, f, separators=(",", ":"))
+        os.chmod(tmp_path, 0o644)
         os.replace(tmp_path, data_file)
         log.info("Wrote scores to %s (%d bytes)", data_file, os.path.getsize(data_file))
     except OSError as e:
@@ -136,9 +170,12 @@ def fetcher_loop():
             sports = list(current_config["sports"])
             interval = current_config["update_interval_seconds"]
             data_file = current_config["data_file"]
+            hours_back = current_config.get("hours_back", DEFAULT_CONFIG["hours_back"])
+            hours_ahead = current_config.get("hours_ahead", DEFAULT_CONFIG["hours_ahead"])
+            timezone = current_config.get("timezone", DEFAULT_CONFIG["timezone"])
 
         try:
-            scores = fetch_all_scores(sports)
+            scores = fetch_all_scores(sports, hours_back, hours_ahead, timezone)
             write_scores(scores, data_file)
         except Exception as e:
             log.error("Unexpected error in fetch cycle: %s", e, exc_info=True)
@@ -165,6 +202,24 @@ def index():
 def static_files(filename):
     """Serve static assets (JS, CSS)."""
     return send_from_directory(str(WEB_DIR / "static"), filename)
+
+
+@app.route("/api/logo")
+def proxy_logo():
+    """Proxy ESPN team logo images to avoid browser CORS restrictions."""
+    url = request.args.get("url", "")
+    if not url or not url.startswith("https://a.espncdn.com/"):
+        return "", 404
+    try:
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+        return Response(
+            resp.content,
+            content_type=resp.headers.get("content-type", "image/png"),
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+    except requests.RequestException:
+        return "", 502
 
 
 @app.route("/api/scores")
@@ -210,6 +265,8 @@ def api_put_config():
         ("scroll_speed", 1, 10),
         ("update_interval_seconds", 5, 300),
         ("brightness", 1, 100),
+        ("hours_back", 0, 168),
+        ("hours_ahead", 0, 168),
     ]:
         if field in data:
             val = data[field]

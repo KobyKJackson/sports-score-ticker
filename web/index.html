@@ -75,6 +75,16 @@
           <span id="update-interval-val">30s</span>
         </div>
         <div class="field">
+          <label for="hours-back">Show Past</label>
+          <input type="range" id="hours-back" min="0" max="72" step="1" value="12">
+          <span id="hours-back-val">12h</span>
+        </div>
+        <div class="field">
+          <label for="hours-ahead">Show Future</label>
+          <input type="range" id="hours-ahead" min="0" max="168" step="1" value="24">
+          <span id="hours-ahead-val">24h</span>
+        </div>
+        <div class="field">
           <label for="timezone">Timezone</label>
           <select id="timezone">
             <option value="America/New_York">Eastern</option>

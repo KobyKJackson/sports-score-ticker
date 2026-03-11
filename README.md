@@ -102,6 +102,17 @@ Open `http://<pi-ip>:5001` in a browser for the LED panel simulator and config e
 sudo ./deploy/install.sh
 ```
 
+## Cross-Compiling From Your Workstation
+
+If you want to build the C++ display binary on your computer and push it to the Raspberry Pi, use the cross-build workflow in [docs/cross-compiling.md](docs/cross-compiling.md).
+
+Typical flow:
+
+```bash
+./deploy/cross-build-pi.sh
+./deploy/push-to-pi.sh pi@raspberrypi.local /home/pi/sports-score-ticker
+```
+
 ## Configuration
 
 Edit `config/ticker.json` to customize:

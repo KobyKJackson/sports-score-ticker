@@ -1,11 +1,15 @@
 {
-  "sports": ["nba", "nfl", "mlb", "nhl", "ncaaf", "ncaam"],
-  "scroll_speed": 1,
-  "update_interval_seconds": 30,
-  "brightness": 80,
-  "timezone": "America/New_York",
+  "sports": [
+    "nba"
+  ],
+  "update_interval_seconds": 15,
   "data_file": "/tmp/scores.json",
-  "logo_dir": "logos/",
   "show_betting": true,
-  "show_venue": true
+  "show_venue": false,
+  "timezone": "America/Chicago",
+  "scroll_speed": 1,
+  "brightness": 100,
+  "logo_dir": "logos/",
+  "hours_back": 0,
+  "hours_ahead": 168
 }
