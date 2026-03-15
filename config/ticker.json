@@ -1,15 +1,16 @@
 {
   "sports": [
-    "nba"
+    "nba",
+    "nccab"
   ],
-  "update_interval_seconds": 15,
+  "update_interval_seconds": 120,
   "data_file": "/tmp/scores.json",
   "show_betting": true,
   "show_venue": false,
   "timezone": "America/Chicago",
-  "scroll_speed": 1,
-  "brightness": 100,
+  "scroll_speed": 4,
+  "brightness": 80,
   "logo_dir": "logos/",
-  "hours_back": 0,
-  "hours_ahead": 168
+  "hours_back": 12,
+  "hours_ahead": 12
 }

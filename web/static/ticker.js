@@ -478,6 +478,12 @@
   function renderFrame() {
     clearBuffer();
 
+    // Notification takes priority over normal rendering
+    if (notifyPhase !== "none") {
+      renderNotification();
+      return;
+    }
+
     if (cards.length === 0) {
       drawText(40, 36, CYAN, "No games right now", true);
       return;
@@ -576,6 +582,88 @@
     }
   }
 
+  // --- Notification state machine (mirrors C++ ticker) ---
+
+  let notifyPhase = "none"; // "none", "active"
+  let notifyQueue = [];
+  let notifyGame = null;
+  let notifyFlashCount = 3;
+  let notifyDisplayFrames = 200; // 5s * 40fps
+  let notifyFramesRemaining = 0;
+  let notifyFlashRemaining = 0;
+  let notifyFlashTimer = 0;
+  let notifyFlashOn = false;
+
+  const NOTIFY_BORDER_W = 3;
+
+  function startNextNotification() {
+    if (notifyQueue.length === 0) {
+      notifyPhase = "none";
+      return;
+    }
+    notifyGame = notifyQueue.shift();
+    notifyPhase = "active";
+    notifyFramesRemaining = notifyDisplayFrames;
+    notifyFlashRemaining = notifyFlashCount;
+    notifyFlashTimer = 0;
+    notifyFlashOn = true;
+  }
+
+  function queueNotification(game) {
+    notifyQueue.push(game);
+    if (notifyPhase === "none") startNextNotification();
+  }
+
+  function drawBorder(color) {
+    for (let i = 0; i < NOTIFY_BORDER_W; i++) {
+      for (let x = 0; x < DISPLAY_W; x++) {
+        setPixel(x, i, color[0], color[1], color[2]);                       // top
+        setPixel(x, DISPLAY_H - 1 - i, color[0], color[1], color[2]);       // bottom
+      }
+      for (let y = 0; y < DISPLAY_H; y++) {
+        setPixel(i, y, color[0], color[1], color[2]);                       // left
+        setPixel(DISPLAY_W - 1 - i, y, color[0], color[1], color[2]);       // right
+      }
+    }
+  }
+
+  function renderNotification() {
+    if (!notifyGame) return;
+
+    // Always render the centered game card
+    const card = { game: notifyGame, totalWidth: calcCardWidth(notifyGame) };
+    const cardContentW = card.totalWidth - GAME_CARD_GAP;
+    const xStart = Math.floor((DISPLAY_W - cardContentW) / 2);
+    renderGameCard(card, xStart);
+
+    // Draw flashing border on top if still flashing
+    if (notifyFlashRemaining > 0 && notifyFlashOn) {
+      drawBorder(WHITE);
+    }
+  }
+
+  function advanceNotification() {
+    notifyFramesRemaining--;
+    if (notifyFramesRemaining <= 0) {
+      startNextNotification();
+      return;
+    }
+
+    // Advance border flash cycles
+    if (notifyFlashRemaining > 0) {
+      notifyFlashTimer++;
+      if (notifyFlashTimer < 6) {
+        notifyFlashOn = true;
+      } else if (notifyFlashTimer < 12) {
+        notifyFlashOn = false;
+      } else {
+        notifyFlashRemaining--;
+        notifyFlashTimer = 0;
+        notifyFlashOn = true;
+      }
+    }
+  }
+
   // --- Animation loop ---
 
   let scrollSpeed = 1;
@@ -583,6 +671,10 @@
   let lastFpsTime = 0;
 
   function advance() {
+    if (notifyPhase !== "none") {
+      advanceNotification();
+      return;
+    }
     scrollX += scrollSpeed / 4;
     if (totalStripWidth > 0 && scrollX >= totalStripWidth) {
       scrollX -= totalStripWidth;
@@ -698,6 +790,25 @@
     const venueEl = document.getElementById("show-venue");
     if (venueEl && config.show_venue !== undefined)
       venueEl.checked = config.show_venue;
+
+    // Notification settings
+    const notifyEl = document.getElementById("notify-on-final");
+    if (notifyEl && config.notify_on_final !== undefined)
+      notifyEl.checked = config.notify_on_final;
+
+    const flashCountEl = document.getElementById("notify-flash-count");
+    if (flashCountEl && config.notify_flash_count !== undefined) {
+      flashCountEl.value = config.notify_flash_count;
+      document.getElementById("notify-flash-count-val").textContent = config.notify_flash_count;
+      notifyFlashCount = config.notify_flash_count;
+    }
+
+    const displaySecsEl = document.getElementById("notify-display-seconds");
+    if (displaySecsEl && config.notify_display_seconds !== undefined) {
+      displaySecsEl.value = config.notify_display_seconds;
+      document.getElementById("notify-display-seconds-val").textContent = config.notify_display_seconds + "s";
+      notifyDisplayFrames = config.notify_display_seconds * 40;
+    }
   }
 
   function gatherConfigFromUI() {
@@ -716,6 +827,9 @@
       timezone: document.getElementById("timezone").value,
       show_betting: document.getElementById("show-betting").checked,
       show_venue: document.getElementById("show-venue").checked,
+      notify_on_final: document.getElementById("notify-on-final").checked,
+      notify_flash_count: parseInt(document.getElementById("notify-flash-count").value, 10),
+      notify_display_seconds: parseInt(document.getElementById("notify-display-seconds").value, 10),
     };
   }
 
@@ -744,6 +858,8 @@
       showStatus("Configuration saved.", false);
       scrollSpeed = config.scroll_speed;
       showBetting = config.show_betting;
+      notifyFlashCount = config.notify_flash_count;
+      notifyDisplayFrames = config.notify_display_seconds * 40;
       fetchInterval = config.update_interval_seconds * 1000;
       startScoreFetcher();
     } catch (e) {
@@ -808,6 +924,37 @@
     });
     document.getElementById("hours-ahead").addEventListener("input", function () {
       document.getElementById("hours-ahead-val").textContent = formatHours(parseInt(this.value, 10));
+    });
+
+    // Notification slider live display
+    document.getElementById("notify-flash-count").addEventListener("input", function () {
+      document.getElementById("notify-flash-count-val").textContent = this.value;
+    });
+    document.getElementById("notify-display-seconds").addEventListener("input", function () {
+      document.getElementById("notify-display-seconds-val").textContent = this.value + "s";
+    });
+
+    // Test notification button
+    document.getElementById("btn-test-notify").addEventListener("click", async function () {
+      try {
+        const resp = await fetch("/api/test-notification", { method: "POST" });
+        const data = await resp.json();
+        if (!resp.ok) {
+          showStatus("Error: " + (data.error || "No games available"), true);
+          return;
+        }
+        // Queue notification in the simulator
+        if (data.game) {
+          // Ensure sport field is set on the game
+          if (!data.game.sport && data.game.game_id) data.game.sport = "";
+          notifyFlashCount = parseInt(document.getElementById("notify-flash-count").value, 10);
+          notifyDisplayFrames = parseInt(document.getElementById("notify-display-seconds").value, 10) * 40;
+          queueNotification(data.game);
+          showStatus("Test notification sent.", false);
+        }
+      } catch (e) {
+        showStatus("Error: " + e.message, true);
+      }
     });
 
     // Config buttons

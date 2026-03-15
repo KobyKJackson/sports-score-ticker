@@ -27,7 +27,7 @@
         {
             "label": "Push binary to Pi",
             "type": "shell",
-            "command": "rsync -av display/build-pi/led_ticker root@192.168.4.46:/root/sports-score-ticker/display/build/led_ticker",
+            "command": "rsync -az --delete --exclude '.git/' --exclude '__pycache__/' --exclude '.DS_Store' --exclude 'display/build/' --exclude 'display/build-pi/' --exclude 'logos/*.ppm' --exclude '.vscode/' ./ root@192.168.4.46:/root/sports-score-ticker/ && rsync -av display/build-pi/led_ticker root@192.168.4.46:/root/sports-score-ticker/display/build/led_ticker",
             "options": { "cwd": "${workspaceFolder}" },
             "presentation": { "reveal": "silent", "panel": "shared" }
         },
@@ -52,7 +52,7 @@
         {
             "label": "Build, push & start gdbserver",
             "type": "shell",
-            "command": "PI_BUILD_TYPE=Debug bash deploy/cross-build-pi.sh && rsync -av display/build-pi/led_ticker root@192.168.4.46:/root/sports-score-ticker/display/build/led_ticker && ssh root@192.168.4.46 'systemctl stop led-ticker 2>/dev/null; pkill -x led_ticker 2>/dev/null; pkill -x gdbserver 2>/dev/null; sleep 1; cd /root/sports-score-ticker && taskset -c 3 gdbserver :2345 ./display/build/led_ticker --led-no-hardware-pulse --led-slowdown-gpio=4 --led-pwm-lsb-nanoseconds=200 --led-pwm-bits=9 &' && sleep 2",
+            "command": "PI_BUILD_TYPE=Debug bash deploy/cross-build-pi.sh && rsync -az --delete --exclude '.git/' --exclude '__pycache__/' --exclude '.DS_Store' --exclude 'display/build/' --exclude 'display/build-pi/' --exclude 'logos/*.ppm' --exclude '.vscode/' ./ root@192.168.4.46:/root/sports-score-ticker/ && rsync -av display/build-pi/led_ticker root@192.168.4.46:/root/sports-score-ticker/display/build/led_ticker && ssh root@192.168.4.46 'systemctl stop led-ticker 2>/dev/null; pkill -x led_ticker 2>/dev/null; pkill -x gdbserver 2>/dev/null; systemctl restart score-fetcher 2>/dev/null; sleep 1; cd /root/sports-score-ticker && taskset -c 3 gdbserver :2345 ./display/build/led_ticker --led-no-hardware-pulse --led-slowdown-gpio=4 --led-pwm-lsb-nanoseconds=200 --led-pwm-bits=9 &' && sleep 2",
             "options": { "cwd": "${workspaceFolder}" },
             "presentation": { "reveal": "always", "panel": "shared" },
             "problemMatcher": {

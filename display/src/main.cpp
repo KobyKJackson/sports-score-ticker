@@ -42,6 +42,9 @@ struct AppConfig
     std::string tiny_font = "display/libs/rpi-rgb-led-matrix/fonts/5x8.bdf";
     int scroll_speed = 1;
     int brightness = 80;
+    bool notify_on_final = true;
+    int notify_flash_count = 3;
+    int notify_display_seconds = 5;
 
     void load_config_file()
     {
@@ -68,8 +71,32 @@ struct AppConfig
                 out = std::atoi(json.c_str() + pos);
         };
 
+        auto extract_bool = [&](const char *key, bool &out)
+        {
+            std::string search = std::string("\"") + key + "\"";
+            auto pos = json.find(search);
+            if (pos == std::string::npos)
+                return;
+            pos = json.find(':', pos + search.size());
+            if (pos == std::string::npos)
+                return;
+            while (++pos < json.size() && std::isspace((unsigned char)json[pos]))
+            {
+            }
+            if (pos < json.size())
+            {
+                if (json[pos] == 't')
+                    out = true;
+                else if (json[pos] == 'f')
+                    out = false;
+            }
+        };
+
         extract_int("scroll_speed", scroll_speed);
         extract_int("brightness", brightness);
+        extract_bool("notify_on_final", notify_on_final);
+        extract_int("notify_flash_count", notify_flash_count);
+        extract_int("notify_display_seconds", notify_display_seconds);
     }
 
     void load_env()
@@ -168,8 +195,11 @@ int main(int argc, char **argv)
     ScoreData scores;
     std::time_t last_load = 0;
     std::time_t last_config = 0;
+    std::time_t last_notify_check = 0;
     constexpr int load_interval = 5;
     constexpr int config_interval = 5;
+    constexpr int notify_check_interval = 1;
+    const std::string notify_file = "/tmp/score_notifications.json";
 
     // Track applied values so we only act when something actually changed.
     int applied_brightness = cfg.brightness;
@@ -203,7 +233,23 @@ int main(int argc, char **argv)
                 std::fprintf(stderr, "Scroll speed changed to %d\n", scaled);
                 applied_scroll_speed = scaled;
             }
+            ticker.set_notify_config(cfg.notify_flash_count, cfg.notify_display_seconds);
             last_config = now;
+        }
+
+        // Periodically check for notifications
+        if (cfg.notify_on_final && now - last_notify_check >= notify_check_interval)
+        {
+            auto notifs = load_notifications(notify_file);
+            if (notifs && !notifs->notifications.empty())
+            {
+                for (auto &n : notifs->notifications)
+                    ticker.queue_notification(n.game);
+                clear_notifications(notify_file);
+                std::fprintf(stderr, "Queued %zu notification(s)\n",
+                             notifs->notifications.size());
+            }
+            last_notify_check = now;
         }
 
         // Periodically reload score data

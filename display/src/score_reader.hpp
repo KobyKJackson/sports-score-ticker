@@ -74,3 +74,23 @@ struct ScoreData
 
 // Parse scores.json at filepath. Returns nullopt on I/O or parse error.
 std::optional<ScoreData> load_scores(const std::string &filepath);
+
+// A single notification (e.g. a game going final).
+struct Notification
+{
+    std::string type; // "final"
+    Game game;        // the game that triggered the notification
+    double timestamp = 0;
+};
+
+// Container for the notifications file.
+struct NotificationData
+{
+    std::vector<Notification> notifications;
+};
+
+// Parse score_notifications.json at filepath. Returns nullopt on I/O or parse error.
+std::optional<NotificationData> load_notifications(const std::string &filepath);
+
+// Clear the notification file by writing an empty notifications array.
+void clear_notifications(const std::string &filepath);

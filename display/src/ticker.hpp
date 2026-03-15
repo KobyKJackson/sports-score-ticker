@@ -12,6 +12,7 @@
 #include "logo_cache.hpp"
 
 #include <algorithm>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,15 @@ public:
 
     // Update scroll speed at runtime (e.g. after a config reload).
     void set_scroll_speed(int speed) { scroll_speed_ = std::max(1, speed); }
+
+    // Queue a game notification (flashes screen, then shows centered card).
+    void queue_notification(const Game &g);
+
+    // Update notification config at runtime.
+    void set_notify_config(int flash_count, int display_seconds);
+
+    // Returns true if currently showing a notification (flashing or holding).
+    bool in_notification() const { return notify_phase_ != NotifyPhase::None; }
 
 private:
     // Blank pixels between the end of one game card and the start of the next.
@@ -103,4 +113,34 @@ private:
 
     // Owns the Game pointers referenced by cards_; kept alive across update_games() calls.
     std::vector<const Game *> game_ptrs_;
+
+    // ── Notification state machine ────────────────────────────────────────────
+    enum class NotifyPhase { None, Active };
+    NotifyPhase notify_phase_ = NotifyPhase::None;
+    Game notify_game_;                // current notification game (owned copy)
+    std::queue<Game> notify_queue_;   // pending notifications
+
+    int notify_flash_count_ = 3;     // config: number of border flash cycles
+    int notify_display_frames_ = 200; // config: total display duration in frames (5s * 40fps)
+
+    int notify_frames_remaining_ = 0; // total frames left for this notification
+    int notify_flash_timer_ = 0;      // frame counter within one flash cycle
+    int notify_flash_remaining_ = 0;  // flash cycles left
+    bool notify_flash_on_ = false;    // true = border visible, false = border off
+
+    static constexpr int NOTIFY_BORDER_W = 3; // border thickness in pixels
+
+    // Start the next notification from the queue.
+    void start_next_notification();
+
+    // Render the centered card with optional flashing border.
+    void render_notification(rgb_matrix::Canvas *canvas, const rgb_matrix::Font &font,
+                             const rgb_matrix::Font &large_font,
+                             const rgb_matrix::Font &sched_font) const;
+
+    // Draw a border around the display edge.
+    void draw_border(rgb_matrix::Canvas *canvas, const rgb_matrix::Color &color) const;
+
+    // Advance the notification state machine by one frame.
+    void advance_notification();
 };

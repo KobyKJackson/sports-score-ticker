@@ -447,6 +447,44 @@ namespace
         return sb;
     }
 
+    // Parse a Notification object from the current '{' token.
+    Notification parse_notification(Parser &p)
+    {
+        Notification n;
+        if (p.type != Token::LBrace)
+        {
+            p.skip_value();
+            return n;
+        }
+        p.next(); // consume '{'
+
+        while (p.type == Token::String)
+        {
+            auto key = p.consume_key();
+
+            if (key == "type" && p.type == Token::String)
+                n.type = p.consume_string();
+            else if (key == "game")
+                n.game = parse_game(p);
+            else if (key == "timestamp" && p.type == Token::Number)
+            {
+                n.timestamp = p.num_val;
+                p.next();
+            }
+            else
+            {
+                p.skip_value();
+                continue;
+            }
+
+            if (p.type == Token::Comma)
+                p.next();
+        }
+        if (p.type == Token::RBrace)
+            p.next(); // consume '}'
+        return n;
+    }
+
 } // anonymous namespace
 
 // Return flat list of all games across all sport boards (pointers into boards vector).
@@ -541,4 +579,70 @@ std::optional<ScoreData> load_scores(const std::string &filepath)
     }
 
     return data;
+}
+
+// Read and parse the notifications JSON file. Returns nullopt on any error.
+std::optional<NotificationData> load_notifications(const std::string &filepath)
+{
+    std::ifstream file(filepath, std::ios::binary);
+    if (!file)
+        return std::nullopt;
+
+    std::ostringstream ss;
+    ss << file.rdbuf();
+    std::string content = ss.str();
+
+    if (content.empty())
+        return std::nullopt;
+    if (content.size() > 1024 * 1024)
+        return std::nullopt;
+
+    Parser p{content.c_str(), 0, static_cast<int>(content.size())};
+    p.next();
+
+    if (p.type != Token::LBrace)
+        return std::nullopt;
+    p.next();
+
+    NotificationData data;
+
+    while (p.type == Token::String)
+    {
+        auto key = p.consume_key();
+
+        if (key == "notifications" && p.type == Token::LBracket)
+        {
+            p.next(); // consume '['
+            while (p.type != Token::RBracket && p.type != Token::Eof)
+            {
+                data.notifications.push_back(parse_notification(p));
+                if (p.type == Token::Comma)
+                    p.next();
+            }
+            if (p.type == Token::RBracket)
+                p.next();
+        }
+        else
+        {
+            p.skip_value();
+            continue;
+        }
+        if (p.type == Token::Comma)
+            p.next();
+    }
+
+    return data;
+}
+
+// Clear notifications file by writing an empty array.
+void clear_notifications(const std::string &filepath)
+{
+    std::string tmp = filepath + ".tmp";
+    std::ofstream f(tmp);
+    if (f)
+    {
+        f << R"({"notifications":[]})";
+        f.close();
+        std::rename(tmp.c_str(), filepath.c_str());
+    }
 }

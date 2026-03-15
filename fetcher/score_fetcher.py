@@ -42,7 +42,13 @@ DEFAULT_CONFIG = {
     "logo_dir": "logos/",
     "hours_back": 12,
     "hours_ahead": 24,
+    "notify_on_final": True,
+    "notify_flash_count": 3,
+    "notify_display_seconds": 5,
 }
+
+NOTIFICATIONS_FILE = "/tmp/score_notifications.json"
+previous_game_states = {}
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = PROJECT_ROOT / "config" / "ticker.json"
@@ -161,6 +167,65 @@ def write_scores(data: list, data_file: str):
             pass
 
 
+def detect_and_write_finals(scoreboards: list):
+    """Detect games that just went final and write notifications."""
+    global previous_game_states
+
+    with config_lock:
+        if not current_config.get("notify_on_final", True):
+            return
+
+    new_notifications = []
+    current_states = {}
+
+    for board in scoreboards:
+        sport = board.get("sport", "")
+        for game in board.get("games", []):
+            game_id = game.get("game_id", "")
+            status = game.get("status", "")
+            if not game_id:
+                continue
+            current_states[game_id] = status
+            prev = previous_game_states.get(game_id)
+            if status == "final" and prev != "final" and prev is not None:
+                new_notifications.append({
+                    "type": "final",
+                    "game": game,
+                    "timestamp": time.time(),
+                })
+
+    previous_game_states = current_states
+
+    if not new_notifications:
+        return
+
+    # Read existing notifications, append new ones, write atomically
+    existing = []
+    try:
+        with open(NOTIFICATIONS_FILE) as f:
+            data = json.load(f)
+            existing = data.get("notifications", [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
+    existing.extend(new_notifications)
+    output = {"notifications": existing}
+
+    try:
+        fd, tmp_path = tempfile.mkstemp(dir="/tmp", suffix=".json")
+        with os.fdopen(fd, "w") as f:
+            json.dump(output, f, separators=(",", ":"))
+        os.chmod(tmp_path, 0o644)
+        os.replace(tmp_path, NOTIFICATIONS_FILE)
+        log.info("Wrote %d new notification(s)", len(new_notifications))
+    except OSError as e:
+        log.error("Failed to write notifications: %s", e)
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+
 def fetcher_loop():
     """Background thread that polls ESPN APIs."""
     global current_config
@@ -177,6 +242,7 @@ def fetcher_loop():
         try:
             scores = fetch_all_scores(sports, hours_back, hours_ahead, timezone)
             write_scores(scores, data_file)
+            detect_and_write_finals(scores)
         except Exception as e:
             log.error("Unexpected error in fetch cycle: %s", e, exc_info=True)
 
@@ -267,6 +333,8 @@ def api_put_config():
         ("brightness", 1, 100),
         ("hours_back", 0, 168),
         ("hours_ahead", 0, 168),
+        ("notify_flash_count", 1, 10),
+        ("notify_display_seconds", 1, 30),
     ]:
         if field in data:
             val = data[field]
@@ -285,6 +353,69 @@ def api_put_config():
         except OSError as e:
             return jsonify({"error": str(e)}), 500
         return jsonify(current_config)
+
+
+@app.route("/api/test-notification", methods=["POST"])
+def api_test_notification():
+    """Write a test notification for a random game."""
+    import random
+
+    with scores_lock:
+        all_games = []
+        for board in latest_scores.get("scoreboards", []):
+            for game in board.get("games", []):
+                game["sport"] = board.get("sport", "")
+                all_games.append(game)
+
+    if not all_games:
+        return jsonify({"error": "No games available"}), 404
+
+    # Prefer a final game, otherwise pick any and fake it
+    final_games = [g for g in all_games if g.get("status") == "final"]
+    if final_games:
+        game = random.choice(final_games)
+    else:
+        game = dict(random.choice(all_games))
+        game["status"] = "final"
+
+    notification = {
+        "type": "final",
+        "game": game,
+        "timestamp": time.time(),
+    }
+
+    # Read existing, append, write atomically
+    existing = []
+    try:
+        with open(NOTIFICATIONS_FILE) as f:
+            data = json.load(f)
+            existing = data.get("notifications", [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
+    existing.append(notification)
+    output = {"notifications": existing}
+
+    try:
+        fd, tmp_path = tempfile.mkstemp(dir="/tmp", suffix=".json")
+        with os.fdopen(fd, "w") as f:
+            json.dump(output, f, separators=(",", ":"))
+        os.chmod(tmp_path, 0o644)
+        os.replace(tmp_path, NOTIFICATIONS_FILE)
+    except OSError as e:
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify(notification)
+
+
+@app.route("/api/notifications")
+def api_notifications():
+    """Return pending notifications."""
+    try:
+        with open(NOTIFICATIONS_FILE) as f:
+            return jsonify(json.load(f))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({"notifications": []})
 
 
 @app.route("/api/config/reset", methods=["POST"])

@@ -388,11 +388,117 @@ int Ticker::render_game_card(const TickerCard &card, Canvas *canvas,
     return text_end_x + logo_gap_ - x_start + GAME_CARD_GAP; // total card pixel width
 }
 
+// ── Notification state machine ────────────────────────────────────────────────
+
+void Ticker::queue_notification(const Game &g)
+{
+    notify_queue_.push(g);
+    if (notify_phase_ == NotifyPhase::None)
+        start_next_notification();
+}
+
+void Ticker::set_notify_config(int flash_count, int display_seconds)
+{
+    notify_flash_count_ = std::max(1, std::min(flash_count, 10));
+    notify_display_frames_ = std::max(1, std::min(display_seconds, 30)) * 40;
+}
+
+void Ticker::start_next_notification()
+{
+    if (notify_queue_.empty())
+    {
+        notify_phase_ = NotifyPhase::None;
+        return;
+    }
+    notify_game_ = notify_queue_.front();
+    notify_queue_.pop();
+    notify_phase_ = NotifyPhase::Active;
+    notify_frames_remaining_ = notify_display_frames_;
+    notify_flash_remaining_ = notify_flash_count_;
+    notify_flash_timer_ = 0;
+    notify_flash_on_ = true;
+}
+
+void Ticker::draw_border(Canvas *canvas, const Color &color) const
+{
+    for (int i = 0; i < NOTIFY_BORDER_W; ++i)
+    {
+        for (int x = 0; x < display_width_; ++x)
+        {
+            canvas->SetPixel(x, i, color.r, color.g, color.b);                       // top
+            canvas->SetPixel(x, display_height_ - 1 - i, color.r, color.g, color.b); // bottom
+        }
+        for (int y = 0; y < display_height_; ++y)
+        {
+            canvas->SetPixel(i, y, color.r, color.g, color.b);                      // left
+            canvas->SetPixel(display_width_ - 1 - i, y, color.r, color.g, color.b); // right
+        }
+    }
+}
+
+void Ticker::render_notification(Canvas *canvas, const Font &font,
+                                 const Font &large_font,
+                                 const Font &sched_font) const
+{
+    // Always render the centered game card
+    TickerCard card;
+    card.game = &notify_game_;
+    int row1_w = 0;
+    card.total_width = calc_card_width(notify_game_, large_font, row1_w);
+    card.row1_width = row1_w;
+
+    int card_content_w = card.total_width - GAME_CARD_GAP;
+    int x_start = (display_width_ - card_content_w) / 2;
+    render_game_card(card, canvas, font, large_font, sched_font, x_start);
+
+    // Draw flashing border on top if still flashing
+    if (notify_flash_remaining_ > 0 && notify_flash_on_)
+        draw_border(canvas, WHITE);
+}
+
+void Ticker::advance_notification()
+{
+    --notify_frames_remaining_;
+    if (notify_frames_remaining_ <= 0)
+    {
+        start_next_notification();
+        return;
+    }
+
+    // Advance the border flash cycles
+    if (notify_flash_remaining_ > 0)
+    {
+        ++notify_flash_timer_;
+        // Each flash cycle: 6 frames on + 6 frames off = 12 frames (~300ms)
+        if (notify_flash_timer_ < 6)
+        {
+            notify_flash_on_ = true;
+        }
+        else if (notify_flash_timer_ < 12)
+        {
+            notify_flash_on_ = false;
+        }
+        else
+        {
+            --notify_flash_remaining_;
+            notify_flash_timer_ = 0;
+            notify_flash_on_ = true;
+        }
+    }
+}
+
 // ── Main render ──────────────────────────────────────────────────────────────
 
 void Ticker::render(Canvas *canvas, const Font &font, const Font &large_font,
                     const Font &sched_font) const
 {
+    // If in notification mode, render notification instead of scrolling ticker
+    if (notify_phase_ != NotifyPhase::None)
+    {
+        render_notification(canvas, font, large_font, sched_font);
+        return;
+    }
+
     if (cards_.empty())
     {
         // Center "NO GAMES" on the display when there is nothing to show.
@@ -435,6 +541,13 @@ void Ticker::render(Canvas *canvas, const Font &font, const Font &large_font,
 
 void Ticker::advance()
 {
+    // If in notification mode, advance the notification state machine instead
+    if (notify_phase_ != NotifyPhase::None)
+    {
+        advance_notification();
+        return;
+    }
+
     // Accumulate scroll_speed_ (pixels × 4) and drain into scroll_x_ one pixel at a time.
     // This gives sub-pixel precision: speed=1 → 1px every 4 frames (~10 fps at 40 FPS).
     scroll_accum_ += scroll_speed_;
