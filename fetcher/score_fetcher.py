@@ -22,7 +22,7 @@ import requests
 from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_cors import CORS
 
-from espn import fetch_scoreboard
+from espn import fetch_bracket, fetch_scoreboard
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,6 +42,7 @@ DEFAULT_CONFIG = {
     "logo_dir": "logos/",
     "hours_back": 12,
     "hours_ahead": 24,
+    "show_bracket": False,
     "notify_on_final": True,
     "notify_flash_count": 3,
     "notify_display_seconds": 5,
@@ -56,7 +57,9 @@ WEB_DIR = PROJECT_ROOT / "web"
 
 running = True
 latest_scores = {"scoreboards": [], "timestamp": 0}
+latest_bracket = {"bracket": None, "timestamp": 0}
 scores_lock = threading.Lock()
+bracket_lock = threading.Lock()
 config_lock = threading.Lock()
 current_config = dict(DEFAULT_CONFIG)
 
@@ -332,6 +335,31 @@ def detect_and_write_finals(scoreboards: list):
             pass
 
 
+def fetch_and_write_bracket(data_file: str):
+    """Fetch bracket data and write it to a bracket JSON file."""
+    global latest_bracket
+
+    bracket_file = data_file.replace("scores.json", "bracket.json")
+    try:
+        bracket = fetch_bracket()
+        bracket_dict = bracket.to_dict()
+        output = {"bracket": bracket_dict, "timestamp": time.time()}
+
+        with bracket_lock:
+            latest_bracket = output
+
+        dir_name = os.path.dirname(bracket_file) or "/tmp"
+        fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".json")
+        with os.fdopen(fd, "w") as f:
+            json.dump(output, f, separators=(",", ":"))
+        os.chmod(tmp_path, 0o644)
+        os.replace(tmp_path, bracket_file)
+        log.info("Wrote bracket to %s (%d matchups)",
+                 bracket_file, len(bracket.matchups))
+    except Exception as e:
+        log.error("Failed to fetch/write bracket: %s", e, exc_info=True)
+
+
 def fetcher_loop():
     """Background thread that polls ESPN APIs."""
     global current_config
@@ -344,11 +372,14 @@ def fetcher_loop():
             hours_back = current_config.get("hours_back", DEFAULT_CONFIG["hours_back"])
             hours_ahead = current_config.get("hours_ahead", DEFAULT_CONFIG["hours_ahead"])
             timezone = current_config.get("timezone", DEFAULT_CONFIG["timezone"])
+            show_bracket = current_config.get("show_bracket", False)
 
         try:
             scores = fetch_all_scores(sports, hours_back, hours_ahead, timezone)
             write_scores(scores, data_file)
             detect_and_write_finals(scores)
+            if show_bracket:
+                fetch_and_write_bracket(data_file)
         except Exception as e:
             log.error("Unexpected error in fetch cycle: %s", e, exc_info=True)
 
@@ -399,6 +430,13 @@ def api_scores():
     """Return current score data."""
     with scores_lock:
         return jsonify(latest_scores)
+
+
+@app.route("/api/bracket")
+def api_bracket():
+    """Return current bracket data."""
+    with bracket_lock:
+        return jsonify(latest_bracket)
 
 
 @app.route("/api/config", methods=["GET"])

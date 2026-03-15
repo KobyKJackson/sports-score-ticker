@@ -151,6 +151,8 @@
 
   let scoreData = null;
   let showBetting = true;
+  let showBracket = false;
+  let bracketData = null;
   let scrollX = 0;
   let totalStripWidth = 0;
   let cards = [];
@@ -524,12 +526,219 @@
     return textEndX + 4 + LOGO_SIZE - xStart + GAME_CARD_GAP;
   }
 
+  // --- Bracket rendering ---
+
+  const BRACKET_REGION_COLORS = {
+    "East":    [29, 66, 138],
+    "West":    [128, 0, 0],
+    "South":   [0, 100, 0],
+    "Midwest": [139, 69, 19],
+  };
+
+  let bracketCards = [];
+  let bracketStripWidth = 0;
+
+  function updateBracket(data) {
+    if (!data || !data.bracket || !data.bracket.matchups) return;
+    bracketData = data.bracket;
+    bracketCards = [];
+    bracketStripWidth = 0;
+
+    // Group matchups by region, then by round
+    const matchups = bracketData.matchups;
+    if (matchups.length === 0) return;
+
+    let prevRegion = "";
+    for (const m of matchups) {
+      if (m.region && m.region !== prevRegion) {
+        bracketStripWidth += SPORT_DIVIDER_W;
+        prevRegion = m.region;
+      }
+      const cardWidth = calcBracketCardWidth(m);
+      bracketCards.push({ matchup: m, totalWidth: cardWidth });
+      bracketStripWidth += cardWidth;
+    }
+
+    if (bracketStripWidth < DISPLAY_W) bracketStripWidth = DISPLAY_W;
+  }
+
+  function calcBracketCardWidth(m) {
+    // Line 1: "#seed AWAY score @ score HOME #seed"
+    let line1 = 0;
+    if (m.away_seed > 0) line1 += textWidth("#" + m.away_seed, false) + 2;
+    if (m.away_team) line1 += textWidth(m.away_team.abbreviation, true) + 4;
+
+    const hasScores = m.status !== "scheduled" &&
+                      m.home_team && m.away_team &&
+                      m.home_team.score != null && m.away_team.score != null;
+    if (hasScores) {
+      line1 += textWidth(String(m.away_team.score), true) + 3;
+      line1 += textWidth("@", true) + 3;
+      line1 += textWidth(String(m.home_team.score), true) + 4;
+    } else {
+      line1 += textWidth("vs", true) + 4;
+    }
+
+    if (m.home_seed > 0) line1 += textWidth("#" + m.home_seed, false) + 2;
+    if (m.home_team) line1 += textWidth(m.home_team.abbreviation, true) + 8;
+
+    // Line 2: round name + status
+    let line2 = 0;
+    if (m.status === "final") {
+      line2 = textWidth("FINAL", false) + 8;
+    } else if (m.status === "in_progress" || m.status === "halftime") {
+      if (m.period) line2 += textWidth(m.period, false) + 4;
+      if (m.clock) line2 += textWidth(m.clock, false) + 4;
+    } else if (m.detail) {
+      line2 = textWidth(m.detail, false, true) + 8;
+    }
+
+    // Line 3: round name
+    let line3 = 0;
+    if (m.round_name) line3 = textWidth(m.round_name, false) + 8;
+
+    const textW = Math.max(line1, line2, line3);
+    return LOGO_SIZE + 4 + textW + 4 + LOGO_SIZE + GAME_CARD_GAP;
+  }
+
+  function renderBracketCard(card, xStart) {
+    const m = card.matchup;
+
+    // Away logo
+    if (m.away_team) {
+      drawLogo(xStart, 2, m.away_team.abbreviation, "ncaam", m.away_team.logo_url);
+    }
+
+    const textStartX = xStart + LOGO_SIZE + 4;
+    const textW = card.totalWidth - 2 * LOGO_SIZE - 8 - GAME_CARD_GAP;
+    const textEndX = textStartX + textW;
+
+    // Line 1: seeds + teams + scores
+    const line1Y = 26;
+    const hasScores = m.status !== "scheduled" &&
+                      m.home_team && m.away_team &&
+                      m.home_team.score != null && m.away_team.score != null;
+
+    let line1W = 0;
+    if (m.away_seed > 0) line1W += textWidth("#" + m.away_seed, false) + 2;
+    if (m.away_team) line1W += textWidth(m.away_team.abbreviation, true) + 4;
+    if (hasScores) {
+      line1W += textWidth(String(m.away_team.score), true) + 3 +
+                textWidth("@", true) + 3 +
+                textWidth(String(m.home_team.score), true) + 4;
+    } else {
+      line1W += textWidth("vs", true) + 4;
+    }
+    if (m.home_seed > 0) line1W += textWidth("#" + m.home_seed, false) + 2;
+    if (m.home_team) line1W += textWidth(m.home_team.abbreviation, true);
+
+    let x = centerX(textStartX, textEndX, line1W);
+
+    // Away seed
+    if (m.away_seed > 0) {
+      x = drawText(x, line1Y - 6, CYAN, "#" + m.away_seed, false);
+      x += 2;
+    }
+    if (m.away_team) {
+      x = drawText(x, line1Y, WHITE, m.away_team.abbreviation, true);
+      x += 4;
+    }
+
+    if (hasScores) {
+      const awayWinning = m.away_team.score > m.home_team.score;
+      const homeWinning = m.home_team.score > m.away_team.score;
+      x = drawText(x, line1Y, awayWinning ? WHITE : GRAY, String(m.away_team.score), true);
+      x += 3;
+      x = drawText(x, line1Y, DIM, "@", true);
+      x += 3;
+      x = drawText(x, line1Y, homeWinning ? WHITE : GRAY, String(m.home_team.score), true);
+      x += 4;
+    } else {
+      x = drawText(x, line1Y, DIM, "vs", true);
+      x += 4;
+    }
+
+    // Home seed
+    if (m.home_seed > 0) {
+      x = drawText(x, line1Y - 6, CYAN, "#" + m.home_seed, false);
+      x += 2;
+    }
+    if (m.home_team) {
+      x = drawText(x, line1Y, WHITE, m.home_team.abbreviation, true);
+    }
+
+    // Line 2: status
+    const line2Y = 43;
+    const stc = statusColor(m.status);
+    if (m.status === "in_progress" || m.status === "halftime") {
+      const parts = [];
+      if (m.period) parts.push({ text: m.period, color: stc });
+      if (m.clock) parts.push({ text: m.clock, color: WHITE });
+      if (m.status === "halftime") parts.push({ text: "HALF", color: YELLOW });
+      const totalW = parts.reduce((s, p, i) =>
+        s + textWidth(p.text, false) + (i < parts.length - 1 ? 4 : 0), 0);
+      let cx = centerX(textStartX, textEndX, totalW);
+      parts.forEach((p, i) => {
+        cx = drawText(cx, line2Y, p.color, p.text, false);
+        if (i < parts.length - 1) cx += 4;
+      });
+    } else if (m.status === "final") {
+      const fw = textWidth("FINAL", false);
+      drawText(centerX(textStartX, textEndX, fw), line2Y, RED, "FINAL", false);
+    } else if (m.detail) {
+      const dw = textWidth(m.detail, false, true);
+      drawText(centerX(textStartX, textEndX, dw), line2Y, CYAN, m.detail, false, true);
+    }
+
+    // Line 3: round name
+    const line3Y = 56;
+    if (m.round_name) {
+      const rw = textWidth(m.round_name, false);
+      const regionColor = BRACKET_REGION_COLORS[m.region] || ORANGE;
+      drawText(centerX(textStartX, textEndX, rw), line3Y, regionColor, m.round_name, false);
+    }
+
+    // Home logo
+    if (m.home_team) {
+      drawLogo(textEndX + 4, 2, m.home_team.abbreviation, "ncaam", m.home_team.logo_url);
+    }
+  }
+
+  function drawBracketRegionDivider(x, region) {
+    const bg = BRACKET_REGION_COLORS[region] || DIM;
+    fillRect(x, 0, SPORT_DIVIDER_W, 64, bg);
+    const label = region.substring(0, 3).toUpperCase();
+    drawText(x + 2, 36, WHITE, label, false);
+  }
+
   function renderFrame() {
     clearBuffer();
 
     // Notification takes priority over normal rendering
     if (notifyPhase !== "none") {
       renderNotification();
+      return;
+    }
+
+    // Bracket mode
+    if (showBracket && bracketCards.length > 0) {
+      let stripX = -Math.floor(scrollX);
+      for (let pass = 0; pass < 2; pass++) {
+        let cx = stripX;
+        let prevRegion = "";
+        for (const card of bracketCards) {
+          if (card.matchup.region && card.matchup.region !== prevRegion) {
+            if (cx + SPORT_DIVIDER_W > 0 && cx < DISPLAY_W)
+              drawBracketRegionDivider(cx, card.matchup.region);
+            cx += SPORT_DIVIDER_W;
+            prevRegion = card.matchup.region;
+          }
+          if (cx + card.totalWidth > 0 && cx < DISPLAY_W)
+            renderBracketCard(card, cx);
+          cx += card.totalWidth;
+        }
+        stripX += bracketStripWidth;
+      }
       return;
     }
 
@@ -732,8 +941,9 @@
       return;
     }
     scrollX += scrollSpeed / 4;
-    if (totalStripWidth > 0 && scrollX >= totalStripWidth) {
-      scrollX -= totalStripWidth;
+    const activeWidth = (showBracket && bracketCards.length > 0) ? bracketStripWidth : totalStripWidth;
+    if (activeWidth > 0 && scrollX >= activeWidth) {
+      scrollX -= activeWidth;
     }
   }
 
@@ -766,6 +976,16 @@
       updateGames(data);
     } catch (e) {
       console.warn("Failed to fetch scores:", e);
+    }
+    if (showBracket) {
+      try {
+        const resp = await fetch("/api/bracket");
+        if (!resp.ok) return;
+        const data = await resp.json();
+        updateBracket(data);
+      } catch (e) {
+        console.warn("Failed to fetch bracket:", e);
+      }
     }
   }
 
@@ -847,6 +1067,12 @@
     if (venueEl && config.show_venue !== undefined)
       venueEl.checked = config.show_venue;
 
+    const bracketEl = document.getElementById("show-bracket");
+    if (bracketEl && config.show_bracket !== undefined) {
+      bracketEl.checked = config.show_bracket;
+      showBracket = config.show_bracket;
+    }
+
     // Notification settings
     const notifyEl = document.getElementById("notify-on-final");
     if (notifyEl && config.notify_on_final !== undefined)
@@ -883,6 +1109,7 @@
       timezone: document.getElementById("timezone").value,
       show_betting: document.getElementById("show-betting").checked,
       show_venue: document.getElementById("show-venue").checked,
+      show_bracket: document.getElementById("show-bracket").checked,
       notify_on_final: document.getElementById("notify-on-final").checked,
       notify_flash_count: parseInt(document.getElementById("notify-flash-count").value, 10),
       notify_display_seconds: parseInt(document.getElementById("notify-display-seconds").value, 10),
@@ -914,6 +1141,7 @@
       showStatus("Configuration saved.", false);
       scrollSpeed = config.scroll_speed;
       showBetting = config.show_betting;
+      showBracket = config.show_bracket;
       notifyFlashCount = config.notify_flash_count;
       notifyDisplayFrames = config.notify_display_seconds * 40;
       fetchInterval = config.update_interval_seconds * 1000;

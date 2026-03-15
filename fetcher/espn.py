@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from models import Game, Odds, ScoreBoard, Team
+from models import BracketData, BracketMatchup, Game, Odds, ScoreBoard, Team
 
 log = logging.getLogger(__name__)
 
@@ -339,4 +339,195 @@ def fetch_scoreboard(sport: str, hours_back: int = 12, hours_ahead: int = 24) ->
         sport=sport,
         games=filtered,
         last_updated=now.isoformat(),
+    )
+
+
+# ESPN bracket/tournament endpoint for March Madness
+ESPN_BRACKET_URL = (
+    "https://site.api.espn.com/apis/site/v2/sports/basketball/"
+    "mens-college-basketball/scoreboard"
+)
+
+# Round names in display order
+ROUND_NAMES = {
+    1: "First Round",
+    2: "Second Round",
+    3: "Sweet 16",
+    4: "Elite 8",
+    5: "Final Four",
+    6: "Championship",
+}
+
+
+def fetch_bracket() -> BracketData:
+    """Fetch March Madness bracket data from ESPN.
+
+    Uses the NCAAM scoreboard with groups=100 (NCAA Tournament) to get
+    all tournament games and organizes them by region and round.
+    """
+    now = datetime.now(timezone.utc)
+    bracket = BracketData(
+        tournament_name="NCAA Tournament",
+        last_updated=now.isoformat(),
+    )
+
+    params = {
+        "groups": "100",  # NCAA Tournament
+        "limit": "100",
+        "dates": now.strftime("%Y%m%d"),
+    }
+
+    try:
+        resp = requests.get(ESPN_BRACKET_URL, params=params, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+    except requests.RequestException as e:
+        log.warning("Failed to fetch bracket data: %s", e)
+        return bracket
+
+    events = _safe_get(data, "events", default=[])
+    regions_seen = set()
+    max_round = 0
+
+    for event in events:
+        try:
+            matchup = _parse_bracket_matchup(event)
+            if matchup:
+                bracket.matchups.append(matchup)
+                if matchup.region and matchup.region not in regions_seen:
+                    regions_seen.add(matchup.region)
+                    bracket.regions.append(matchup.region)
+                if matchup.round_number > max_round:
+                    max_round = matchup.round_number
+        except Exception as e:
+            log.warning("Failed to parse bracket matchup: %s", e)
+
+    if max_round > 0:
+        bracket.current_round = ROUND_NAMES.get(max_round, f"Round {max_round}")
+
+    return bracket
+
+
+def _parse_bracket_matchup(event: dict) -> BracketMatchup | None:
+    """Parse an ESPN tournament event into a BracketMatchup."""
+    game_id = _safe_get(event, "id", default="")
+    competition = _safe_get(event, "competitions", 0, default={})
+    competitors = _safe_get(competition, "competitors", default=[])
+
+    if len(competitors) < 2:
+        return None
+
+    home_data = None
+    away_data = None
+    for comp in competitors:
+        if _safe_get(comp, "homeAway") == "home":
+            home_data = comp
+        else:
+            away_data = comp
+
+    if not home_data and len(competitors) > 0:
+        home_data = competitors[0]
+    if not away_data and len(competitors) > 1:
+        away_data = competitors[1]
+
+    home = _parse_team({}, home_data) if home_data else None
+    away = _parse_team({}, away_data) if away_data else None
+
+    home_seed = _safe_get(home_data, "curatedRank", "current", default=0) if home_data else 0
+    away_seed = _safe_get(away_data, "curatedRank", "current", default=0) if away_data else 0
+
+    # Try to get seed from the "seed" field which is more accurate for tournament
+    if home_data:
+        seed_val = _safe_get(home_data, "team", "seed", default=None)
+        if seed_val is not None:
+            try:
+                home_seed = int(seed_val)
+            except (ValueError, TypeError):
+                pass
+    if away_data:
+        seed_val = _safe_get(away_data, "team", "seed", default=None)
+        if seed_val is not None:
+            try:
+                away_seed = int(seed_val)
+            except (ValueError, TypeError):
+                pass
+
+    # Status
+    status_obj = _safe_get(event, "status", default={})
+    status_type = _safe_get(status_obj, "type", "name", default="STATUS_SCHEDULED")
+    detail = _safe_get(status_obj, "type", "detail", default="")
+    clock = _safe_get(status_obj, "displayClock", default="")
+    period = _safe_get(status_obj, "period", default=0)
+
+    status_map = {
+        "STATUS_SCHEDULED": "scheduled",
+        "STATUS_IN_PROGRESS": "in_progress",
+        "STATUS_HALFTIME": "halftime",
+        "STATUS_END_PERIOD": "in_progress",
+        "STATUS_FINAL": "final",
+        "STATUS_FINAL_OT": "final",
+    }
+    status = status_map.get(status_type, "scheduled")
+
+    period_str = ""
+    if period and status in ("in_progress", "halftime"):
+        period_str = f"H{period}" if period <= 2 else ("OT" if period == 3 else f"OT{period-2}")
+
+    # Extract round and region from the event notes or name
+    round_number = 0
+    region = ""
+    round_name = ""
+
+    # ESPN includes notes with round info
+    notes = _safe_get(event, "competitions", 0, "notes", default=[])
+    for note in notes:
+        headline = _safe_get(note, "headline", default="")
+        if headline:
+            headline_lower = headline.lower()
+            # Extract region
+            for r in ["East", "West", "South", "Midwest"]:
+                if r.lower() in headline_lower:
+                    region = r
+                    break
+            # Extract round
+            round_map = {
+                "first round": 1,
+                "second round": 2,
+                "sweet 16": 3, "sweet sixteen": 3,
+                "elite 8": 4, "elite eight": 4,
+                "final four": 5,
+                "championship": 6, "national championship": 6,
+            }
+            for rname, rnum in round_map.items():
+                if rname in headline_lower:
+                    round_number = rnum
+                    round_name = ROUND_NAMES.get(rnum, headline)
+                    break
+
+    # Fallback: try the event name
+    if not round_name:
+        event_name = _safe_get(event, "name", default="")
+        if event_name:
+            name_lower = event_name.lower()
+            for r in ["East", "West", "South", "Midwest"]:
+                if r.lower() in name_lower and not region:
+                    region = r
+                    break
+
+    start_time = _safe_get(event, "date", default="")
+
+    return BracketMatchup(
+        game_id=game_id,
+        round_name=round_name or "Tournament",
+        round_number=round_number,
+        region=region,
+        home_team=home,
+        away_team=away,
+        home_seed=home_seed,
+        away_seed=away_seed,
+        status=status,
+        clock=clock,
+        period=period_str,
+        detail=detail,
+        start_time=start_time,
     )

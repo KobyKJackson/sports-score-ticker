@@ -646,6 +646,177 @@ std::optional<ScoreData> load_scores(const std::string &filepath)
     return data;
 }
 
+    // Parse a BracketMatchup object from the current '{' token.
+    BracketMatchup parse_bracket_matchup(Parser &p)
+    {
+        BracketMatchup m;
+        if (p.type != Token::LBrace)
+        {
+            p.skip_value();
+            return m;
+        }
+        p.next(); // consume '{'
+
+        while (p.type == Token::String)
+        {
+            auto key = p.consume_key();
+
+            if (key == "game_id" && p.type == Token::String)
+                m.game_id = p.consume_string();
+            else if (key == "round_name" && p.type == Token::String)
+                m.round_name = p.consume_string();
+            else if (key == "round_number" && p.type == Token::Number)
+            {
+                m.round_number = static_cast<int>(p.num_val);
+                p.next();
+            }
+            else if (key == "region" && p.type == Token::String)
+                m.region = p.consume_string();
+            else if (key == "home_team")
+            {
+                if (p.type == Token::Null)
+                    p.next();
+                else
+                    m.home = parse_team(p);
+            }
+            else if (key == "away_team")
+            {
+                if (p.type == Token::Null)
+                    p.next();
+                else
+                    m.away = parse_team(p);
+            }
+            else if (key == "home_seed" && p.type == Token::Number)
+            {
+                m.home_seed = static_cast<int>(p.num_val);
+                p.next();
+            }
+            else if (key == "away_seed" && p.type == Token::Number)
+            {
+                m.away_seed = static_cast<int>(p.num_val);
+                p.next();
+            }
+            else if (key == "status" && p.type == Token::String)
+                m.status = p.consume_string();
+            else if (key == "clock" && p.type == Token::String)
+                m.clock = p.consume_string();
+            else if (key == "period" && p.type == Token::String)
+                m.period = p.consume_string();
+            else if (key == "detail" && p.type == Token::String)
+                m.detail = p.consume_string();
+            else if (key == "start_time" && p.type == Token::String)
+                m.start_time = p.consume_string();
+            else
+            {
+                p.skip_value();
+                continue;
+            }
+
+            if (p.type == Token::Comma)
+                p.next();
+        }
+        if (p.type == Token::RBrace)
+            p.next(); // consume '}'
+        return m;
+    }
+
+} // anonymous namespace (temporarily close for load_bracket, reopen for load_notifications)
+
+// Parse bracket.json. Returns nullopt on I/O or parse error.
+std::optional<BracketData> load_bracket(const std::string &filepath)
+{
+    std::ifstream file(filepath, std::ios::binary);
+    if (!file)
+        return std::nullopt;
+
+    std::ostringstream ss;
+    ss << file.rdbuf();
+    std::string content = ss.str();
+
+    if (content.empty() || content.size() > 1024 * 1024)
+        return std::nullopt;
+
+    Parser p{content.c_str(), 0, static_cast<int>(content.size())};
+    p.next();
+
+    if (p.type != Token::LBrace)
+        return std::nullopt;
+    p.next();
+
+    BracketData data;
+
+    while (p.type == Token::String)
+    {
+        auto key = p.consume_key();
+
+        if (key == "bracket" && p.type == Token::LBrace)
+        {
+            p.next(); // consume '{'
+            while (p.type == Token::String)
+            {
+                auto bkey = p.consume_key();
+                if (bkey == "tournament_name" && p.type == Token::String)
+                    data.tournament_name = p.consume_string();
+                else if (bkey == "current_round" && p.type == Token::String)
+                    data.current_round = p.consume_string();
+                else if (bkey == "regions" && p.type == Token::LBracket)
+                {
+                    p.next();
+                    while (p.type != Token::RBracket && p.type != Token::Eof)
+                    {
+                        if (p.type == Token::String)
+                            data.regions.push_back(p.consume_string());
+                        else
+                            p.skip_value();
+                        if (p.type == Token::Comma)
+                            p.next();
+                    }
+                    if (p.type == Token::RBracket)
+                        p.next();
+                }
+                else if (bkey == "matchups" && p.type == Token::LBracket)
+                {
+                    p.next();
+                    while (p.type != Token::RBracket && p.type != Token::Eof)
+                    {
+                        data.matchups.push_back(parse_bracket_matchup(p));
+                        if (p.type == Token::Comma)
+                            p.next();
+                    }
+                    if (p.type == Token::RBracket)
+                        p.next();
+                }
+                else
+                {
+                    p.skip_value();
+                    continue;
+                }
+                if (p.type == Token::Comma)
+                    p.next();
+            }
+            if (p.type == Token::RBrace)
+                p.next();
+        }
+        else if (key == "timestamp" && p.type == Token::Number)
+        {
+            data.timestamp = p.num_val;
+            p.next();
+        }
+        else
+        {
+            p.skip_value();
+            continue;
+        }
+        if (p.type == Token::Comma)
+            p.next();
+    }
+
+    return data;
+}
+
+namespace
+{
+
 // Read and parse the notifications JSON file. Returns nullopt on any error.
 std::optional<NotificationData> load_notifications(const std::string &filepath)
 {

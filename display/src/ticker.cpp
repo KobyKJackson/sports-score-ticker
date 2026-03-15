@@ -579,6 +579,249 @@ void Ticker::advance_notification()
     }
 }
 
+// ── Bracket mode ────────────────────────────────────────────────────────
+
+Color Ticker::region_color(const std::string &region)
+{
+    if (region == "East")
+        return {29, 66, 138};
+    if (region == "West")
+        return {128, 0, 0};
+    if (region == "South")
+        return {0, 100, 0};
+    if (region == "Midwest")
+        return {139, 69, 19};
+    return DIM;
+}
+
+void Ticker::draw_region_divider(Canvas *canvas, const Font &font,
+                                  int x, const std::string &region) const
+{
+    Color bg = region_color(region);
+    for (int dy = 0; dy < display_height_; ++dy)
+        for (int dx = 0; dx < SPORT_DIVIDER_W; ++dx)
+            canvas->SetPixel(x + dx, dy, bg.r, bg.g, bg.b);
+
+    // Show first 3 chars of region name
+    std::string label = region.substr(0, 3);
+    for (auto &c : label)
+        c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+    DrawText(canvas, font, x + 2, 36, WHITE, label.c_str());
+}
+
+void Ticker::update_bracket(const BracketData &data, const Font &large_font)
+{
+    bracket_cards_.clear();
+    bracket_strip_width_ = 0;
+
+    std::string prev_region;
+    for (const auto &m : data.matchups)
+    {
+        if (!m.region.empty() && m.region != prev_region)
+        {
+            bracket_strip_width_ += SPORT_DIVIDER_W;
+            prev_region = m.region;
+        }
+
+        BracketCard card;
+        card.matchup = m;
+        card.total_width = calc_bracket_card_width(m, large_font, card.row1_width);
+        bracket_strip_width_ += card.total_width;
+        bracket_cards_.push_back(card);
+    }
+
+    if (bracket_strip_width_ < display_width_)
+        bracket_strip_width_ = display_width_;
+}
+
+int Ticker::calc_bracket_card_width(const BracketMatchup &m, const Font &large_font,
+                                     int &row1_w_out) const
+{
+    auto measure_row1 = [&](const std::string &s)
+    {
+        return measure_text(large_font, s) + LARGE_EXTRA_ADVANCE * static_cast<int>(s.size());
+    };
+
+    int row1_w = 0;
+    if (m.away_seed > 0)
+    {
+        char buf[8];
+        std::snprintf(buf, sizeof(buf), "#%d", m.away_seed);
+        row1_w += static_cast<int>(std::strlen(buf)) * SMALL_FONT_W + 2;
+    }
+    row1_w += measure_row1(m.away.abbreviation) + 4;
+
+    bool has_scores = !m.is_scheduled() && m.home.has_score() && m.away.has_score();
+    if (has_scores)
+    {
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%d", m.away.score);
+        row1_w += measure_row1(buf) + 3;
+        row1_w += large_font.CharacterWidth('@') + LARGE_EXTRA_ADVANCE + 6;
+        std::snprintf(buf, sizeof(buf), "%d", m.home.score);
+        row1_w += measure_row1(buf) + 4;
+    }
+    else
+    {
+        row1_w += measure_row1("vs") + 6;
+    }
+
+    if (m.home_seed > 0)
+    {
+        char buf[8];
+        std::snprintf(buf, sizeof(buf), "#%d", m.home_seed);
+        row1_w += static_cast<int>(std::strlen(buf)) * SMALL_FONT_W + 2;
+    }
+    row1_w += measure_row1(m.home.abbreviation) + 8;
+
+    // Row 2: status
+    int row2_w = 0;
+    if (m.is_live())
+    {
+        if (!m.period.empty())
+            row2_w += static_cast<int>(m.period.size()) * SMALL_FONT_W + 4;
+        if (!m.clock.empty())
+            row2_w += static_cast<int>(m.clock.size()) * SMALL_FONT_W;
+    }
+    else if (m.is_final())
+        row2_w = 5 * SMALL_FONT_W;
+    else if (!m.detail.empty())
+        row2_w = static_cast<int>(m.detail.size()) * TINY_FONT_W;
+
+    // Row 3: round name
+    int row3_w = 0;
+    if (!m.round_name.empty())
+        row3_w = static_cast<int>(m.round_name.size()) * SMALL_FONT_W;
+
+    row1_w_out = row1_w;
+    int text_w = std::max({row1_w, row2_w, row3_w});
+    return logo_gap_ + text_w + logo_gap_ + GAME_CARD_GAP;
+}
+
+int Ticker::render_bracket_card(const BracketCard &card, Canvas *canvas,
+                                 const Font &font, const Font &large_font,
+                                 const Font &sched_font, int x_start) const
+{
+    const BracketMatchup &m = card.matchup;
+    int x = x_start;
+
+    // Away logo
+    logos_.draw(canvas, m.away.abbreviation, "ncaam", x, 2, logo_size_, true);
+    x += logo_gap_;
+
+    const int text_start_x = x;
+    const int text_w = card.total_width - 2 * logo_gap_ - GAME_CARD_GAP;
+    const int text_end_x = text_start_x + text_w;
+    const int text_mid = (text_start_x + text_end_x) / 2;
+
+    // Row 1: seeds + teams + scores
+    constexpr int line1_y = 24;
+    x = text_start_x + (text_w - card.row1_width) / 2;
+
+    if (m.away_seed > 0)
+    {
+        char buf[8];
+        std::snprintf(buf, sizeof(buf), "#%d", m.away_seed);
+        x += DrawText(canvas, font, x, line1_y - 5, CYAN, buf);
+        x += 2;
+    }
+    x += DrawText(canvas, large_font, x, line1_y, WHITE, nullptr,
+                  m.away.abbreviation.c_str(), LARGE_EXTRA_ADVANCE);
+    x += 4;
+
+    bool has_scores = !m.is_scheduled() && m.home.has_score() && m.away.has_score();
+    if (has_scores)
+    {
+        char buf[16];
+        bool away_winning = m.away.score > m.home.score;
+        bool home_winning = m.home.score > m.away.score;
+
+        std::snprintf(buf, sizeof(buf), "%d", m.away.score);
+        x += DrawText(canvas, large_font, x, line1_y, away_winning ? WHITE : GRAY,
+                      nullptr, buf, LARGE_EXTRA_ADVANCE);
+        x += 3;
+        x += DrawText(canvas, large_font, x, line1_y, DIM, nullptr, "@", LARGE_EXTRA_ADVANCE);
+        x += 3;
+        std::snprintf(buf, sizeof(buf), "%d", m.home.score);
+        x += DrawText(canvas, large_font, x, line1_y, home_winning ? WHITE : GRAY,
+                      nullptr, buf, LARGE_EXTRA_ADVANCE);
+        x += 4;
+    }
+    else
+    {
+        x += DrawText(canvas, large_font, x, line1_y, DIM, nullptr, "vs", LARGE_EXTRA_ADVANCE);
+        x += 4;
+    }
+
+    if (m.home_seed > 0)
+    {
+        char buf[8];
+        std::snprintf(buf, sizeof(buf), "#%d", m.home_seed);
+        x += DrawText(canvas, font, x, line1_y - 5, CYAN, buf);
+        x += 2;
+    }
+    x += DrawText(canvas, large_font, x, line1_y, WHITE, nullptr,
+                  m.home.abbreviation.c_str(), LARGE_EXTRA_ADVANCE);
+
+    // Row 2: status
+    constexpr int line2_y = 43;
+    Color stc = status_color(m.status);
+
+    if (m.is_live())
+    {
+        std::string live_str;
+        if (!m.period.empty())
+            live_str += m.period;
+        if (!m.period.empty() && !m.clock.empty())
+            live_str += " ";
+        if (!m.clock.empty())
+            live_str += m.clock;
+        if (m.status == "halftime")
+            live_str += live_str.empty() ? "HALF" : " HALF";
+
+        int total_w = static_cast<int>(live_str.size()) * SMALL_FONT_W;
+        int cx = text_mid - total_w / 2;
+        if (!m.period.empty())
+        {
+            cx += DrawText(canvas, font, cx, line2_y, stc, m.period.c_str());
+            if (!m.clock.empty())
+                cx += 4;
+        }
+        if (!m.clock.empty())
+            cx += DrawText(canvas, font, cx, line2_y, WHITE, m.clock.c_str());
+        if (m.status == "halftime")
+        {
+            cx += 4;
+            DrawText(canvas, font, cx, line2_y, YELLOW, "HALF");
+        }
+    }
+    else if (m.is_final())
+    {
+        constexpr int fw = 5 * SMALL_FONT_W;
+        DrawText(canvas, font, text_mid - fw / 2, line2_y, RED, "FINAL");
+    }
+    else if (!m.detail.empty())
+    {
+        int dw = static_cast<int>(m.detail.size()) * SMALL_FONT_W;
+        DrawText(canvas, font, text_mid - dw / 2, line2_y, CYAN, m.detail.c_str());
+    }
+
+    // Row 3: round name
+    if (!m.round_name.empty())
+    {
+        constexpr int line3_y = 56;
+        int rw = static_cast<int>(m.round_name.size()) * SMALL_FONT_W;
+        Color rc = region_color(m.region);
+        DrawText(canvas, font, text_mid - rw / 2, line3_y, rc, m.round_name.c_str());
+    }
+
+    // Home logo
+    logos_.draw(canvas, m.home.abbreviation, "ncaam",
+                text_end_x - 5, 2, logo_size_, false);
+
+    return text_end_x + logo_gap_ - x_start + GAME_CARD_GAP;
+}
+
 // ── Main render ──────────────────────────────────────────────────────────────
 
 void Ticker::render(Canvas *canvas, const Font &font, const Font &large_font,
@@ -588,6 +831,32 @@ void Ticker::render(Canvas *canvas, const Font &font, const Font &large_font,
     if (notify_phase_ != NotifyPhase::None)
     {
         render_notification(canvas, font, large_font, sched_font);
+        return;
+    }
+
+    // Bracket mode: render bracket cards instead of score ticker
+    if (bracket_mode_ && !bracket_cards_.empty())
+    {
+        int strip_x = -scroll_x_;
+        for (int pass = 0; pass < 2; ++pass)
+        {
+            int cx = strip_x;
+            std::string prev_region;
+            for (auto &card : bracket_cards_)
+            {
+                if (!card.matchup.region.empty() && card.matchup.region != prev_region)
+                {
+                    if (cx + SPORT_DIVIDER_W > 0 && cx < display_width_)
+                        draw_region_divider(canvas, font, cx, card.matchup.region);
+                    cx += SPORT_DIVIDER_W;
+                    prev_region = card.matchup.region;
+                }
+                if (cx + card.total_width > 0 && cx < display_width_)
+                    render_bracket_card(card, canvas, font, large_font, sched_font, cx);
+                cx += card.total_width;
+            }
+            strip_x += bracket_strip_width_;
+        }
         return;
     }
 
@@ -647,6 +916,7 @@ void Ticker::advance()
     scroll_accum_ %= 4;
 
     // Wrap when we've scrolled one full strip width (seamless loop).
-    if (scroll_x_ >= total_strip_width_)
-        scroll_x_ -= total_strip_width_;
+    int active_width = (bracket_mode_ && !bracket_cards_.empty()) ? bracket_strip_width_ : total_strip_width_;
+    if (scroll_x_ >= active_width)
+        scroll_x_ -= active_width;
 }

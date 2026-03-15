@@ -7,6 +7,7 @@
   "data_file": "/tmp/scores.json",
   "show_betting": true,
   "show_venue": false,
+  "show_bracket": false,
   "timezone": "America/Chicago",
   "scroll_speed": 4,
   "brightness": 80,

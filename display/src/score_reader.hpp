@@ -88,6 +88,41 @@ struct ScoreData
 // Parse scores.json at filepath. Returns nullopt on I/O or parse error.
 std::optional<ScoreData> load_scores(const std::string &filepath);
 
+// A single matchup in a tournament bracket.
+struct BracketMatchup
+{
+    std::string game_id;
+    std::string round_name;   // "First Round", "Sweet 16", etc.
+    int round_number = 0;     // 1-6
+    std::string region;       // "East", "West", "South", "Midwest"
+    Team home;
+    Team away;
+    int home_seed = 0;
+    int away_seed = 0;
+    std::string status;       // scheduled, in_progress, halftime, final
+    std::string clock;
+    std::string period;
+    std::string detail;
+    std::string start_time;
+
+    bool is_live() const { return status == "in_progress" || status == "halftime"; }
+    bool is_final() const { return status == "final"; }
+    bool is_scheduled() const { return status == "scheduled"; }
+};
+
+// Top-level bracket data container.
+struct BracketData
+{
+    std::string tournament_name;
+    std::string current_round;
+    std::vector<std::string> regions;
+    std::vector<BracketMatchup> matchups;
+    double timestamp = 0;
+};
+
+// Parse bracket.json at filepath. Returns nullopt on I/O or parse error.
+std::optional<BracketData> load_bracket(const std::string &filepath);
+
 // A single notification (e.g. a game going final).
 struct Notification
 {

@@ -42,6 +42,7 @@ struct AppConfig
     std::string tiny_font = "display/libs/rpi-rgb-led-matrix/fonts/5x8.bdf";
     int scroll_speed = 1;
     int brightness = 80;
+    bool show_bracket = false;
     bool notify_on_final = true;
     int notify_flash_count = 3;
     int notify_display_seconds = 5;
@@ -94,6 +95,7 @@ struct AppConfig
 
         extract_int("scroll_speed", scroll_speed);
         extract_int("brightness", brightness);
+        extract_bool("show_bracket", show_bracket);
         extract_bool("notify_on_final", notify_on_final);
         extract_int("notify_flash_count", notify_flash_count);
         extract_int("notify_display_seconds", notify_display_seconds);
@@ -196,10 +198,13 @@ int main(int argc, char **argv)
     std::time_t last_load = 0;
     std::time_t last_config = 0;
     std::time_t last_notify_check = 0;
+    std::time_t last_bracket_load = 0;
     constexpr int load_interval = 5;
     constexpr int config_interval = 5;
     constexpr int notify_check_interval = 1;
+    constexpr int bracket_load_interval = 5;
     const std::string notify_file = "/tmp/score_notifications.json";
+    const std::string bracket_file = "/tmp/bracket.json";
 
     // Track applied values so we only act when something actually changed.
     int applied_brightness = cfg.brightness;
@@ -234,7 +239,21 @@ int main(int argc, char **argv)
                 applied_scroll_speed = scaled;
             }
             ticker.set_notify_config(cfg.notify_flash_count, cfg.notify_display_seconds);
+            ticker.set_bracket_mode(cfg.show_bracket);
             last_config = now;
+        }
+
+        // Periodically reload bracket data when bracket mode is enabled
+        if (cfg.show_bracket && now - last_bracket_load >= bracket_load_interval)
+        {
+            auto bracket = load_bracket(bracket_file);
+            if (bracket)
+            {
+                std::fprintf(stderr, "Loaded %zu bracket matchups\n",
+                             bracket->matchups.size());
+                ticker.update_bracket(*bracket, score_font);
+            }
+            last_bracket_load = now;
         }
 
         // Periodically check for notifications

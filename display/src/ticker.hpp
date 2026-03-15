@@ -25,6 +25,12 @@ public:
     // large_font is used to measure exact row-1 text widths so card sizing is pixel-accurate.
     void update_games(const ScoreData &data, const rgb_matrix::Font &large_font);
 
+    // Replace bracket data for March Madness bracket display mode.
+    void update_bracket(const BracketData &data, const rgb_matrix::Font &large_font);
+
+    // Enable/disable bracket display mode.
+    void set_bracket_mode(bool enabled) { bracket_mode_ = enabled; }
+
     // Draw one frame of the scrolling ticker onto the canvas.
     void render(rgb_matrix::Canvas *canvas, const rgb_matrix::Font &font,
                 const rgb_matrix::Font &large_font,
@@ -110,6 +116,28 @@ private:
     int total_strip_width_ = 0;     // total pixel width of one full scroll cycle
 
     LogoCache &logos_;
+
+    // ── Bracket mode ──────────────────────────────────────────────────────────
+    bool bracket_mode_ = false;
+
+    struct BracketCard
+    {
+        BracketMatchup matchup;
+        int total_width = 0;
+        int row1_width = 0;
+    };
+
+    std::vector<BracketCard> bracket_cards_;
+    int bracket_strip_width_ = 0;
+
+    int calc_bracket_card_width(const BracketMatchup &m, const rgb_matrix::Font &large_font,
+                                int &row1_w_out) const;
+    int render_bracket_card(const BracketCard &card, rgb_matrix::Canvas *canvas,
+                            const rgb_matrix::Font &font, const rgb_matrix::Font &large_font,
+                            const rgb_matrix::Font &sched_font, int x_start) const;
+    void draw_region_divider(rgb_matrix::Canvas *canvas, const rgb_matrix::Font &font,
+                             int x, const std::string &region) const;
+    static rgb_matrix::Color region_color(const std::string &region);
 
     // Owns the Game pointers referenced by cards_; kept alive across update_games() calls.
     std::vector<const Game *> game_ptrs_;
