@@ -1,0 +1,17 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Pi (aarch64)",
+            "includePath": [
+                "${workspaceFolder}/display/src",
+                "${workspaceFolder}/display/libs/rpi-rgb-led-matrix/include"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/homebrew/bin/aarch64-linux-gnu-g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-arm64"
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug on Pi",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/display/build-pi/led_ticker",
+            "miDebuggerPath": "/opt/homebrew/bin/aarch64-linux-gnu-gdb",
+            "miDebuggerServerAddress": "192.168.4.46:2345",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "sourceFileMap": {
+                "/root/sports-score-ticker": "${workspaceFolder}"
+            },
+            "preLaunchTask": "Build, push & start gdbserver",
+            "postDebugTask": "Start led-ticker service"
+        }
+    ]
+}
