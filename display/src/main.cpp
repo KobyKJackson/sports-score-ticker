@@ -244,7 +244,7 @@ int main(int argc, char **argv)
             if (notifs && !notifs->notifications.empty())
             {
                 for (auto &n : notifs->notifications)
-                    ticker.queue_notification(n.game);
+                    ticker.queue_notification(n);
                 clear_notifications(notify_file);
                 std::fprintf(stderr, "Queued %zu notification(s)\n",
                              notifs->notifications.size());

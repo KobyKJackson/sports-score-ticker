@@ -31,6 +31,18 @@ struct Odds
     std::string moneyline;  // moneyline (e.g. "-175")
 };
 
+// Bet results computed from opening odds and final scores.
+struct BetResults
+{
+    std::string spread_text;      // covering team + spread (e.g. "BOS +3.5")
+    std::string spread_result;    // "covered", "not_covered", "push"
+    std::string ou_result;        // "OVER", "UNDER", "PUSH"
+    double ou_line = 0;           // e.g. 215.5
+    std::string winner_ml;        // e.g. "+130"
+    std::string winner_abbr;      // e.g. "BOS"
+    bool has_data = false;
+};
+
 // One game with all associated metadata.
 struct Game
 {
@@ -47,6 +59,7 @@ struct Game
     std::string broadcast;    // TV network (e.g. "ESPN")
     std::optional<Odds> odds; // betting line; nullopt if unavailable
     std::string start_time;   // UTC ISO-8601 start time for scheduled games
+    BetResults bet_results;   // computed bet results for final games
 
     bool is_live() const { return status == "in_progress" || status == "halftime"; }
     bool is_final() const { return status == "final"; }
@@ -78,8 +91,9 @@ std::optional<ScoreData> load_scores(const std::string &filepath);
 // A single notification (e.g. a game going final).
 struct Notification
 {
-    std::string type; // "final"
-    Game game;        // the game that triggered the notification
+    std::string type;      // "final"
+    Game game;             // the game that triggered the notification
+    BetResults bet_results; // computed bet results from opening odds
     double timestamp = 0;
 };
 

@@ -21,6 +21,20 @@ ESPN_ENDPOINTS = {
     "ncaam": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
 }
 
+# ESPN event summary endpoints by sport (for odds/pickcenter)
+ESPN_SUMMARY_ENDPOINTS = {
+    "nba": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary",
+    "nfl": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary",
+    "mlb": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary",
+    "nhl": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary",
+    "ncaaf": "https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary",
+    "ncaam": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/summary",
+}
+
+# Cache of opening odds keyed by game_id. Persists across fetch cycles so we
+# always have the opening lines even after ESPN stops returning them.
+_odds_cache: dict[str, Odds] = {}
+
 REQUEST_TIMEOUT = 10
 
 
@@ -61,7 +75,7 @@ def _parse_team(team_data: dict, competitor: dict) -> Team:
 
 
 def _parse_odds(competition: dict) -> Odds | None:
-    """Parse betting odds from a competition."""
+    """Parse betting odds from a competition's odds array (legacy scoreboard format)."""
     odds_list = _safe_get(competition, "odds", default=[])
     if not odds_list:
         return None
@@ -77,6 +91,74 @@ def _parse_odds(competition: dict) -> Odds | None:
     moneyline = ""
     if away_ml and home_ml:
         moneyline = f"{away_ml}/{home_ml}"
+
+    return Odds(spread=spread_str, over_under=over_under, moneyline=moneyline)
+
+
+def _fetch_odds_from_summary(sport: str, game_id: str) -> Odds | None:
+    """Fetch opening odds from ESPN event summary (pickcenter). Uses open lines."""
+    url = ESPN_SUMMARY_ENDPOINTS.get(sport)
+    if not url:
+        return None
+
+    try:
+        resp = requests.get(url, params={"event": game_id}, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+    except requests.RequestException as e:
+        log.debug("Failed to fetch odds for %s event %s: %s", sport, game_id, e)
+        return None
+
+    pickcenter = _safe_get(data, "pickcenter", default=[])
+    if not pickcenter:
+        return None
+
+    primary = pickcenter[0]
+
+    # Spread: prefer open line, fall back to close/details
+    spread_str = ""
+    ps = _safe_get(primary, "pointSpread", default={})
+    open_line = _safe_get(ps, "home", "open", "line", default=None)
+    if open_line:
+        spread_str = _safe_get(primary, "details", default="")
+        # Replace the close spread value with the open one if details has a spread
+        # details is like "PHI -8.5"; we want to use the open line number
+        if spread_str and open_line:
+            parts = spread_str.rsplit(" ", 1)
+            if len(parts) == 2:
+                spread_str = f"{parts[0]} {open_line}"
+    if not spread_str:
+        spread_str = _safe_get(primary, "details", default="")
+
+    # Over/Under: prefer open line
+    ou_open = _safe_get(primary, "total", "over", "open", "line", default=None)
+    if ou_open:
+        # Format: "o215.5" → extract number
+        try:
+            ou_num = float(str(ou_open).lstrip("oOuU"))
+            over_under = f"O/U {ou_num}"
+        except (ValueError, TypeError):
+            over_under = ""
+    else:
+        ou_val = _safe_get(primary, "overUnder", default=None)
+        over_under = f"O/U {ou_val}" if ou_val else ""
+
+    # Moneyline: prefer open lines
+    ml = _safe_get(primary, "moneyline", default={})
+    away_ml_open = _safe_get(ml, "away", "open", "odds", default=None)
+    home_ml_open = _safe_get(ml, "home", "open", "odds", default=None)
+    moneyline = ""
+    if away_ml_open and home_ml_open:
+        moneyline = f"{away_ml_open}/{home_ml_open}"
+    else:
+        # Fall back to top-level moneyLine
+        away_ml = _safe_get(primary, "awayTeamOdds", "moneyLine", default=None)
+        home_ml = _safe_get(primary, "homeTeamOdds", "moneyLine", default=None)
+        if away_ml and home_ml:
+            moneyline = f"{away_ml}/{home_ml}"
+
+    if not spread_str and not over_under and not moneyline:
+        return None
 
     return Odds(spread=spread_str, over_under=over_under, moneyline=moneyline)
 
@@ -154,8 +236,19 @@ def _parse_game(event: dict, sport: str) -> Game:
         names = _safe_get(broadcasts, 0, "names", default=[])
         broadcast = names[0] if names else ""
 
-    # Odds
+    # Odds: try scoreboard inline first, then cached, then fetch from summary
     odds = _parse_odds(competition)
+    if odds:
+        # Cache the first odds we see as the opening line
+        if game_id not in _odds_cache:
+            _odds_cache[game_id] = odds
+    elif game_id in _odds_cache:
+        odds = _odds_cache[game_id]
+    else:
+        # Fetch from event summary endpoint (has pickcenter with open/close lines)
+        odds = _fetch_odds_from_summary(sport, game_id)
+        if odds:
+            _odds_cache[game_id] = odds
 
     # Start time
     start_time = _safe_get(event, "date", default="")

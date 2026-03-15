@@ -36,13 +36,13 @@ public:
     // Update scroll speed at runtime (e.g. after a config reload).
     void set_scroll_speed(int speed) { scroll_speed_ = std::max(1, speed); }
 
-    // Queue a game notification (flashes screen, then shows centered card).
-    void queue_notification(const Game &g);
+    // Queue a notification (flashes border, then shows centered card with bet results).
+    void queue_notification(const Notification &n);
 
     // Update notification config at runtime.
     void set_notify_config(int flash_count, int display_seconds);
 
-    // Returns true if currently showing a notification (flashing or holding).
+    // Returns true if currently showing a notification.
     bool in_notification() const { return notify_phase_ != NotifyPhase::None; }
 
 private:
@@ -117,8 +117,9 @@ private:
     // ── Notification state machine ────────────────────────────────────────────
     enum class NotifyPhase { None, Active };
     NotifyPhase notify_phase_ = NotifyPhase::None;
-    Game notify_game_;                // current notification game (owned copy)
-    std::queue<Game> notify_queue_;   // pending notifications
+    Game notify_game_;                   // current notification game (owned copy)
+    BetResults notify_bet_results_;      // current notification bet results
+    std::queue<Notification> notify_queue_; // pending notifications
 
     int notify_flash_count_ = 3;     // config: number of border flash cycles
     int notify_display_frames_ = 200; // config: total display duration in frames (5s * 40fps)

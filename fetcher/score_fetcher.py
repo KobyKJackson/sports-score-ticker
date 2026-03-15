@@ -136,7 +136,12 @@ def fetch_all_scores(sports: list, hours_back: int, hours_ahead: int, tz_name: s
                 if formatted:
                     game.detail = formatted
         if board.games:
-            all_scoreboards.append(board.to_dict())
+            board_dict = board.to_dict()
+            # Compute bet results for final games so the display can show them
+            for game in board_dict["games"]:
+                if game.get("status") == "final" and game.get("odds"):
+                    game["bet_results"] = compute_bet_results(game, game["odds"])
+            all_scoreboards.append(board_dict)
             log.info("  Got %d %s games", len(board.games), sport.upper())
         else:
             log.info("  No %s games right now", sport.upper())
@@ -167,6 +172,89 @@ def write_scores(data: list, data_file: str):
             pass
 
 
+def compute_bet_results(game: dict, opening_odds) -> dict:
+    """Compute bet results from a final game and its opening odds."""
+    if not opening_odds:
+        return None
+
+    home_score = game.get("home_team", {}).get("score")
+    away_score = game.get("away_team", {}).get("score")
+    if home_score is None or away_score is None:
+        return None
+
+    home_abbr = game.get("home_team", {}).get("abbreviation", "")
+    away_abbr = game.get("away_team", {}).get("abbreviation", "")
+    results = {}
+
+    # Spread: parse "LAL -3.5" → fav_abbr, spread_num
+    spread_str = opening_odds.get("spread", "")
+    if spread_str:
+        parts = spread_str.rsplit(" ", 1)
+        if len(parts) == 2:
+            fav_abbr = parts[0]
+            try:
+                spread_num = float(parts[1])
+            except ValueError:
+                spread_num = None
+
+            if spread_num is not None:
+                # Determine the underdog
+                dog_abbr = away_abbr if fav_abbr == home_abbr else home_abbr
+                dog_spread = f"+{abs(spread_num):g}" if spread_num != 0 else "0"
+
+                if fav_abbr == home_abbr:
+                    margin = home_score - away_score
+                elif fav_abbr == away_abbr:
+                    margin = away_score - home_score
+                else:
+                    margin = None
+
+                if margin is not None:
+                    # spread_num is negative for favorites (-3.5)
+                    # favorite covers if margin + spread_num > 0
+                    diff = margin + spread_num
+                    if diff > 0:
+                        results["spread_result"] = "covered"
+                        results["spread_text"] = spread_str  # fav covered
+                    elif diff < 0:
+                        results["spread_result"] = "not_covered"
+                        results["spread_text"] = f"{dog_abbr} {dog_spread}"  # dog covered
+                    else:
+                        results["spread_result"] = "push"
+                        results["spread_text"] = spread_str
+
+    # Over/Under: parse "O/U 215.5"
+    ou_str = opening_odds.get("over_under", "")
+    if ou_str:
+        try:
+            ou_num = float(ou_str.replace("O/U ", "").strip())
+            total = home_score + away_score
+            if total > ou_num:
+                results["ou_result"] = "OVER"
+            elif total < ou_num:
+                results["ou_result"] = "UNDER"
+            else:
+                results["ou_result"] = "PUSH"
+            results["ou_line"] = ou_num
+        except ValueError:
+            pass
+
+    # Moneyline: stored as "away_ml/home_ml" e.g. "-150/+130"
+    ml_str = opening_odds.get("moneyline", "")
+    if ml_str and "/" in ml_str:
+        ml_parts = ml_str.split("/", 1)
+        if len(ml_parts) == 2:
+            away_ml, home_ml = ml_parts[0].strip(), ml_parts[1].strip()
+            if home_score > away_score:
+                results["winner_ml"] = home_ml
+                results["winner_abbr"] = home_abbr
+            elif away_score > home_score:
+                results["winner_ml"] = away_ml
+                results["winner_abbr"] = away_abbr
+
+    return results if results else None
+
+
 def detect_and_write_finals(scoreboards: list):
     """Detect games that just went final and write notifications."""
     global previous_game_states
@@ -185,12 +273,30 @@ def detect_and_write_finals(scoreboards: list):
             status = game.get("status", "")
             if not game_id:
                 continue
-            current_states[game_id] = status
+
             prev = previous_game_states.get(game_id)
-            if status == "final" and prev != "final" and prev is not None:
+
+            # Preserve opening odds from when we first saw the game
+            if prev is None:
+                current_states[game_id] = {
+                    "status": status,
+                    "odds": game.get("odds"),
+                }
+            else:
+                current_states[game_id] = {
+                    "status": status,
+                    "odds": prev.get("odds"),  # keep opening odds
+                }
+
+            if status == "final" and prev is not None and prev.get("status") != "final":
+                opening_odds = prev.get("odds")
+                bet_results = compute_bet_results(game, opening_odds)
+                notification_game = dict(game)
+                notification_game["odds"] = None  # clear odds; bet_results replaces them
                 new_notifications.append({
                     "type": "final",
-                    "game": game,
+                    "game": notification_game,
+                    "bet_results": bet_results,
                     "timestamp": time.time(),
                 })
 
@@ -378,9 +484,15 @@ def api_test_notification():
         game = dict(random.choice(all_games))
         game["status"] = "final"
 
+    # Compute bet results from current odds (best we can do for test)
+    bet_results = compute_bet_results(game, game.get("odds"))
+    notification_game = dict(game)
+    notification_game["odds"] = None  # clear odds; bet_results replaces them
+
     notification = {
         "type": "final",
-        "game": game,
+        "game": notification_game,
+        "bet_results": bet_results,
         "timestamp": time.time(),
     }
 

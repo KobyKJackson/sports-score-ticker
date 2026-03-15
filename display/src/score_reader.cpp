@@ -244,6 +244,9 @@ namespace
         }
     };
 
+    // Forward declaration — defined below parse_sport_board.
+    BetResults parse_bet_results(Parser &p);
+
     // Parse a Team object from the current '{' token.
     Team parse_team(Parser &p)
     {
@@ -388,6 +391,8 @@ namespace
                 g.odds = parse_odds(p);
             else if (key == "start_time" && p.type == Token::String)
                 g.start_time = p.consume_string();
+            else if (key == "bet_results")
+                g.bet_results = parse_bet_results(p);
             else
             {
                 p.skip_value();
@@ -447,6 +452,64 @@ namespace
         return sb;
     }
 
+    // Parse a BetResults object, or return empty on null.
+    BetResults parse_bet_results(Parser &p)
+    {
+        BetResults br;
+        if (p.type == Token::Null)
+        {
+            p.next();
+            return br;
+        }
+        if (p.type != Token::LBrace)
+        {
+            p.skip_value();
+            return br;
+        }
+        p.next(); // consume '{'
+
+        while (p.type == Token::String)
+        {
+            auto key = p.consume_key();
+
+            if (key == "spread_text" && p.type == Token::String)
+            {
+                br.spread_text = p.consume_string();
+                br.has_data = true;
+            }
+            else if (key == "spread_result" && p.type == Token::String)
+                br.spread_result = p.consume_string();
+            else if (key == "ou_result" && p.type == Token::String)
+            {
+                br.ou_result = p.consume_string();
+                br.has_data = true;
+            }
+            else if (key == "ou_line" && p.type == Token::Number)
+            {
+                br.ou_line = p.num_val;
+                p.next();
+            }
+            else if (key == "winner_ml" && p.type == Token::String)
+            {
+                br.winner_ml = p.consume_string();
+                br.has_data = true;
+            }
+            else if (key == "winner_abbr" && p.type == Token::String)
+                br.winner_abbr = p.consume_string();
+            else
+            {
+                p.skip_value();
+                continue;
+            }
+
+            if (p.type == Token::Comma)
+                p.next();
+        }
+        if (p.type == Token::RBrace)
+            p.next(); // consume '}'
+        return br;
+    }
+
     // Parse a Notification object from the current '{' token.
     Notification parse_notification(Parser &p)
     {
@@ -466,6 +529,8 @@ namespace
                 n.type = p.consume_string();
             else if (key == "game")
                 n.game = parse_game(p);
+            else if (key == "bet_results")
+                n.bet_results = parse_bet_results(p);
             else if (key == "timestamp" && p.type == Token::Number)
             {
                 n.timestamp = p.num_val;

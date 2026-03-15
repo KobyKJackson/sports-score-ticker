@@ -218,9 +218,25 @@
       line2 = textWidth(game.detail, false) + 8;
     }
 
-    // Line 3: odds
+    // Line 3: bet results for final, raw odds otherwise
     let line3 = 0;
-    if (game.odds && game.odds.spread) {
+    if (game.status === "final" && game.bet_results) {
+      const br = game.bet_results;
+      let bw = 0;
+      if (br.spread_text) bw += textWidth(br.spread_text, false);
+      if (br.ou_result) {
+        if (bw > 0) bw += 10;
+        const letter = br.ou_result === "OVER" ? "O" : br.ou_result === "UNDER" ? "U" : "P";
+        const lineStr = br.ou_line === Math.floor(br.ou_line)
+          ? String(Math.floor(br.ou_line)) : br.ou_line.toFixed(1);
+        bw += textWidth(letter + " " + lineStr, false);
+      }
+      if (br.winner_ml && br.winner_abbr) {
+        if (bw > 0) bw += 10;
+        bw += textWidth(br.winner_abbr + " " + br.winner_ml, false);
+      }
+      line3 = bw;
+    } else if (game.odds && game.odds.spread) {
       line3 = textWidth(game.odds.spread, false) + 8;
       if (game.odds.over_under)
         line3 += textWidth("  " + game.odds.over_under, false);
@@ -457,9 +473,42 @@
       drawText(centerX(textStartX, textEndX, dw), line2Y, stc, g.detail, false);
     }
 
-    // --- Line 3: Odds, centered (baseline y=56) ---
+    // --- Line 3: Bet results for final, raw odds otherwise ---
     const line3Y = 56;
-    if (g.odds && showBetting) {
+    if (g.status === "final" && g.bet_results) {
+      const br = g.bet_results;
+      const segments = [];
+
+      if (br.spread_text) {
+        const color = br.spread_result === "covered" ? GREEN
+                    : br.spread_result === "push" ? YELLOW : RED;
+        segments.push({ text: br.spread_text, color });
+      }
+      if (br.ou_result) {
+        const letter = br.ou_result === "OVER" ? "O" : br.ou_result === "UNDER" ? "U" : "P";
+        const lineStr = br.ou_line != null
+          ? (br.ou_line === Math.floor(br.ou_line) ? String(Math.floor(br.ou_line)) : br.ou_line.toFixed(1))
+          : "";
+        segments.push({ text: letter + " " + lineStr, color: WHITE });
+      }
+      if (br.winner_ml && br.winner_abbr) {
+        segments.push({ text: br.winner_abbr + " " + br.winner_ml, color: GREEN });
+      }
+
+      if (segments.length > 0) {
+        const gap = 10;
+        let totalW = 0;
+        segments.forEach((s, i) => {
+          totalW += textWidth(s.text, false);
+          if (i < segments.length - 1) totalW += gap;
+        });
+        let bx = centerX(textStartX, textEndX, totalW);
+        segments.forEach((s, i) => {
+          bx = drawText(bx, line3Y, s.color, s.text, false);
+          if (i < segments.length - 1) bx += gap;
+        });
+      }
+    } else if (g.odds && showBetting) {
       let oddsText = "";
       if (g.odds.spread)     oddsText += g.odds.spread;
       if (g.odds.over_under) oddsText += (oddsText ? "  " : "") + g.odds.over_under;
@@ -585,8 +634,9 @@
   // --- Notification state machine (mirrors C++ ticker) ---
 
   let notifyPhase = "none"; // "none", "active"
-  let notifyQueue = [];
+  let notifyQueue = [];     // [{game, bet_results}, ...]
   let notifyGame = null;
+  let notifyBetResults = null;
   let notifyFlashCount = 3;
   let notifyDisplayFrames = 200; // 5s * 40fps
   let notifyFramesRemaining = 0;
@@ -599,9 +649,12 @@
   function startNextNotification() {
     if (notifyQueue.length === 0) {
       notifyPhase = "none";
+      notifyBetResults = null;
       return;
     }
-    notifyGame = notifyQueue.shift();
+    const entry = notifyQueue.shift();
+    notifyGame = entry.game;
+    notifyBetResults = entry.bet_results || null;
     notifyPhase = "active";
     notifyFramesRemaining = notifyDisplayFrames;
     notifyFlashRemaining = notifyFlashCount;
@@ -609,8 +662,8 @@
     notifyFlashOn = true;
   }
 
-  function queueNotification(game) {
-    notifyQueue.push(game);
+  function queueNotification(game, betResults) {
+    notifyQueue.push({ game, bet_results: betResults || null });
     if (notifyPhase === "none") startNextNotification();
   }
 
@@ -630,8 +683,11 @@
   function renderNotification() {
     if (!notifyGame) return;
 
-    // Always render the centered game card
-    const card = { game: notifyGame, totalWidth: calcCardWidth(notifyGame) };
+    // Copy bet_results into game so renderGameCard draws them on row 3
+    const gameCopy = Object.assign({}, notifyGame);
+    if (notifyBetResults) gameCopy.bet_results = notifyBetResults;
+
+    const card = { game: gameCopy, totalWidth: calcCardWidth(gameCopy) };
     const cardContentW = card.totalWidth - GAME_CARD_GAP;
     const xStart = Math.floor((DISPLAY_W - cardContentW) / 2);
     renderGameCard(card, xStart);
@@ -949,7 +1005,7 @@
           if (!data.game.sport && data.game.game_id) data.game.sport = "";
           notifyFlashCount = parseInt(document.getElementById("notify-flash-count").value, 10);
           notifyDisplayFrames = parseInt(document.getElementById("notify-display-seconds").value, 10) * 40;
-          queueNotification(data.game);
+          queueNotification(data.game, data.bet_results);
           showStatus("Test notification sent.", false);
         }
       } catch (e) {

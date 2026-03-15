@@ -117,9 +117,38 @@ int Ticker::calc_card_width(const Game &g, const Font &large_font, int &row1_w_o
         row2_w = static_cast<int>(g.detail.size()) * SMALL_FONT_W;
     }
 
-    // Row 3: odds (fixed-width font)
+    // Row 3: bet results for final games, raw odds otherwise
     int row3_w = 0;
-    if (g.odds)
+    if (g.is_final() && g.bet_results.has_data)
+    {
+        // Estimate width: "SPR_TEXT  O/U XXX.X  ABR +NNN"
+        const auto &br = g.bet_results;
+        int bw = 0;
+        if (!br.spread_text.empty())
+            bw += static_cast<int>(br.spread_text.size()) * SMALL_FONT_W;
+        if (!br.ou_result.empty())
+        {
+            if (bw > 0)
+                bw += 10;
+            // "O 215.5" or "U 215" — single letter + space + number
+            bw += 1 * SMALL_FONT_W + 1 * SMALL_FONT_W; // letter + space
+            char buf[16];
+            if (br.ou_line == static_cast<int>(br.ou_line))
+                std::snprintf(buf, sizeof(buf), "%d", static_cast<int>(br.ou_line));
+            else
+                std::snprintf(buf, sizeof(buf), "%.1f", br.ou_line);
+            bw += static_cast<int>(std::strlen(buf)) * SMALL_FONT_W;
+        }
+        if (!br.winner_ml.empty())
+        {
+            if (bw > 0)
+                bw += 10;
+            // "BOS +130"
+            bw += (static_cast<int>(br.winner_abbr.size()) + 1 + static_cast<int>(br.winner_ml.size())) * SMALL_FONT_W;
+        }
+        row3_w = bw;
+    }
+    else if (g.odds)
     {
         std::string odds_str;
         if (!g.odds->spread.empty())
@@ -365,10 +394,68 @@ int Ticker::render_game_card(const TickerCard &card, Canvas *canvas,
         DrawText(canvas, font, text_mid - dw / 2, line2_y, stc, g.detail.c_str());
     }
 
-    // ── Row 3: betting odds ───────────────────────────────────────────────────
-    if (g.odds)
+    // ── Row 3: bet results for final, raw odds otherwise ─────────────────────
+    if (g.is_final() && g.bet_results.has_data)
     {
-        // Combine spread and over/under into one string, separated by two spaces.
+        constexpr int bet_y = 56;
+        const auto &br = g.bet_results;
+
+        // Build segments: spread, O/U, winner ML
+        int total_w = 0;
+        std::string ou_buf;
+        std::string ml_buf;
+
+        if (!br.spread_text.empty())
+            total_w += measure_text(font, br.spread_text);
+
+        if (!br.ou_result.empty())
+        {
+            char buf[32];
+            const char *letter = (br.ou_result == "OVER") ? "O" : (br.ou_result == "UNDER") ? "U"
+                                                                                              : "P";
+            if (br.ou_line == static_cast<int>(br.ou_line))
+                std::snprintf(buf, sizeof(buf), "%s %d", letter, static_cast<int>(br.ou_line));
+            else
+                std::snprintf(buf, sizeof(buf), "%s %.1f", letter, br.ou_line);
+            ou_buf = buf;
+            if (total_w > 0)
+                total_w += 10;
+            total_w += measure_text(font, ou_buf);
+        }
+
+        if (!br.winner_ml.empty() && !br.winner_abbr.empty())
+        {
+            ml_buf = br.winner_abbr + " " + br.winner_ml;
+            if (total_w > 0)
+                total_w += 10;
+            total_w += measure_text(font, ml_buf);
+        }
+
+        int bx = text_mid - total_w / 2;
+
+        if (!br.spread_text.empty())
+        {
+            Color sc = (br.spread_result == "covered")    ? GREEN
+                       : (br.spread_result == "push") ? YELLOW
+                                                      : RED;
+            bx += DrawText(canvas, font, bx, bet_y, sc, br.spread_text.c_str());
+        }
+        if (!ou_buf.empty())
+        {
+            if (!br.spread_text.empty())
+                bx += 10;
+            bx += DrawText(canvas, font, bx, bet_y, WHITE, ou_buf.c_str());
+        }
+        if (!ml_buf.empty())
+        {
+            if (!ou_buf.empty() || !br.spread_text.empty())
+                bx += 10;
+            DrawText(canvas, font, bx, bet_y, GREEN, ml_buf.c_str());
+        }
+    }
+    else if (g.odds)
+    {
+        // Non-final: combine spread and over/under into one string.
         std::string odds_str;
         if (!g.odds->spread.empty())
             odds_str += g.odds->spread;
@@ -390,9 +477,9 @@ int Ticker::render_game_card(const TickerCard &card, Canvas *canvas,
 
 // ── Notification state machine ────────────────────────────────────────────────
 
-void Ticker::queue_notification(const Game &g)
+void Ticker::queue_notification(const Notification &n)
 {
-    notify_queue_.push(g);
+    notify_queue_.push(n);
     if (notify_phase_ == NotifyPhase::None)
         start_next_notification();
 }
@@ -410,7 +497,9 @@ void Ticker::start_next_notification()
         notify_phase_ = NotifyPhase::None;
         return;
     }
-    notify_game_ = notify_queue_.front();
+    auto &n = notify_queue_.front();
+    notify_game_ = n.game;
+    notify_bet_results_ = n.bet_results;
     notify_queue_.pop();
     notify_phase_ = NotifyPhase::Active;
     notify_frames_remaining_ = notify_display_frames_;
@@ -440,11 +529,14 @@ void Ticker::render_notification(Canvas *canvas, const Font &font,
                                  const Font &large_font,
                                  const Font &sched_font) const
 {
-    // Always render the centered game card
+    // Copy bet_results from notification into the game so render_game_card draws them
+    Game game_copy = notify_game_;
+    game_copy.bet_results = notify_bet_results_;
+
     TickerCard card;
-    card.game = &notify_game_;
+    card.game = &game_copy;
     int row1_w = 0;
-    card.total_width = calc_card_width(notify_game_, large_font, row1_w);
+    card.total_width = calc_card_width(game_copy, large_font, row1_w);
     card.row1_width = row1_w;
 
     int card_content_w = card.total_width - GAME_CARD_GAP;
